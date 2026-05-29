@@ -22,7 +22,7 @@ export default function NotFound() {
             <Link href="/">Till startsidan</Link>
           </Button>
           <Button asChild size="xl" variant="outline" className="rounded-full">
-            <Link href="/blog">Läs bloggen</Link>
+            <Link href="/blog">Läs artiklarna</Link>
           </Button>
         </div>
       </Container>

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/container";
-import { LessonView } from "@/components/education/lesson-view";
-import { courseModules, getAdjacentLessons, getLesson } from "@/lib/courses";
+import { LessonView } from "@/features/education/components/lesson-view";
+import { courseModules, getAdjacentLessons, getLesson } from "@/features/education/data/courses";
 
 type Params = { modul: string; lektion: string };
 

@@ -3,13 +3,34 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List, X, GraduationCap } from "@phosphor-icons/react";
+import {
+  List,
+  X,
+  House,
+  GraduationCap,
+  Article,
+  Newspaper,
+  Info,
+  Books,
+  type Icon,
+} from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
-import { mainNav } from "@/lib/site";
-import { Button } from "@/components/ui/button";
+import { mainNav, type NavIconKey } from "@/lib/site";
+import { functionMenu } from "@/features/functions/data/functions";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
+import { FeaturesMenu } from "@/components/layout/features-menu";
+import { DataCta } from "@/components/layout/data-cta";
+
+const NAV_ICONS: Record<NavIconKey, Icon> = {
+  home: House,
+  education: GraduationCap,
+  articles: Article,
+  news: Newspaper,
+  about: Info,
+  glossary: Books,
+};
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -26,52 +47,53 @@ export function SiteHeader() {
         <Logo />
 
         <ul className="hidden items-center gap-1 lg:flex">
-          {mainNav.map((item) => {
+          {mainNav.flatMap((item) => {
             const active = isActive(pathname, item.href);
+            const NavI = item.icon ? NAV_ICONS[item.icon] : null;
 
-            if (item.highlight) {
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "ml-1 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors",
-                      active
-                        ? "border-bitcoin bg-bitcoin text-bitcoin-foreground"
-                        : "border-bitcoin/40 bg-bitcoin-muted text-bitcoin hover:border-bitcoin/70",
-                    )}
-                  >
-                    <GraduationCap size={16} weight="fill" aria-hidden />
-                    {item.title}
-                  </Link>
-                </li>
-              );
-            }
-
-            return (
+            const node = item.highlight ? (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "ml-1 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors",
+                    active
+                      ? "border-bitcoin bg-bitcoin text-bitcoin-foreground"
+                      : "border-bitcoin/40 bg-bitcoin-muted text-bitcoin hover:border-bitcoin/70",
+                  )}
+                >
+                  {NavI ? <NavI size={16} weight="fill" aria-hidden /> : null}
+                  {item.title}
+                </Link>
+              </li>
+            ) : (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
+                  {NavI ? <NavI size={15} weight={active ? "fill" : "regular"} aria-hidden /> : null}
                   {item.title}
                 </Link>
               </li>
             );
+
+            // The "Funktioner" mega-menu sits right after Utbildning.
+            return item.href === "/utbildning"
+              ? [node, <FeaturesMenu key="funktioner" />]
+              : [node];
           })}
         </ul>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button asChild size="lg" className="h-10 rounded-full px-5 text-sm">
-            <Link href="/data">Se Bitcoindata</Link>
-          </Button>
+          <DataCta />
         </div>
 
         <button
@@ -89,51 +111,68 @@ export function SiteHeader() {
       {open ? (
         <div id="mobile-menu" className="border-t border-border bg-background lg:hidden">
           <Container className="flex flex-col gap-1 py-4">
-            {mainNav.map((item) => {
+            {mainNav.flatMap((item) => {
               const active = isActive(pathname, item.href);
+              const NavI = item.icon ? NAV_ICONS[item.icon] : null;
 
-              if (item.highlight) {
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-base font-semibold transition-colors",
-                      active
-                        ? "border-bitcoin bg-bitcoin text-bitcoin-foreground"
-                        : "border-bitcoin/40 bg-bitcoin-muted text-bitcoin",
-                    )}
-                  >
-                    <GraduationCap size={18} weight="fill" aria-hidden />
-                    {item.title}
-                  </Link>
-                );
-              }
-
-              return (
+              const node = item.highlight ? (
                 <Link
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-lg px-3 py-2.5 text-base font-medium transition-colors",
+                    "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-base font-semibold transition-colors",
+                    active
+                      ? "border-bitcoin bg-bitcoin text-bitcoin-foreground"
+                      : "border-bitcoin/40 bg-bitcoin-muted text-bitcoin",
+                  )}
+                >
+                  {NavI ? <NavI size={18} weight="fill" aria-hidden /> : null}
+                  {item.title}
+                </Link>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition-colors",
                     active
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
+                  {NavI ? <NavI size={18} weight={active ? "fill" : "regular"} aria-hidden /> : null}
                   {item.title}
                 </Link>
               );
+
+              if (item.href !== "/utbildning") return [node];
+
+              // "Funktioner" group, listed right after Utbildning.
+              return [
+                node,
+                <div key="funktioner" className="mt-1">
+                  <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Funktioner
+                  </p>
+                  {functionMenu.map((feature) => (
+                    <Link
+                      key={feature.title}
+                      href={feature.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <span className="size-1.5 shrink-0 rounded-full bg-bitcoin" aria-hidden />
+                      {feature.title}
+                    </Link>
+                  ))}
+                </div>,
+              ];
             })}
-            <Button asChild size="lg" className="mt-2 h-11 rounded-full text-sm">
-              <Link href="/data" onClick={() => setOpen(false)}>
-                Se Bitcoindata
-              </Link>
-            </Button>
+            <DataCta className="mt-2 h-11 w-full" onClick={() => setOpen(false)} />
           </Container>
         </div>
       ) : null}

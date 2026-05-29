@@ -14,15 +14,15 @@ import {
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { SourceNote } from "@/components/data/source-note";
+import { SourceNote } from "@/features/bitcoin-data/components/source-note";
 import {
   getBitcoinMarket,
   getRecommendedFees,
   getFearGreed,
   getBlockHeight,
-} from "@/lib/live-data";
-import { getBitcoinNews } from "@/lib/news";
-import { getHalvingInfo } from "@/lib/metrics";
+} from "@/features/bitcoin-data/data/live-data";
+import { getBitcoinNews } from "@/features/bitcoin-data/data/news";
+import { getHalvingInfo } from "@/features/bitcoin-data/data/metrics";
 import {
   formatCurrency,
   formatNumber,
@@ -34,14 +34,14 @@ import {
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Bitcoin idag: dagens läge och rubriker",
+  title: "Nyheter: senaste om Bitcoin",
   description:
-    "En lugn daglig ögonblicksbild av Bitcoin: pris i SEK, nätverksavgifter, marknadshumör och tid till halvering, plus dagens rubriker från utvalda källor.",
+    "Ett lugnt urval Bitcoinnyheter från den senaste veckan, hämtade från bitcoinfokuserade källor, plus en snabb överblick av läget i SEK. Utan hype.",
   alternates: { canonical: "/bitcoin-idag" },
   openGraph: {
-    title: "Bitcoin idag · Bitcoinlivet",
+    title: "Nyheter · bitcoinlivet",
     description:
-      "Dagens Bitcoinläge i SEK plus utvalda rubriker, minimalt och utan hype.",
+      "Veckans Bitcoinnyheter från bitcoinfokuserade källor, plus läget just nu i SEK. Minimalt och utan hype.",
     url: "/bitcoin-idag",
     type: "website",
   },
@@ -92,7 +92,7 @@ export default async function BitcoinTodayPage() {
     getRecommendedFees(),
     getFearGreed(),
     getBlockHeight(),
-    getBitcoinNews(9),
+    getBitcoinNews(18),
   ]);
 
   const halving = height !== null ? getHalvingInfo(height) : null;
@@ -104,25 +104,25 @@ export default async function BitcoinTodayPage() {
         <header className="max-w-3xl">
           <div className="flex items-center gap-3">
             <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-              Bitcoin idag
+              Nyheter
             </p>
-            <Badge variant="outline">Uppdateras automatiskt</Badge>
+            <Badge variant="outline">Senaste veckan</Badge>
           </div>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Dagens läge, lugnt sammanfattat
+            Senaste nytt om Bitcoin
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            En kort ögonblicksbild av Bitcoin, siffrorna som rör sig idag och
-            ett urval rubriker. Tänk långsiktigt: det här är en överblick, inte
-            en uppmaning att agera.
+            Ett lugnt urval rubriker från den senaste veckan, hämtade från
+            bitcoinfokuserade källor, plus en snabb överblick av läget. Tänk
+            långsiktigt: det här är en överblick, inte en uppmaning att agera.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            {formatDate(today)}
+            Uppdaterad {formatDate(today)}
           </p>
         </header>
 
-        {/* Daily snapshot */}
-        <section aria-label="Dagens siffror" className="mt-10">
+        {/* Snapshot */}
+        <section aria-label="Läget just nu" className="mt-10">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SnapshotTile
               icon={<CurrencyBtc size={18} weight="bold" aria-hidden />}
@@ -166,19 +166,19 @@ export default async function BitcoinTodayPage() {
         </section>
 
         {/* Headlines */}
-        <section aria-label="Dagens rubriker" className="mt-12">
+        <section aria-label="Veckans rubriker" className="mt-12">
           <div className="flex items-center gap-2.5">
             <span className="grid size-9 place-items-center rounded-full bg-bitcoin-muted text-bitcoin">
               <Newspaper size={18} weight="fill" aria-hidden />
             </span>
             <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-              Dagens rubriker
+              Veckans rubriker
             </h2>
           </div>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Utvalda rubriker från externa källor. Vi länkar vidare och
-            republicerar inget, läs källkritiskt och kom ihåg att nyheter ofta
-            är brus i det långa loppet.
+            Ett urval rubriker från den senaste veckan, från bitcoinfokuserade
+            källor. Jag länkar vidare och republicerar inget, läs källkritiskt
+            och kom ihåg att nyheter ofta är brus i det långa loppet.
           </p>
 
           {news.items.length > 0 ? (
@@ -236,9 +236,9 @@ export default async function BitcoinTodayPage() {
         </section>
 
         <Disclaimer className="mt-12 max-w-2xl">
-          Ögonblicksbilden hämtas live och rubrikerna kommer från externa
-          källor som vi inte styr över. Detta är inte finansiell rådgivning,
-          och dagsnyheter bör sällan styra långsiktiga beslut.
+          Överblicken hämtas live och rubrikerna kommer från externa källor som
+          jag inte styr över. Detta är inte finansiell rådgivning, och nyheter
+          bör sällan styra långsiktiga beslut.
         </Disclaimer>
       </Container>
     </div>

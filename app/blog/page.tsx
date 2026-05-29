@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 
 import { Container } from "@/components/layout/container";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { BlogExplorer } from "@/components/blog/blog-explorer";
+import { BlogExplorer } from "@/features/blog/components/blog-explorer";
 import {
   categories,
   getAllPosts,
   getFeaturedPost,
   type CategorySlug,
-} from "@/lib/posts";
+} from "@/features/blog/data/posts";
 
 export const metadata: Metadata = {
-  title: "Blogg",
+  title: "Artiklar",
   description:
     "Guider och artiklar om Bitcoin, sparande, inflation och köpkraft, skrivna lugnt och på svenska.",
   alternates: { canonical: "/blog" },
   openGraph: {
-    title: "Blogg · Bitcoinlivet",
+    title: "Artiklar · bitcoinlivet",
     description:
       "Guider och artiklar om Bitcoin, sparande, inflation och köpkraft.",
     url: "/blog",
@@ -44,7 +44,7 @@ export default async function BlogPage({
       <Container>
         <header className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-            Blogg
+            Artiklar
           </p>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             Förstå Bitcoin och din ekonomi

@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/site";
-import { getAllPosts } from "@/lib/posts";
-import { courseModules } from "@/lib/courses";
+import { getAllPosts } from "@/features/blog/data/posts";
+import { courseModules } from "@/features/education/data/courses";
+import { bitcoinFunctions } from "@/features/functions/data/functions";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
@@ -15,8 +16,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/bitcoin-idag`, changeFrequency: "hourly", priority: 0.7 },
     { url: `${base}/ordlista`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/halvering`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/funktioner`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/om`, changeFrequency: "monthly", priority: 0.5 },
   ];
+
+  const functionRoutes: MetadataRoute.Sitemap = bitcoinFunctions.map((fn) => ({
+    url: `${base}/funktioner/${fn.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
 
   const courseRoutes: MetadataRoute.Sitemap = courseModules.flatMap((module) => [
     {
@@ -38,5 +46,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...courseRoutes, ...postRoutes];
+  return [...staticRoutes, ...functionRoutes, ...courseRoutes, ...postRoutes];
 }

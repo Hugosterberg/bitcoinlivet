@@ -14,19 +14,20 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { MetricCard } from "@/components/data/metric-card";
-import { SatsCalculator } from "@/components/data/sats-calculator";
-import { SavingsCalculator } from "@/components/data/savings-calculator";
-import { FeesWidget } from "@/components/data/fees-widget";
-import { FearGreedWidget } from "@/components/data/fear-greed";
-import { SourceNote } from "@/components/data/source-note";
-import { BtcPriceChart } from "@/components/charts/btc-price-chart";
-import { InflationChart } from "@/components/charts/inflation-chart";
-import { PurchasingPowerChart } from "@/components/charts/purchasing-power-chart";
-import { InvestmentChart } from "@/components/charts/investment-chart";
-import { AssetAllocationChart } from "@/components/charts/asset-allocation-chart";
-import { assetColor } from "@/lib/assets";
-import { btcSnapshot, getSupplyTimeline } from "@/lib/metrics";
+import { MetricCard } from "@/features/bitcoin-data/components/metric-card";
+import { SatsCalculator } from "@/features/bitcoin-data/components/sats-calculator";
+import { SavingsCalculator } from "@/features/bitcoin-data/components/savings-calculator";
+import { FeesWidget } from "@/features/bitcoin-data/components/fees-widget";
+import { FearGreedWidget } from "@/features/bitcoin-data/components/fear-greed";
+import { SourceNote } from "@/features/bitcoin-data/components/source-note";
+import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
+import { BtcPriceChart } from "@/features/bitcoin-data/components/charts/btc-price-chart";
+import { InflationChart } from "@/features/bitcoin-data/components/charts/inflation-chart";
+import { PurchasingPowerChart } from "@/features/bitcoin-data/components/charts/purchasing-power-chart";
+import { InvestmentChart } from "@/features/bitcoin-data/components/charts/investment-chart";
+import { AssetAllocationChart } from "@/features/bitcoin-data/components/charts/asset-allocation-chart";
+import { assetColor } from "@/features/bitcoin-data/data/assets";
+import { btcSnapshot, getSupplyTimeline } from "@/features/bitcoin-data/data/metrics";
 import {
   getAssetAllocation,
   getBitcoinMarket,
@@ -34,13 +35,14 @@ import {
   getInflation,
   getInvestmentHistory,
   getRecommendedFees,
-} from "@/lib/live-data";
+} from "@/features/bitcoin-data/data/live-data";
 import {
   formatAmountWords,
   formatCurrency,
   formatDate,
   formatNumber,
   formatPercent,
+  formatShare,
 } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
     "En lugn Bitcoin dashboard: pris, marknadsvärde, utbud, satskalkylator och grafer över inflation och köpkraft. Exempeldata i utbildande syfte.",
   alternates: { canonical: "/data" },
   openGraph: {
-    title: "Bitcoindata · Bitcoinlivet",
+    title: "Bitcoindata · bitcoinlivet",
     description:
       "Pris, marknadsvärde, utbud, satskalkylator och grafer över inflation och köpkraft.",
     url: "/data",
@@ -92,28 +94,6 @@ function ChartCard({
         updatePath={updatePath}
       />
     </Card>
-  );
-}
-
-function SupplyStat({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-}) {
-  return (
-    <div className="rounded-lg border border-border/60 bg-card/40 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1.5 font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums">
-        {value}
-      </p>
-      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
-    </div>
   );
 }
 
@@ -173,7 +153,7 @@ export default async function DataPage() {
   const btcSlice = allocation.slices.find((s) => s.isBitcoin);
   const fmtPercent = (v: number) =>
     `${v.toLocaleString("sv-SE", { maximumFractionDigits: v < 1 ? 2 : 1 })} %`;
-  const fmtBiljoner = (usd: number) =>
+  const fmtTrillions = (usd: number) =>
     `${(usd / 1_000_000_000_000).toLocaleString("sv-SE", {
       maximumFractionDigits: 1,
     })} biljoner USD`;
@@ -241,7 +221,7 @@ export default async function DataPage() {
             />
             <MetricCard
               label="Andel utgivet"
-              value={formatPercent(market.issuedPercent).replace("+", "")}
+              value={formatShare(market.issuedPercent)}
               sub="av maxutbudet"
               icon={<ChartLineUp size={20} weight="bold" aria-hidden />}
             />
@@ -252,7 +232,7 @@ export default async function DataPage() {
               href="https://www.coingecko.com/sv"
               live={market.live}
               hardcoded={!market.live}
-              updatePath={!market.live ? "lib/metrics.ts → btcSnapshot (reserv)" : undefined}
+              updatePath={!market.live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot (reserv)" : undefined}
             />
           </div>
         </section>
@@ -268,7 +248,7 @@ export default async function DataPage() {
                 Bitcoins utgivning är förutbestämd. Det mest slående: efter cirka{" "}
                 {fmtYears(supply.ageYears)} år är redan{" "}
                 <span className="font-medium text-foreground">
-                  {formatPercent(supply.issuedPercent).replace("+", "")}
+                  {formatShare(supply.issuedPercent)}
                 </span>{" "}
                 av alla bitcoin skapade, men de allra sista skapas först omkring
                 år {supply.lastCoinYear}, om ungefär {Math.round(supply.yearsLeft)} år.
@@ -276,32 +256,32 @@ export default async function DataPage() {
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <SupplyStat
+              <StatTile
                 label="Bitcoins ålder"
                 value={`${fmtYears(supply.ageYears)} år`}
                 sub="sedan 3 januari 2009"
               />
-              <SupplyStat
+              <StatTile
                 label="Andel utgivet"
-                value={formatPercent(supply.issuedPercent).replace("+", "")}
+                value={formatShare(supply.issuedPercent)}
                 sub={`${formatNumber(Math.round(market.circulatingSupply))} av ${formatNumber(market.maxSupply)} BTC`}
               />
-              <SupplyStat
+              <StatTile
                 label="Kvar att utvinna"
                 value={`${formatNumber(Math.round(supply.remaining))} BTC`}
                 sub={`av ${formatNumber(market.maxSupply)} BTC totalt`}
               />
-              <SupplyStat
+              <StatTile
                 label="Allt utgivet (ungefär)"
                 value={`år ${supply.lastCoinYear}`}
                 sub={`om cirka ${Math.round(supply.yearsLeft)} år`}
               />
-              <SupplyStat
+              <StatTile
                 label="Block reward nu"
                 value={`${fmtYears(supply.currentReward, 4)} BTC`}
                 sub="halveras vart fjärde år"
               />
-              <SupplyStat
+              <StatTile
                 label="Nytt utbud per dag"
                 value={`≈ ${formatNumber(Math.round(supply.perDay))} BTC`}
                 sub="vid ~144 block per dygn"
@@ -330,17 +310,17 @@ export default async function DataPage() {
                 Knapphet i siffror
               </h3>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <SupplyStat
+                <StatTile
                   label="Utbudsinflation"
                   value={`${fmtYears(supply.supplyInflationPercent, 2)} %`}
                   sub="per år nu, sjunker mot noll"
                 />
-                <SupplyStat
+                <StatTile
                   label="Tid att dubbla utbudet"
                   value={`≈ ${Math.round(supply.yearsToDouble)} år`}
                   sub="vid dagens nyproduktion (stock-to-flow)"
                 />
-                <SupplyStat
+                <StatTile
                   label="Din andel om alla delade lika"
                   value={`${fmtYears(supply.perPersonBtc, 4)} BTC`}
                   sub={`≈ ${formatNumber(Math.round(supply.perPersonSats))} sats per person`}
@@ -360,7 +340,7 @@ export default async function DataPage() {
                 live={market.live}
                 hardcoded={!market.live}
                 updatePath={
-                  !market.live ? "lib/metrics.ts → btcSnapshot (reserv)" : undefined
+                  !market.live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot (reserv)" : undefined
                 }
               />
             </div>
@@ -375,7 +355,7 @@ export default async function DataPage() {
               description="Årsslutspris i SEK. Illustrerar det långa loppet, inte exakt historik."
               source="Exempeldata"
               hardcoded
-              updatePath="lib/metrics.ts → priceHistory"
+              updatePath="features/bitcoin-data/data/metrics.ts → priceHistory"
             >
               <BtcPriceChart height={340} />
             </ChartCard>
@@ -442,7 +422,7 @@ export default async function DataPage() {
                           {fmtPercent(slice.percent)}
                         </span>
                         <span className="hidden text-xs text-muted-foreground sm:inline">
-                          {fmtBiljoner(slice.valueUsd)}
+                          {fmtTrillions(slice.valueUsd)}
                         </span>
                       </dd>
                     </div>
@@ -461,7 +441,7 @@ export default async function DataPage() {
                 source={allocation.source}
                 href={allocation.href}
                 hardcoded
-                updatePath="lib/assets.ts → assetClassEstimates"
+                updatePath="features/bitcoin-data/data/assets.ts → assetClassEstimates"
               />
             </div>
           </Card>
@@ -550,14 +530,14 @@ export default async function DataPage() {
                 hardcoded={!investment.live && !investment.source.startsWith("Instagram")}
                 updatePath={
                   !investment.live && !investment.source.startsWith("Instagram")
-                    ? "lib/portfolio.ts"
+                    ? "features/bitcoin-data/data/portfolio.ts"
                     : undefined
                 }
               />
               <SourceNote
                 source={`${formatCurrency(investment.dailySek)}/dag sedan ${formatDate(investment.startDate)}`}
                 hardcoded
-                updatePath="lib/portfolio.ts → dcaConfig"
+                updatePath="features/bitcoin-data/data/portfolio.ts → dcaConfig"
               />
             </div>
           </Card>
@@ -605,7 +585,7 @@ export default async function DataPage() {
             sourceHref="https://www.scb.se/hitta-statistik/statistik-efter-amne/priser-och-konsumtion/konsumentprisindex/konsumentprisindex-kpi/"
             live={inflation.live}
             hardcoded={!inflation.live}
-            updatePath={!inflation.live ? "lib/metrics.ts → inflationHistory" : undefined}
+            updatePath={!inflation.live ? "features/bitcoin-data/data/metrics.ts → inflationHistory" : undefined}
           >
             <InflationChart height={300} data={inflation.points} />
           </ChartCard>
@@ -615,7 +595,7 @@ export default async function DataPage() {
             description="Index från start = 100. Kontanter urholkas av inflation, knappa pengar behåller köpkraft."
             source="Exempeldata"
             hardcoded
-            updatePath="lib/metrics.ts → purchasingPower"
+            updatePath="features/bitcoin-data/data/metrics.ts → purchasingPower"
           >
             <div className="mb-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">

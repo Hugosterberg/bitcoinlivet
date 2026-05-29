@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/site";
-import { getAllPosts } from "@/lib/posts";
+import { getAllPosts } from "@/features/blog/data/posts";
 
 export const dynamic = "force-static";
 
@@ -37,7 +37,7 @@ export function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeXml(siteConfig.name)}, Blogg</title>
+    <title>${escapeXml(siteConfig.name)}, Artiklar</title>
     <link>${base}/blog</link>
     <description>${escapeXml(siteConfig.description)}</description>
     <language>sv-SE</language>

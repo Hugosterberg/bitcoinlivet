@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Lightning } from "@phosphor-icons/react/dist/ssr";
 
 import { Container } from "@/components/layout/container";
-import { ModuleIcon } from "@/components/education/module-icon";
-import { LessonList } from "@/components/education/lesson-list";
-import { courseModules, getModule, maxLessonXp } from "@/lib/courses";
+import { ModuleIcon } from "@/features/education/components/module-icon";
+import { LessonList } from "@/features/education/components/lesson-list";
+import { courseModules, getModule, maxLessonXp } from "@/features/education/data/courses";
 import { formatNumber } from "@/lib/format";
 
 type Params = { modul: string };

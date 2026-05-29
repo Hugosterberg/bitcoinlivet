@@ -4,11 +4,11 @@
  */
 
 export const siteConfig = {
-  name: "Bitcoinlivet",
+  name: "bitcoinlivet",
   // Short brand tagline (Swedish).
   tagline: "Bitcoin, sparande och sundare pengar, förklarat på svenska.",
   description:
-    "Bitcoinlivet är en svensk guide till Bitcoin, långsiktigt sparande, inflation och köpkraft. Lugn, datadriven och utbildande, utan hype.",
+    "bitcoinlivet är en svensk guide till Bitcoin, långsiktigt sparande, inflation och köpkraft. Lugn, datadriven och utbildande, utan hype.",
   // Used for absolute URLs (Open Graph, sitemap). Override via env in prod.
   url:
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
@@ -22,28 +22,40 @@ export const siteConfig = {
   lightningAddress: "",
 } as const;
 
+/** Navigation icon key, mapped to a Phosphor icon in
+ *  components/layout/site-header.tsx. */
+export type NavIconKey =
+  | "home"
+  | "education"
+  | "articles"
+  | "news"
+  | "about"
+  | "glossary";
+
 export type NavItem = {
   title: string;
   href: string;
   description?: string;
+  /** Small icon shown next to the title in the navigation. */
+  icon?: NavIconKey;
   /** Render with extra emphasis in the navigation. */
   highlight?: boolean;
 };
 
 export const mainNav: NavItem[] = [
-  { title: "Hem", href: "/" },
+  { title: "Hem", href: "/", icon: "home" },
   {
     title: "Utbildning",
     href: "/utbildning",
     description: "Interaktiv Bitcoinskola",
+    icon: "education",
     highlight: true,
   },
-  { title: "Ordlista", href: "/ordlista", description: "Bitcoinbegrepp förklarade" },
-  { title: "Blogg", href: "/blog", description: "Guider och artiklar" },
-  { title: "Data", href: "/data", description: "Bitcoin dashboard" },
-  { title: "Halveringen", href: "/halvering", description: "Nedräkning, block & historik" },
-  { title: "Bitcoin idag", href: "/bitcoin-idag", description: "Dagens läge & rubriker" },
-  { title: "Om", href: "/om", description: "Om Bitcoinlivet" },
+  // (The "Funktioner" mega-menu is injected here in the header.)
+  { title: "Artiklar", href: "/blog", description: "Guider och artiklar", icon: "articles" },
+  { title: "Nyheter", href: "/bitcoin-idag", description: "Veckans Bitcoinnyheter", icon: "news" },
+  { title: "Om", href: "/om", description: "Om bitcoinlivet", icon: "about" },
+  { title: "Ordlista", href: "/ordlista", description: "Bitcoinbegrepp förklarade", icon: "glossary" },
 ];
 
 export const footerNav: { title: string; items: NavItem[] }[] = [
@@ -51,10 +63,10 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     title: "Utforska",
     items: [
       { title: "Hem", href: "/" },
-      { title: "Bitcoin idag", href: "/bitcoin-idag" },
-      { title: "Blogg", href: "/blog" },
+      { title: "Nyheter", href: "/bitcoin-idag" },
+      { title: "Artiklar", href: "/blog" },
       { title: "Bitcoindata", href: "/data" },
-      { title: "Om Bitcoinlivet", href: "/om" },
+      { title: "Om bitcoinlivet", href: "/om" },
     ],
   },
   {

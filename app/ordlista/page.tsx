@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
-import { GlossaryExplorer } from "@/components/glossary/glossary-explorer";
-import { sortedGlossary } from "@/lib/glossary";
+import { GlossaryExplorer } from "@/features/glossary/components/glossary-explorer";
+import { sortedGlossary } from "@/features/glossary/data/glossary";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "En lugn ordlista över Bitcoinbegrepp på svenska: sats, halvering, UTXO, cold storage, köpkraft, sunda pengar och mer, enkelt förklarat utan hype.",
   alternates: { canonical: "/ordlista" },
   openGraph: {
-    title: "Ordlista · Bitcoinlivet",
+    title: "Ordlista · bitcoinlivet",
     description:
       "Bitcoinbegrepp förklarade på svenska, sats, halvering, UTXO, köpkraft och mer.",
     url: "/ordlista",

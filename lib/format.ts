@@ -81,6 +81,18 @@ export function formatPercent(
   }).format(value / 100);
 }
 
+/**
+ * Formats a 0–100 *share* (e.g. percent of supply issued) without a leading
+ * sign. Use this instead of {@link formatPercent} for shares, where the "+"
+ * that suits a 24h change reads as noise. E.g. 94.5 → "94,5 %".
+ */
+export function formatShare(
+  value: number,
+  options: Intl.NumberFormatOptions = {},
+): string {
+  return formatPercent(value, { signDisplay: "auto", ...options });
+}
+
 export function formatSats(sats: number): string {
   return `${formatNumber(Math.round(sats))} sats`;
 }

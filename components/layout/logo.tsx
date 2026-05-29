@@ -30,7 +30,7 @@ export function Logo({
       </span>
       {showWordmark ? (
         <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
-          Bitcoin<span className="text-bitcoin">livet</span>
+          bitcoin<span className="text-bitcoin">livet</span>
         </span>
       ) : null}
     </Link>

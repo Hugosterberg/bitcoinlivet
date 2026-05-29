@@ -6,9 +6,9 @@ import { ArrowLeft, Clock } from "@phosphor-icons/react/dist/ssr";
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { PostCard } from "@/components/blog/post-card";
+import { PostCard } from "@/features/blog/components/post-card";
 import { formatDate } from "@/lib/format";
-import { getAllPosts, getPost, getPostSlugs } from "@/lib/posts";
+import { getAllPosts, getPost, getPostSlugs } from "@/features/blog/data/posts";
 
 export const dynamicParams = false;
 
@@ -73,7 +73,7 @@ export default async function BlogPostPage({
           className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={16} weight="bold" aria-hidden />
-          Tillbaka till bloggen
+          Tillbaka till artiklarna
         </Link>
 
         <header className="mt-8 border-b border-border pb-8">
@@ -96,7 +96,7 @@ export default async function BlogPostPage({
 
           <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
             <span className="font-medium text-foreground">
-              {meta.author ?? "Bitcoinlivet"}
+              {meta.author ?? "bitcoinlivet"}
             </span>
             <span aria-hidden>·</span>
             <time dateTime={meta.date} className="tabular-nums">

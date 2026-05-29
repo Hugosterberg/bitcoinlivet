@@ -2,6 +2,7 @@ import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
+import { linkifyGlossary } from "@/features/glossary/components/glossary-linkify";
 
 /**
  * Global MDX component mapping. Required by @next/mdx in the App Router.
@@ -38,14 +39,16 @@ export function useMDXComponents(
         {...props}
       />
     ),
-    p: ({ className, ...props }) => (
+    p: ({ className, children, ...props }) => (
       <p
         className={cn(
           "mt-5 text-base/7 text-muted-foreground first:mt-0",
           className,
         )}
         {...props}
-      />
+      >
+        {linkifyGlossary(children)}
+      </p>
     ),
     a: ({ className, href = "#", ...props }) => (
       <Link
@@ -74,6 +77,11 @@ export function useMDXComponents(
         )}
         {...props}
       />
+    ),
+    li: ({ className, children, ...props }) => (
+      <li className={className} {...props}>
+        {linkifyGlossary(children)}
+      </li>
     ),
     blockquote: ({ className, ...props }) => (
       <blockquote

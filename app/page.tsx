@@ -1,11 +1,11 @@
-import { Hero } from "@/components/sections/hero";
-import { TrustIntro } from "@/components/sections/trust-intro";
-import { FeaturedMetrics } from "@/components/sections/featured-metrics";
-import { LearnCta } from "@/components/sections/learn-cta";
-import { EducationPreview } from "@/components/sections/education-preview";
-import { BlogPreview } from "@/components/sections/blog-preview";
-import { InstagramFeed } from "@/components/sections/instagram-feed";
-import { Newsletter } from "@/components/sections/newsletter";
+import { Hero } from "@/features/home/components/hero";
+import { TrustIntro } from "@/features/home/components/trust-intro";
+import { FeaturedMetrics } from "@/features/home/components/featured-metrics";
+import { LearnCta } from "@/features/home/components/learn-cta";
+import { EducationPreview } from "@/features/home/components/education-preview";
+import { BlogPreview } from "@/features/home/components/blog-preview";
+import { InstagramFeed } from "@/features/home/components/instagram-feed";
+import { Newsletter } from "@/features/home/components/newsletter";
 
 export default function HomePage() {
   return (

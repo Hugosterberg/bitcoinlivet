@@ -84,7 +84,7 @@ Riksbanken/Frankfurter för SEK-kurs.
 - [x] Tydlig märkning "live" vs "exempel" på datasidan (`SourceNote`-komponenten).
 
 ### P1 – Svensk makro & verktyg
-- [x] **Riktig inflationsgraf** från SCB (svensk KPI, årsförändring) – `getInflation()` i `lib/live-data.ts`.
+- [x] **Riktig inflationsgraf** från SCB (svensk KPI, årsförändring) – `getInflation()` i `features/bitcoin-data/data/live-data.ts`.
 - [x] **SEK-kurs** via Frankfurter → korrekt SEK i historik (`getInvestmentHistory`).
 - [x] **DCA / sparkalkylator** ("Min Bitcoin-resa" + `SavingsCalculator`) – pedagogiskt, utan löften.
 - [x] **Fear & Greed-mätare** (alternative.me) – förklarad som humör, inte signal.
@@ -99,7 +99,7 @@ Riksbanken/Frankfurter för SEK-kurs.
 
 ### P3 – Fördjupning
 - [x] Dedikerad **halveringssida** (`/halvering`) med live-nedräkning + historik.
-- [x] "**Bitcoin idag**" (`/bitcoin-idag`) – daglig ögonblicksbild (pris/avgift/humör/halvering) + automatiska rubriker via RSS/Atom (Bitcoin Magazine, Cointelegraph, Bitcoin Optech). Cachas 1 h. Källor redigeras i `lib/news.ts`.
+- [x] "**Bitcoin idag**" (`/bitcoin-idag`) – daglig ögonblicksbild (pris/avgift/humör/halvering) + automatiska rubriker via RSS/Atom (Bitcoin Magazine, Cointelegraph, Bitcoin Optech). Cachas 1 h. Källor redigeras i `features/bitcoin-data/data/news.ts`.
 - [x] **Lightning-tipsjar** – konfigurerbar via `siteConfig.lightningAddress` (placeholder tills adress fylls i).
 - [ ] Engelsk version (i18n) – kräver beslut om `next-intl` och översättningsarbete.
 
@@ -109,7 +109,7 @@ Riksbanken/Frankfurter för SEK-kurs.
 
 **Nuvarande lösning (gratis, ingen nyckel):** `iframe`-inbäddning av publika inlägg
 via `https://www.instagram.com/p/<shortcode>/embed/captioned`. Konfigureras i
-`lib/instagram.ts` – klistra bara in shortcodes från dina inläggslänkar.
+`features/home/data/instagram.ts` – klistra bara in shortcodes från dina inläggslänkar.
 
 ```
 https://www.instagram.com/p/ABC123xyz/  →  shortcode = "ABC123xyz"

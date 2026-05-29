@@ -11,9 +11,9 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { ProgressDashboard } from "@/components/education/progress-dashboard";
-import { ModuleCard, type ModuleCardData } from "@/components/education/module-card";
-import { courseModules, maxLessonXp, totalLessons, totalXp } from "@/lib/courses";
+import { ProgressDashboard } from "@/features/education/components/progress-dashboard";
+import { ModuleCard, type ModuleCardData } from "@/features/education/components/module-card";
+import { courseModules, maxLessonXp, totalLessons, totalXp } from "@/features/education/data/courses";
 import { formatNumber } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "Lär dig Bitcoin steg för steg i en interaktiv kurs på svenska. Samla XP, höj din nivå och håll din streak vid liv. Helt gratis.",
   alternates: { canonical: "/utbildning" },
   openGraph: {
-    title: "Bitcoinskolan · Bitcoinlivet",
+    title: "Bitcoinskolan · bitcoinlivet",
     description:
       "Interaktiv Bitcoinutbildning på svenska med XP, nivåer och kunskapsfrågor.",
     url: "/utbildning",
@@ -129,7 +129,7 @@ export default function UtbildningPage() {
             Källa och vidare läsning
           </h2>
           <p className="mt-2 text-sm/6 text-muted-foreground">
-            Kursinnehållet är skrivet för Bitcoinlivet och inspirerat av det
+            Kursinnehållet är skrivet för bitcoinlivet och inspirerat av det
             öppna, fria utbildningsmaterialet från Plan ₿ Network. Vill du gräva
             djupare finns hela deras kursbibliotek öppet på GitHub.
           </p>

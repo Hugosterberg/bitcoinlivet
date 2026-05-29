@@ -6,9 +6,10 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { HalvingCountdown } from "@/components/data/halving-countdown";
-import { SourceNote } from "@/components/data/source-note";
-import { getBitcoinMarket } from "@/lib/live-data";
+import { HalvingCountdown } from "@/features/bitcoin-data/components/halving-countdown";
+import { SourceNote } from "@/features/bitcoin-data/components/source-note";
+import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
+import { getBitcoinMarket } from "@/features/bitcoin-data/data/live-data";
 import {
   BLOCKS_PER_DAY,
   BLOCKS_PER_HALVING,
@@ -17,8 +18,8 @@ import {
   halvingHistory,
   getSupplyTimeline,
   MINUTES_PER_BLOCK,
-} from "@/lib/metrics";
-import { formatNumber, formatPercent } from "@/lib/format";
+} from "@/features/bitcoin-data/data/metrics";
+import { formatNumber, formatShare } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Bitcoinhalveringen: så fungerar den",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     "Vad är Bitcoinhalveringen? Live nedräkning till nästa halvering, blocktid, historik över tidigare halveringar och en lugn förklaring av varför utbudet är förutsägbart.",
   alternates: { canonical: "/halvering" },
   openGraph: {
-    title: "Bitcoinhalveringen · Bitcoinlivet",
+    title: "Bitcoinhalveringen · bitcoinlivet",
     description:
       "Live nedräkning, blocktid, historik och en enkel förklaring av Bitcoins halvering.",
     url: "/halvering",
@@ -35,28 +36,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 300;
-
-function FactTile({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-}) {
-  return (
-    <div className="rounded-lg border border-border/60 bg-card/40 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1.5 font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums">
-        {value}
-      </p>
-      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
-    </div>
-  );
-}
 
 export default async function HalvingPage() {
   const market = await getBitcoinMarket();
@@ -129,22 +108,22 @@ export default async function HalvingPage() {
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <FactTile
+              <StatTile
                 label="Måltid per block"
                 value={`≈ ${MINUTES_PER_BLOCK} min`}
                 sub="i snitt, enligt protokollet"
               />
-              <FactTile
+              <StatTile
                 label="Block per halvering"
                 value={formatNumber(BLOCKS_PER_HALVING)}
                 sub="≈ 4 år vid måltiden"
               />
-              <FactTile
+              <StatTile
                 label="Svårighetsjustering"
                 value={`var ${formatNumber(DIFFICULTY_ADJUSTMENT_BLOCKS)} block`}
                 sub={`≈ var ${DIFFICULTY_ADJUSTMENT_DAYS}:e dag`}
               />
-              <FactTile
+              <StatTile
                 label="Block per dygn"
                 value={`≈ ${BLOCKS_PER_DAY}`}
                 sub={`vid ${MINUTES_PER_BLOCK} min/block`}
@@ -177,7 +156,7 @@ export default async function HalvingPage() {
               className="mt-4"
               source="Bitcoin-protokollet (blocktid, svårighetsjustering)"
               hardcoded
-              updatePath="lib/metrics.ts → MINUTES_PER_BLOCK, BLOCKS_PER_HALVING"
+              updatePath="features/bitcoin-data/data/metrics.ts → MINUTES_PER_BLOCK, BLOCKS_PER_HALVING"
             />
           </Card>
         </section>
@@ -195,22 +174,22 @@ export default async function HalvingPage() {
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <FactTile
+              <StatTile
                 label="Blockbelöning nu"
                 value={`${fmtYears(supply.currentReward, 4)} BTC`}
                 sub="halveras vid nästa epok"
               />
-              <FactTile
+              <StatTile
                 label="Nytt utbud per dag"
                 value={`≈ ${formatNumber(Math.round(supply.perDay))} BTC`}
                 sub={`vid ~${BLOCKS_PER_DAY} block/dygn`}
               />
-              <FactTile
+              <StatTile
                 label="Andel utgivet"
-                value={formatPercent(supply.issuedPercent).replace("+", "")}
+                value={formatShare(supply.issuedPercent)}
                 sub={`${formatNumber(Math.round(market.circulatingSupply))} av ${formatNumber(market.maxSupply)} BTC`}
               />
-              <FactTile
+              <StatTile
                 label="Kvar att utvinna"
                 value={`${formatNumber(Math.round(supply.remaining))} BTC`}
                 sub={`till cirka år ${supply.lastCoinYear}`}
@@ -223,7 +202,7 @@ export default async function HalvingPage() {
               href="https://www.coingecko.com/sv"
               live={market.live}
               hardcoded={!market.live}
-              updatePath={!market.live ? "lib/metrics.ts → btcSnapshot (reserv)" : undefined}
+              updatePath={!market.live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot (reserv)" : undefined}
             />
           </Card>
         </section>
@@ -294,7 +273,7 @@ export default async function HalvingPage() {
               className="mt-4"
               source="Bitcoin-protokollet (block & belopp), datum är faktiska/uppskattade"
               hardcoded
-              updatePath="lib/metrics.ts → halvingHistory"
+              updatePath="features/bitcoin-data/data/metrics.ts → halvingHistory"
             />
           </Card>
         </section>
@@ -314,7 +293,7 @@ export default async function HalvingPage() {
             <p className="max-w-3xl text-base/7 text-muted-foreground">
               Halveringen är alltså inte en händelse att tajma, utan en
               illustration av en princip: förutsägbara, knappa pengar. Det är
-              den principen vi tycker är värd att förstå.
+              den principen jag tycker är värd att förstå.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

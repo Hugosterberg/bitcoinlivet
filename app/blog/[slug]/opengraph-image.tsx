@@ -1,9 +1,9 @@
 import { ImageResponse } from "next/og";
 
 import { siteConfig } from "@/lib/site";
-import { getPost, getPostSlugs } from "@/lib/posts";
+import { getPost, getPostSlugs } from "@/features/blog/data/posts";
 
-export const alt = "Bitcoinlivet, artikel";
+export const alt = "bitcoinlivet, artikel";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,7 +19,7 @@ export default async function BlogOpengraphImage({
   const { slug } = await params;
   const post = getPost(slug);
   const title = post?.meta.title ?? siteConfig.name;
-  const category = post?.meta.categoryLabel ?? "Blogg";
+  const category = post?.meta.categoryLabel ?? "Artiklar";
 
   return new ImageResponse(
     (
