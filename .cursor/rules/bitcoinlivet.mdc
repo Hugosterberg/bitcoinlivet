@@ -1,0 +1,67 @@
+---
+description: Rules for building Bitcoinlivet
+alwaysApply: true
+---
+
+You are helping build Bitcoinlivet, a premium Swedish Bitcoin education and data website.
+
+Tech stack:
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Recharts for charts
+- MDX for blog posts
+- Server Components by default
+- Client Components only when interactivity is required
+
+Brand:
+- Name: Bitcoinlivet
+- Language: Swedish
+- Tone: clear, calm, educational, optimistic, non-hype
+- Audience: Swedes who are curious about Bitcoin, saving, inflation, hard money and long-term thinking
+- Avoid shitcoin/trading/casino feeling
+- Feel premium, trustworthy, simple and modern
+
+Visual style:
+- Dark theme first
+- Bitcoin orange as accent
+- Black, graphite, warm gray, white, orange
+- Clean layouts, large typography, lots of whitespace
+- Inspired by premium fintech, data dashboards and modern editorial sites
+- Use subtle gradients, cards, borders and soft shadows
+- Prioritize readability and trust over flashy effects
+
+Code principles:
+- Use small reusable components
+- Use semantic HTML
+- Use accessible UI
+- Use strict TypeScript
+- Prefer server-side data fetching when possible
+- Keep components clean and composable
+- Avoid unnecessary dependencies
+- Add loading, error and empty states for data views
+- Optimize for SEO, performance and mobile
+
+Site structure:
+- Home page
+- Blog
+- Bitcoin data dashboard
+- Bitcoin price / sats calculator
+- About page
+- Newsletter signup placeholder
+- SEO metadata for every page
+
+Content principles:
+- Write Swedish copy
+- Explain Bitcoin simply without dumbing it down
+- Use examples from everyday life, saving, purchasing power and long-term thinking
+- Never give financial advice
+- Add disclaimer where relevant: "Detta är inte finansiell rådgivning."
+
+When generating code:
+- Explain briefly what changed
+- Show file paths
+- Do not rewrite unrelated files
+- Ask before adding major libraries
