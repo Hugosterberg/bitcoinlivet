@@ -17,7 +17,7 @@ export function CategoryFilter({ active }: { active?: CategorySlug }) {
       <ul className="flex flex-wrap gap-2">
         {items.map((item) => {
           const isActive = (item.slug ?? null) === (active ?? null);
-          const href = item.slug ? `/blog?kategori=${item.slug}` : "/blog";
+          const href = item.slug ? `/artiklar?kategori=${item.slug}` : "/artiklar";
           return (
             <li key={item.label}>
               <Link

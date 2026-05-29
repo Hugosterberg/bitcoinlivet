@@ -99,7 +99,7 @@ Riksbanken/Frankfurter för SEK-kurs.
 
 ### P3 – Fördjupning
 - [x] Dedikerad **halveringssida** (`/halvering`) med live-nedräkning + historik.
-- [x] "**Bitcoin idag**" (`/bitcoin-idag`) – daglig ögonblicksbild (pris/avgift/humör/halvering) + automatiska rubriker via RSS/Atom (Bitcoin Magazine, Cointelegraph, Bitcoin Optech). Cachas 1 h. Källor redigeras i `features/bitcoin-data/data/news.ts`.
+- [x] "**Bitcoin idag**" (`/nyheter`) – daglig ögonblicksbild (pris/avgift/humör/halvering) + automatiska rubriker via RSS/Atom (Bitcoin Magazine, Cointelegraph, Bitcoin Optech). Cachas 1 h. Källor redigeras i `features/bitcoin-data/data/news.ts`.
 - [x] **Lightning-tipsjar** – konfigurerbar via `siteConfig.lightningAddress` (placeholder tills adress fylls i).
 - [ ] Engelsk version (i18n) – kräver beslut om `next-intl` och översättningsarbete.
 

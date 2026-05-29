@@ -37,12 +37,12 @@ export const metadata: Metadata = {
   title: "Nyheter: senaste om Bitcoin",
   description:
     "Ett lugnt urval Bitcoinnyheter från den senaste veckan, hämtade från bitcoinfokuserade källor, plus en snabb överblick av läget i SEK. Utan hype.",
-  alternates: { canonical: "/bitcoin-idag" },
+  alternates: { canonical: "/nyheter" },
   openGraph: {
     title: "Nyheter · bitcoinlivet",
     description:
       "Veckans Bitcoinnyheter från bitcoinfokuserade källor, plus läget just nu i SEK. Minimalt och utan hype.",
-    url: "/bitcoin-idag",
+    url: "/nyheter",
     type: "website",
   },
 };

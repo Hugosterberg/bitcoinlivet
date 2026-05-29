@@ -75,7 +75,7 @@ function toPost(slug: string, meta: PostFrontmatter): Post {
   return {
     ...meta,
     slug,
-    href: `/blog/${slug}`,
+    href: `/artiklar/${slug}`,
     categoryLabel: categories[meta.category]?.label ?? meta.category,
   };
 }

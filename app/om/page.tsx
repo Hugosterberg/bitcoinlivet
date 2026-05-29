@@ -130,7 +130,7 @@ export default function AboutPage() {
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild className="h-10 rounded-full px-5 text-sm">
-              <Link href="/blog">
+              <Link href="/artiklar">
                 Läs guiderna
                 <ArrowRight weight="bold" aria-hidden />
               </Link>

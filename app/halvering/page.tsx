@@ -86,7 +86,7 @@ export default async function HalvingPage() {
               Ingen kan ändra på det i efterhand.
             </p>
             <Link
-              href="/blog/bitcoin-sunda-pengar"
+              href="/artiklar/bitcoin-sunda-pengar"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
             >
               Läs: Vad gör Bitcoin till sunda pengar?

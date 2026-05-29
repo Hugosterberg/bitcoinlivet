@@ -18,7 +18,7 @@ export function BlogPreview() {
           description="Guider och förklaringar som hjälper dig att förstå Bitcoin och din egen ekonomi."
         />
         <Button asChild variant="outline" className="h-10 shrink-0 rounded-full px-5 text-sm">
-          <Link href="/blog">
+          <Link href="/artiklar">
             Alla artiklar
             <ArrowRight weight="bold" aria-hidden />
           </Link>

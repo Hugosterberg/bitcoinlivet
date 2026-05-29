@@ -626,13 +626,13 @@ export default async function DataPage() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/blog/kopkraft-forklarat"
+                href="/artiklar/kopkraft-forklarat"
                 className="text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
               >
                 Läs: Köpkraft förklarat
               </Link>
               <Link
-                href="/blog/inflation-och-kopkraft"
+                href="/artiklar/inflation-och-kopkraft"
                 className="text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
               >
                 Läs: Inflation och köpkraft

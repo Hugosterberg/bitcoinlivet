@@ -52,8 +52,8 @@ export const mainNav: NavItem[] = [
     highlight: true,
   },
   // (The "Funktioner" mega-menu is injected here in the header.)
-  { title: "Artiklar", href: "/blog", description: "Guider och artiklar", icon: "articles" },
-  { title: "Nyheter", href: "/bitcoin-idag", description: "Veckans Bitcoinnyheter", icon: "news" },
+  { title: "Artiklar", href: "/artiklar", description: "Guider och artiklar", icon: "articles" },
+  { title: "Nyheter", href: "/nyheter", description: "Veckans Bitcoinnyheter", icon: "news" },
   { title: "Om", href: "/om", description: "Om bitcoinlivet", icon: "about" },
   { title: "Ordlista", href: "/ordlista", description: "Bitcoinbegrepp förklarade", icon: "glossary" },
 ];
@@ -63,8 +63,8 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     title: "Utforska",
     items: [
       { title: "Hem", href: "/" },
-      { title: "Nyheter", href: "/bitcoin-idag" },
-      { title: "Artiklar", href: "/blog" },
+      { title: "Nyheter", href: "/nyheter" },
+      { title: "Artiklar", href: "/artiklar" },
       { title: "Bitcoindata", href: "/data" },
       { title: "Om bitcoinlivet", href: "/om" },
     ],
@@ -75,8 +75,8 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { title: "Bitcoinskolan", href: "/utbildning" },
       { title: "Ordlista", href: "/ordlista" },
       { title: "Halveringen", href: "/halvering" },
-      { title: "Nybörjarguider", href: "/blog?kategori=nyborjarguider" },
-      { title: "Sparande", href: "/blog?kategori=sparande" },
+      { title: "Nybörjarguider", href: "/artiklar?kategori=nyborjarguider" },
+      { title: "Sparande", href: "/artiklar?kategori=sparande" },
     ],
   },
 ];

@@ -22,7 +22,7 @@ export function EducationPreview() {
         {entries.map(([slug, category]) => (
           <Link
             key={slug}
-            href={`/blog?kategori=${slug}`}
+            href={`/artiklar?kategori=${slug}`}
             className="group rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Card className="flex h-full items-start justify-between gap-4 p-6 transition-colors group-hover:border-bitcoin/40">

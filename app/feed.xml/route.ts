@@ -38,7 +38,7 @@ export function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(siteConfig.name)}, Artiklar</title>
-    <link>${base}/blog</link>
+    <link>${base}/artiklar</link>
     <description>${escapeXml(siteConfig.description)}</description>
     <language>sv-SE</language>
     <lastBuildDate>${updated}</lastBuildDate>

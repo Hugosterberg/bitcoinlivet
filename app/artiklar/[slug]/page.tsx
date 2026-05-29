@@ -69,7 +69,7 @@ export default async function BlogPostPage({
     <article className="py-14 sm:py-20">
       <Container className="max-w-3xl">
         <Link
-          href="/blog"
+          href="/artiklar"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={16} weight="bold" aria-hidden />
@@ -78,7 +78,7 @@ export default async function BlogPostPage({
 
         <header className="mt-8 border-b border-border pb-8">
           <div className="flex flex-wrap items-center gap-3">
-            <Link href={`/blog?kategori=${meta.category}`}>
+            <Link href={`/artiklar?kategori=${meta.category}`}>
               <Badge variant="bitcoin">{meta.categoryLabel}</Badge>
             </Link>
             <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">

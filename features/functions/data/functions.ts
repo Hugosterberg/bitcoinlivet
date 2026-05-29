@@ -292,7 +292,7 @@ export const bitcoinFunctions: BitcoinFunction[] = [
     related: [
       { href: "/ordlista#lightning", label: "Ordlista: Lightning Network" },
       { href: "/ordlista#mempool", label: "Ordlista: Mempool" },
-      { href: "/bitcoin-idag", label: "Se dagens avgifter" },
+      { href: "/nyheter", label: "Se dagens avgifter" },
     ],
   },
   {
@@ -353,7 +353,7 @@ export const bitcoinFunctions: BitcoinFunction[] = [
     ],
     related: [
       { href: "/utbildning/kopkraft/kopkraft-over-tid", label: "Lektion: Köpkraft över tid" },
-      { href: "/blog/kopkraft-forklarat", label: "Läs: Köpkraft förklarat" },
+      { href: "/artiklar/kopkraft-forklarat", label: "Läs: Köpkraft förklarat" },
       { href: "/data", label: "Se inflation och köpkraft" },
     ],
   },

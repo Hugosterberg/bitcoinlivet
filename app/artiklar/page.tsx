@@ -14,12 +14,12 @@ export const metadata: Metadata = {
   title: "Artiklar",
   description:
     "Guider och artiklar om Bitcoin, sparande, inflation och köpkraft, skrivna lugnt och på svenska.",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "/artiklar" },
   openGraph: {
     title: "Artiklar · bitcoinlivet",
     description:
       "Guider och artiklar om Bitcoin, sparande, inflation och köpkraft.",
-    url: "/blog",
+    url: "/artiklar",
     type: "website",
   },
 };

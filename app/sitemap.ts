@@ -11,9 +11,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/utbildning`, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/artiklar`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/data`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${base}/bitcoin-idag`, changeFrequency: "hourly", priority: 0.7 },
+    { url: `${base}/nyheter`, changeFrequency: "hourly", priority: 0.7 },
     { url: `${base}/ordlista`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/halvering`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/funktioner`, changeFrequency: "monthly", priority: 0.7 },

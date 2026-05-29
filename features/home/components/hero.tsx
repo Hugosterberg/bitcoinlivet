@@ -66,7 +66,7 @@ export async function Hero() {
               variant="outline"
               className="rounded-full"
             >
-              <Link href="/blog">Läs guiderna</Link>
+              <Link href="/artiklar">Läs guiderna</Link>
             </Button>
           </div>
         </div>
