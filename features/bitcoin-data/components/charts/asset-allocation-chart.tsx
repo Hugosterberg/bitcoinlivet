@@ -3,7 +3,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import type { AssetSlice } from "@/features/bitcoin-data/data/live-data";
-import { assetColor } from "@/features/bitcoin-data/data/assets";
 import { ChartTooltipCard } from "./chart-theme";
 
 function biljoner(valueUsd: number): string {
@@ -34,14 +33,14 @@ export function AssetAllocationChart({
           nameKey="name"
           cx="50%"
           cy="50%"
-          innerRadius="58%"
-          outerRadius="86%"
-          paddingAngle={1.5}
-          stroke="var(--color-background)"
-          strokeWidth={2}
+          innerRadius="60%"
+          outerRadius="88%"
+          paddingAngle={0}
         >
           {data.map((slice) => (
-            <Cell key={slice.name} fill={assetColor(slice.name)} />
+            // Edge in the slice's own colour — no black border or gap, so even
+            // the thin company slivers read as their colour.
+            <Cell key={slice.name} fill={slice.color} stroke={slice.color} strokeWidth={1} />
           ))}
         </Pie>
         <Tooltip
@@ -55,7 +54,7 @@ export function AssetAllocationChart({
                   {
                     label: "Andel",
                     value: percent(slice.percent),
-                    color: assetColor(slice.name),
+                    color: slice.color,
                   },
                   { label: "Värde", value: biljoner(slice.valueUsd) },
                 ]}

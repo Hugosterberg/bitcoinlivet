@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   List,
   X,
-  House,
   GraduationCap,
   Article,
   Newspaper,
@@ -24,7 +23,6 @@ import { FeaturesMenu } from "@/components/layout/features-menu";
 import { DataCta } from "@/components/layout/data-cta";
 
 const NAV_ICONS: Record<NavIconKey, Icon> = {
-  home: House,
   education: GraduationCap,
   articles: Article,
   news: Newspaper,
@@ -93,7 +91,7 @@ export function SiteHeader() {
         </ul>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <DataCta />
+          <DataCta className="gap-1.5 px-3.5 py-2 text-xs xl:gap-2 xl:px-5 xl:py-2.5 xl:text-sm" />
         </div>
 
         <button

@@ -4,7 +4,6 @@ import { useId, useMemo, useState } from "react";
 import { PiggyBank } from "@phosphor-icons/react";
 
 import { Card } from "@/components/ui/card";
-import { SourceNote } from "@/features/bitcoin-data/components/source-note";
 import {
   SATS_PER_BTC,
   formatCurrency,
@@ -16,13 +15,7 @@ import {
  * and how many sats it buys *at today's price*. Deliberately makes no forecast
  * about future value — it is about habit and accumulation, not returns.
  */
-export function SavingsCalculator({
-  priceSek,
-  live,
-}: {
-  priceSek: number;
-  live: boolean;
-}) {
+export function SavingsCalculator({ priceSek }: { priceSek: number }) {
   const monthlyId = useId();
   const yearsId = useId();
   const [monthly, setMonthly] = useState(1000);
@@ -135,14 +128,6 @@ export function SavingsCalculator({
         <strong className="font-medium text-foreground">vid dagens pris</strong>.
         Priset rör sig upp och ner, detta är ingen prognos om framtida värde.
       </p>
-      <SourceNote
-        className="mt-3"
-        source={live ? "CoinGecko (dagens pris)" : "Exempelpris"}
-        href={live ? "https://www.coingecko.com/sv" : undefined}
-        live={live}
-        hardcoded={!live}
-        updatePath={!live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot" : undefined}
-      />
     </Card>
   );
 }

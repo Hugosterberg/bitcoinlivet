@@ -19,18 +19,18 @@ import { SatsCalculator } from "@/features/bitcoin-data/components/sats-calculat
 import { SavingsCalculator } from "@/features/bitcoin-data/components/savings-calculator";
 import { FeesWidget } from "@/features/bitcoin-data/components/fees-widget";
 import { FearGreedWidget } from "@/features/bitcoin-data/components/fear-greed";
-import { SourceNote } from "@/features/bitcoin-data/components/source-note";
 import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
 import { BtcPriceChart } from "@/features/bitcoin-data/components/charts/btc-price-chart";
 import { InflationChart } from "@/features/bitcoin-data/components/charts/inflation-chart";
 import { PurchasingPowerChart } from "@/features/bitcoin-data/components/charts/purchasing-power-chart";
 import { InvestmentChart } from "@/features/bitcoin-data/components/charts/investment-chart";
 import { AssetAllocationChart } from "@/features/bitcoin-data/components/charts/asset-allocation-chart";
-import { assetColor } from "@/features/bitcoin-data/data/assets";
+import { STOCKS_COLOR } from "@/features/bitcoin-data/data/assets";
 import { btcSnapshot, getSupplyTimeline } from "@/features/bitcoin-data/data/metrics";
 import {
   getAssetAllocation,
   getBitcoinMarket,
+  getBtcPriceHistory,
   getFearGreed,
   getInflation,
   getInvestmentHistory,
@@ -63,36 +63,18 @@ function ChartCard({
   title,
   description,
   children,
-  source,
-  sourceHref,
-  live,
-  hardcoded,
-  updatePath,
 }: {
   title: string;
   description: string;
   children: React.ReactNode;
-  source: string;
-  sourceHref?: string;
-  live?: boolean;
-  hardcoded?: boolean;
-  updatePath?: string;
 }) {
   return (
-    <Card className="flex flex-col p-6">
+    <Card className="flex h-full flex-col p-6">
       <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
         {title}
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       <div className="mt-6">{children}</div>
-      <SourceNote
-        className="mt-4"
-        source={source}
-        href={sourceHref}
-        live={live}
-        hardcoded={hardcoded}
-        updatePath={updatePath}
-      />
     </Card>
   );
 }
@@ -130,7 +112,7 @@ function SupplyBar({
 }
 
 export default async function DataPage() {
-  const [market, fees, investment, fearGreed, inflation, allocation] =
+  const [market, fees, investment, fearGreed, inflation, allocation, priceHist] =
     await Promise.all([
       getBitcoinMarket(),
       getRecommendedFees(),
@@ -138,6 +120,7 @@ export default async function DataPage() {
       getFearGreed(),
       getInflation(),
       getAssetAllocation(),
+      getBtcPriceHistory(),
     ]);
 
   const supply = getSupplyTimeline(
@@ -151,6 +134,26 @@ export default async function DataPage() {
     });
 
   const btcSlice = allocation.slices.find((s) => s.isBitcoin);
+  // The companies that make up the "Aktier" total, grouped for the legend.
+  const stockSlices = allocation.slices.filter((s) => s.group === "stocks");
+  const stocksValue = stockSlices.reduce((sum, s) => sum + s.valueUsd, 0);
+  const stocksPercent = stockSlices.reduce((sum, s) => sum + s.percent, 0);
+  // Top-level legend rows in pie order; the stocks block collapses to one entry.
+  type LegendRow =
+    | { kind: "asset"; slice: (typeof allocation.slices)[number] }
+    | { kind: "stocks" };
+  const legendRows: LegendRow[] = [];
+  let stocksInserted = false;
+  for (const slice of allocation.slices) {
+    if (slice.group === "stocks") {
+      if (!stocksInserted) {
+        legendRows.push({ kind: "stocks" });
+        stocksInserted = true;
+      }
+    } else {
+      legendRows.push({ kind: "asset", slice });
+    }
+  }
   const fmtPercent = (v: number) =>
     `${v.toLocaleString("sv-SE", { maximumFractionDigits: v < 1 ? 2 : 1 })} %`;
   const fmtTrillions = (usd: number) =>
@@ -178,7 +181,7 @@ export default async function DataPage() {
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
             En överblick av Bitcoin och de krafter som påverkar din köpkraft.
             {market.live
-              ? " Pris, marknadsvärde och svensk inflation hämtas live; pris över tid och köpkraft visas som exempel."
+              ? " Pris, marknadsvärde, svensk inflation och prishistorik hämtas live; köpkraft visas som exempel."
               : " Siffrorna visas som exempeldata just nu."}
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
@@ -224,15 +227,6 @@ export default async function DataPage() {
               value={formatShare(market.issuedPercent)}
               sub="av maxutbudet"
               icon={<ChartLineUp size={20} weight="bold" aria-hidden />}
-            />
-          </div>
-          <div className="mt-4">
-            <SourceNote
-              source="CoinGecko"
-              href="https://www.coingecko.com/sv"
-              live={market.live}
-              hardcoded={!market.live}
-              updatePath={!market.live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot (reserv)" : undefined}
             />
           </div>
         </section>
@@ -332,18 +326,6 @@ export default async function DataPage() {
                 halvering: nyproduktionen krymper medan efterfrågan kan växa.
               </p>
             </div>
-
-            <div className="mt-5">
-              <SourceNote
-                source="Utbud: CoinGecko (live) · Schema: Bitcoin-protokollet"
-                href="https://www.coingecko.com/sv"
-                live={market.live}
-                hardcoded={!market.live}
-                updatePath={
-                  !market.live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot (reserv)" : undefined
-                }
-              />
-            </div>
           </Card>
         </section>
 
@@ -352,12 +334,9 @@ export default async function DataPage() {
           <div className="lg:col-span-2">
             <ChartCard
               title="Bitcoin i ett längre perspektiv"
-              description="Årsslutspris i SEK. Illustrerar det långa loppet, inte exakt historik."
-              source="Exempeldata"
-              hardcoded
-              updatePath="features/bitcoin-data/data/metrics.ts → priceHistory"
+              description="Pris vid varje årsslut, i SEK. Illustrerar det långa loppet."
             >
-              <BtcPriceChart height={340} />
+              <BtcPriceChart height={340} data={priceHist.points} />
             </ChartCard>
           </div>
           <div>
@@ -373,22 +352,32 @@ export default async function DataPage() {
                 Bitcoin i relation till andra tillgångar
               </h2>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                Världens samlade värde fördelat på några stora tillgångsklasser.
-                Det sätter Bitcoins storlek i perspektiv, fortfarande litet
-                jämfört med guld, aktier och fastigheter.
+                Världens samlade värde fördelat på stora tillgångar. Det sätter
+                Bitcoins storlek i perspektiv. De största bolagen visas som en
+                del av aktie-totalen, så du ser hur var och en står sig mot
+                Bitcoin.
               </p>
             </div>
 
             <div className="mt-6 grid items-center gap-8 lg:grid-cols-2">
               <div className="relative">
-                <AssetAllocationChart data={allocation.slices} height={300} />
+                <AssetAllocationChart data={allocation.slices} height={400} />
                 {btcSlice ? (
                   <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {/* Soft halo behind the centred Bitcoin figure. */}
+                    <span
+                      aria-hidden
+                      className="absolute size-32 rounded-full bg-bitcoin/15 blur-2xl"
+                    />
+                    <span className="relative inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      <CurrencyBtc size={13} weight="fill" className="text-bitcoin" aria-hidden />
                       Bitcoin
                     </span>
-                    <span className="font-heading text-2xl font-semibold tracking-tight text-bitcoin tabular-nums">
+                    <span className="relative mt-1 font-heading text-5xl font-bold tracking-tight text-bitcoin tabular-nums">
                       {fmtPercent(btcSlice.percent)}
+                    </span>
+                    <span className="relative mt-1.5 max-w-[8rem] text-[11px] leading-tight text-muted-foreground">
+                      av världens tillgångar
                     </span>
                   </div>
                 ) : null}
@@ -396,54 +385,98 @@ export default async function DataPage() {
 
               <div>
                 <dl className="flex flex-col gap-2.5">
-                  {allocation.slices.map((slice) => (
-                    <div
-                      key={slice.name}
-                      className="flex items-center justify-between gap-4 border-b border-border/60 pb-2.5 last:border-0"
-                    >
-                      <dt className="flex min-w-0 items-center gap-2.5">
-                        <span
-                          aria-hidden
-                          className="size-3 shrink-0 rounded-full"
-                          style={{ backgroundColor: assetColor(slice.name) }}
-                        />
-                        <span
-                          className={
-                            slice.isBitcoin
-                              ? "truncate font-medium text-bitcoin"
-                              : "truncate font-medium text-foreground"
-                          }
-                        >
-                          {slice.name}
-                        </span>
-                      </dt>
-                      <dd className="flex shrink-0 items-baseline gap-2 tabular-nums">
-                        <span className="font-heading text-base font-semibold text-foreground">
-                          {fmtPercent(slice.percent)}
-                        </span>
-                        <span className="hidden text-xs text-muted-foreground sm:inline">
-                          {fmtTrillions(slice.valueUsd)}
-                        </span>
-                      </dd>
-                    </div>
-                  ))}
+                  {legendRows.map((row) =>
+                    row.kind === "asset" ? (
+                      <div
+                        key={row.slice.name}
+                        className="flex items-center justify-between gap-4 border-b border-border/60 pb-2.5 last:border-0"
+                      >
+                        <dt className="flex min-w-0 items-center gap-2.5">
+                          <span
+                            aria-hidden
+                            className="size-3 shrink-0 rounded-full"
+                            style={{ backgroundColor: row.slice.color }}
+                          />
+                          <span
+                            className={
+                              row.slice.isBitcoin
+                                ? "truncate font-medium text-bitcoin"
+                                : "truncate font-medium text-foreground"
+                            }
+                          >
+                            {row.slice.name}
+                          </span>
+                        </dt>
+                        <dd className="flex shrink-0 items-baseline gap-2 tabular-nums">
+                          <span className="font-heading text-base font-semibold text-foreground">
+                            {fmtPercent(row.slice.percent)}
+                          </span>
+                          <span className="hidden text-xs text-muted-foreground sm:inline">
+                            {fmtTrillions(row.slice.valueUsd)}
+                          </span>
+                        </dd>
+                      </div>
+                    ) : (
+                      <div key="stocks" className="border-b border-border/60 pb-2.5 last:border-0">
+                        <div className="flex items-center justify-between gap-4">
+                          <dt className="flex min-w-0 items-center gap-2.5">
+                            <span
+                              aria-hidden
+                              className="size-3 shrink-0 rounded-full"
+                              style={{ backgroundColor: STOCKS_COLOR }}
+                            />
+                            <span className="truncate font-medium text-foreground">
+                              Aktier
+                            </span>
+                          </dt>
+                          <dd className="flex shrink-0 items-baseline gap-2 tabular-nums">
+                            <span className="font-heading text-base font-semibold text-foreground">
+                              {fmtPercent(stocksPercent)}
+                            </span>
+                            <span className="hidden text-xs text-muted-foreground sm:inline">
+                              {fmtTrillions(stocksValue)}
+                            </span>
+                          </dd>
+                        </div>
+                        <p className="mt-2 pl-[1.625rem] text-xs text-muted-foreground">
+                          varav de största bolagen:
+                        </p>
+                        <ul className="mt-1.5 flex flex-col gap-1.5 pl-[1.625rem]">
+                          {stockSlices
+                            .filter((s) => s.name !== "Övriga aktier")
+                            .map((s) => (
+                              <li
+                                key={s.name}
+                                className="flex items-center justify-between gap-3 text-xs"
+                              >
+                                <span className="flex min-w-0 items-center gap-2">
+                                  <span
+                                    aria-hidden
+                                    className="size-2 shrink-0 rounded-full"
+                                    style={{ backgroundColor: s.color }}
+                                  />
+                                  <span className="truncate text-muted-foreground">
+                                    {s.name}
+                                  </span>
+                                </span>
+                                <span className="flex shrink-0 items-baseline gap-2 tabular-nums">
+                                  <span className="font-medium text-foreground/80">
+                                    {fmtPercent(s.percent)}
+                                  </span>
+                                  <span className="hidden text-muted-foreground sm:inline">
+                                    {fmtTrillions(s.valueUsd)}
+                                  </span>
+                                </span>
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    ),
+                  )}
                 </dl>
               </div>
             </div>
 
-            <div className="mt-5 flex flex-col gap-2">
-              <SourceNote
-                source="Bitcoin: CoinGecko (live)"
-                href="https://www.coingecko.com/sv"
-                live={allocation.btcLive}
-              />
-              <SourceNote
-                source={allocation.source}
-                href={allocation.href}
-                hardcoded
-                updatePath="features/bitcoin-data/data/assets.ts → assetClassEstimates"
-              />
-            </div>
           </Card>
         </section>
 
@@ -518,28 +551,6 @@ export default async function DataPage() {
               <InvestmentChart data={investment.points} height={320} />
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <SourceNote
-                source={investment.source}
-                href={
-                  investment.source.startsWith("CryptoCompare")
-                    ? "https://www.cryptocompare.com"
-                    : undefined
-                }
-                live={investment.live}
-                hardcoded={!investment.live && !investment.source.startsWith("Instagram")}
-                updatePath={
-                  !investment.live && !investment.source.startsWith("Instagram")
-                    ? "features/bitcoin-data/data/portfolio.ts"
-                    : undefined
-                }
-              />
-              <SourceNote
-                source={`${formatCurrency(investment.dailySek)}/dag sedan ${formatDate(investment.startDate)}`}
-                hardcoded
-                updatePath="features/bitcoin-data/data/portfolio.ts → dcaConfig"
-              />
-            </div>
           </Card>
         </section>
 
@@ -566,14 +577,14 @@ export default async function DataPage() {
         </section>
 
         {/* Live network data: fees + sentiment */}
-        <section aria-label="Live från nätverket" className="mt-5 grid items-start gap-5 sm:grid-cols-2">
+        <section aria-label="Live från nätverket" className="mt-5 grid gap-5 sm:grid-cols-2">
           <FeesWidget fees={fees} />
           <FearGreedWidget data={fearGreed} />
         </section>
 
         {/* Savings calculator */}
         <section aria-label="Sparkalkylator" className="mt-5">
-          <SavingsCalculator priceSek={market.priceSek} live={market.live} />
+          <SavingsCalculator priceSek={market.priceSek} />
         </section>
 
         {/* Inflation + purchasing power */}
@@ -581,11 +592,6 @@ export default async function DataPage() {
           <ChartCard
             title="Inflation per år"
             description="Konsumentprisernas förändring (KPI) i Sverige. Höga år markeras i orange."
-            source={inflation.live ? "SCB · KPI, årsförändring" : "Exempeldata (byt mot SCB)"}
-            sourceHref="https://www.scb.se/hitta-statistik/statistik-efter-amne/priser-och-konsumtion/konsumentprisindex/konsumentprisindex-kpi/"
-            live={inflation.live}
-            hardcoded={!inflation.live}
-            updatePath={!inflation.live ? "features/bitcoin-data/data/metrics.ts → inflationHistory" : undefined}
           >
             <InflationChart height={300} data={inflation.points} />
           </ChartCard>
@@ -593,9 +599,6 @@ export default async function DataPage() {
           <ChartCard
             title="Köpkraft över tid"
             description="Index från start = 100. Kontanter urholkas av inflation, knappa pengar behåller köpkraft."
-            source="Exempeldata"
-            hardcoded
-            updatePath="features/bitcoin-data/data/metrics.ts → purchasingPower"
           >
             <div className="mb-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
@@ -642,10 +645,10 @@ export default async function DataPage() {
         </section>
 
         <Disclaimer className="mt-10 max-w-2xl">
-          Pris, marknadsvärde, utbud, nätverksdata och svensk inflation (SCB)
-          hämtas live. Min Bitcoinresa beräknas på ett dagligt köp mot
-          historiska priser. Pris-över-tid och köpkraft är exempeldata i
-          utbildande syfte. Detta är inte finansiell rådgivning.
+          Pris, marknadsvärde, utbud, nätverksdata, svensk inflation (SCB) och
+          prishistorik hämtas live. Min Bitcoinresa beräknas på ett dagligt köp
+          mot historiska priser. Köpkraftsgrafen är exempeldata i utbildande
+          syfte. Detta är inte finansiell rådgivning.
         </Disclaimer>
       </Container>
     </div>

@@ -14,7 +14,6 @@ import {
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { SourceNote } from "@/features/bitcoin-data/components/source-note";
 import {
   getBitcoinMarket,
   getRecommendedFees,
@@ -29,6 +28,7 @@ import {
   formatPercent,
   formatDate,
   formatDateShort,
+  wrappable,
 } from "@/lib/format";
 
 export const revalidate = 3600;
@@ -66,20 +66,20 @@ function SnapshotTile({
         <span className="text-bitcoin">{icon}</span>
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <span className="font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums sm:text-2xl">
-        {value}
+      <span className="font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere] sm:text-2xl">
+        {wrappable(value)}
       </span>
       {sub ? (
         <span
           className={
             tone === "up"
-              ? "text-xs font-medium text-emerald-400 tabular-nums"
+              ? "text-xs font-medium text-emerald-400 tabular-nums [overflow-wrap:anywhere]"
               : tone === "down"
-                ? "text-xs font-medium text-destructive tabular-nums"
-                : "text-xs text-muted-foreground tabular-nums"
+                ? "text-xs font-medium text-destructive tabular-nums [overflow-wrap:anywhere]"
+                : "text-xs text-muted-foreground tabular-nums [overflow-wrap:anywhere]"
           }
         >
-          {sub}
+          {wrappable(sub)}
         </span>
       ) : null}
     </div>
@@ -150,11 +150,7 @@ export default async function BitcoinTodayPage() {
               sub={halving ? `≈ ${formatDate(halving.estimatedDate)}` : "ej tillgängligt nu"}
             />
           </div>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <SourceNote
-              source="CoinGecko · mempool.space · alternative.me"
-              live={market.live}
-            />
+          <div className="mt-4 flex justify-end">
             <Link
               href="/data"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"

@@ -20,7 +20,7 @@ export function DataCta({
       href="/data"
       onClick={onClick}
       className={cn(
-        "group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-bitcoin px-5 py-2.5 text-sm font-semibold text-bitcoin-foreground shadow-lg shadow-bitcoin/25 ring-1 ring-inset ring-white/15 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-bitcoin/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full bg-bitcoin px-5 py-2.5 text-sm font-semibold text-bitcoin-foreground shadow-lg shadow-bitcoin/25 ring-1 ring-inset ring-white/15 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-bitcoin/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >

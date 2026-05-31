@@ -1,8 +1,6 @@
 import { Gauge } from "@phosphor-icons/react/dist/ssr";
 
 import { Card } from "@/components/ui/card";
-import { SourceNote } from "@/features/bitcoin-data/components/source-note";
-import { formatDate } from "@/lib/format";
 import type { FearGreed } from "@/features/bitcoin-data/data/live-data";
 
 const R = 80;
@@ -88,12 +86,6 @@ export function FearGreedWidget({ data }: { data: FearGreed | null }) {
             Mäter marknadens känsloläge från 0 (extrem rädsla) till 100 (extrem
             girighet). Det är ett stämningsläge, inte en köp- eller säljsignal.
           </p>
-          <SourceNote
-            className="mt-3"
-            source={`${data.source} · ${formatDate(data.updated)}`}
-            href="https://alternative.me/crypto/fear-and-greed-index/"
-            live={data.live}
-          />
         </>
       ) : (
         <div className="mt-6 flex min-h-[180px] flex-col items-center justify-center gap-3 text-center">

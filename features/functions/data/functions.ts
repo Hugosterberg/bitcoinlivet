@@ -85,7 +85,7 @@ export const bitcoinFunctions: BitcoinFunction[] = [
       {
         heading: "Ett tak ingen kan rucka på",
         body: [
-          "Bitcoins 21 miljoner frigörs enligt ett schema som var känt från start. Nya bitcoin skapas som belöning till dem som säkrar nätverket, och den belöningen halveras ungefär vart fjärde år. I dag är runt 19,8 miljoner redan utgivna; de allra sista skapas först omkring år 2140.",
+          "Bitcoins 21 miljoner frigörs enligt ett schema som var känt från start. Nya bitcoin skapas som belöning till dem som säkrar nätverket, och den belöningen halveras ungefär vart fjärde år. I dag är runt 20 miljoner redan utgivna; de allra sista skapas först omkring år 2140.",
           "Det avgörande är att reglerna gäller lika för alla och inte kan ändras av en enskild aktör. Att ändra taket skulle kräva att en överväldigande majoritet av nätverket frivilligt gick med på att göra sina egna bitcoin mindre knappa, något ingen rationellt skulle vilja.",
         ],
       },
@@ -99,7 +99,7 @@ export const bitcoinFunctions: BitcoinFunction[] = [
     ],
     takeaways: [
       "Maxtak på 21 miljoner bitcoin, inbyggt i protokollet.",
-      "Cirka 19,8 miljoner är redan utgivna; resten frigörs avtagande till ~2140.",
+      "Cirka 20 miljoner är redan utgivna; resten frigörs avtagande till ~2140.",
       "Ingen enskild aktör kan skapa fler eller ändra taket.",
       "Du kan själv verifiera utbudet med en egen nod.",
     ],

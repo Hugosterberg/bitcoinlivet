@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { HalvingCountdown } from "@/features/bitcoin-data/components/halving-countdown";
-import { SourceNote } from "@/features/bitcoin-data/components/source-note";
 import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
 import { getBitcoinMarket } from "@/features/bitcoin-data/data/live-data";
 import {
@@ -151,13 +150,6 @@ export default async function HalvingPage() {
                 </li>
               </ul>
             </div>
-
-            <SourceNote
-              className="mt-4"
-              source="Bitcoin-protokollet (blocktid, svårighetsjustering)"
-              hardcoded
-              updatePath="features/bitcoin-data/data/metrics.ts → MINUTES_PER_BLOCK, BLOCKS_PER_HALVING"
-            />
           </Card>
         </section>
 
@@ -195,15 +187,6 @@ export default async function HalvingPage() {
                 sub={`till cirka år ${supply.lastCoinYear}`}
               />
             </div>
-
-            <SourceNote
-              className="mt-4"
-              source="CoinGecko (cirkulerande utbud)"
-              href="https://www.coingecko.com/sv"
-              live={market.live}
-              hardcoded={!market.live}
-              updatePath={!market.live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot (reserv)" : undefined}
-            />
           </Card>
         </section>
 
@@ -268,13 +251,6 @@ export default async function HalvingPage() {
                 </tbody>
               </table>
             </div>
-
-            <SourceNote
-              className="mt-4"
-              source="Bitcoin-protokollet (block & belopp), datum är faktiska/uppskattade"
-              hardcoded
-              updatePath="features/bitcoin-data/data/metrics.ts → halvingHistory"
-            />
           </Card>
         </section>
 

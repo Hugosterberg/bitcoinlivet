@@ -1,3 +1,5 @@
+import { wrappable } from "@/lib/format";
+
 /**
  * Small labelled statistic tile used across the data and halving pages:
  * an uppercase label, a prominent value and a muted sub-line.
@@ -16,10 +18,12 @@ export function StatTile({
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1.5 font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums">
-        {value}
+      <p className="mt-1.5 font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]">
+        {wrappable(value)}
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+      <p className="mt-1 text-xs text-muted-foreground [overflow-wrap:anywhere]">
+        {wrappable(sub)}
+      </p>
     </div>
   );
 }

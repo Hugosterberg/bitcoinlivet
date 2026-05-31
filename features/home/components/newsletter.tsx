@@ -30,12 +30,12 @@ export function Newsletter() {
               <EnvelopeSimple size={24} weight="bold" aria-hidden />
             </span>
             <h2 className="mt-6 text-balance font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Få nya guider i inkorgen
+              Häng med när sidan växer
             </h2>
             <p className="mt-4 max-w-xl text-pretty text-base/7 text-muted-foreground">
-              Ett lugnt nyhetsbrev om Bitcoin, sparande och köpkraft. Inga
-              tips, ingen hype, bara begriplig kunskap. Avregistrera när du
-              vill.
+              Skriv upp dig på listan, så hör jag av mig när jag lägger till nya
+              funktioner eller annat viktigt och hjälpsamt här. Det blir sällan,
+              inget spam och ingen hype, och du kan avregistrera dig när du vill.
             </p>
 
             {submitted ? (
@@ -64,13 +64,14 @@ export function Newsletter() {
                   className="h-12 w-full rounded-full border border-input bg-background px-5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 <Button type="submit" size="xl" className="rounded-full">
-                  Prenumerera
+                  Skriv upp mig
                 </Button>
               </form>
             )}
 
             <p className="mt-4 text-xs text-muted-foreground">
-              Platshållare för nyhetsbrev. Detta är inte finansiell rådgivning.
+              Platshållare för anmälningslistan. Detta är inte finansiell
+              rådgivning.
             </p>
           </div>
         </div>

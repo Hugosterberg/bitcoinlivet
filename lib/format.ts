@@ -8,6 +8,18 @@ const LOCALE = "sv-SE";
 /** There are 100,000,000 satoshis in one bitcoin. */
 export const SATS_PER_BTC = 100_000_000;
 
+/**
+ * Replaces the non-breaking spaces that sv-SE uses as thousands separators
+ * with regular spaces, so long formatted numbers can wrap inside narrow
+ * containers (metric cards, tiles) instead of overflowing. Use only for values
+ * shown in width-constrained boxes; keep the non-breaking version in prose.
+ */
+export function wrappable(value: string): string {
+  const nbsp = String.fromCharCode(0xa0);
+  const narrowNbsp = String.fromCharCode(0x202f);
+  return value.split(nbsp).join(" ").split(narrowNbsp).join(" ");
+}
+
 export function formatCurrency(
   value: number,
   currency: "SEK" | "USD" | "EUR" = "SEK",

@@ -10,15 +10,22 @@ import {
   YAxis,
 } from "recharts";
 
-import { priceHistory } from "@/features/bitcoin-data/data/metrics";
+import { priceHistory, type PricePoint } from "@/features/bitcoin-data/data/metrics";
 import { formatCompact, formatCurrency } from "@/lib/format";
 import { axisTick, chartColors, ChartTooltipCard } from "./chart-theme";
 
-export function BtcPriceChart({ height = 320 }: { height?: number }) {
+export function BtcPriceChart({
+  height = 320,
+  data = priceHistory,
+}: {
+  height?: number;
+  /** Yearly close points; defaults to the static example series. */
+  data?: PricePoint[];
+}) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart
-        data={priceHistory}
+        data={data}
         margin={{ top: 8, right: 8, bottom: 0, left: 4 }}
       >
         <defs>

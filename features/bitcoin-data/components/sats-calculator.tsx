@@ -6,8 +6,6 @@ import { ArrowsDownUp } from "@phosphor-icons/react";
 import { btcSnapshot } from "@/features/bitcoin-data/data/metrics";
 import { formatNumber, formatCurrency, SATS_PER_BTC } from "@/lib/format";
 import { Card } from "@/components/ui/card";
-import { Disclaimer } from "@/components/ui/disclaimer";
-import { SourceNote } from "@/features/bitcoin-data/components/source-note";
 
 const QUICK_AMOUNTS = [100, 500, 1000, 5000];
 
@@ -52,7 +50,7 @@ export function SatsCalculator({
   }
 
   return (
-    <Card className="p-6">
+    <Card className="flex h-full flex-col p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
@@ -125,21 +123,11 @@ export function SatsCalculator({
         ))}
       </div>
 
-      <p className="mt-5 text-xs text-muted-foreground">
+      <p className="mt-auto pt-5 text-xs text-muted-foreground">
         {live
           ? `Beräknat på aktuellt pris om ${formatCurrency(PRICE_SEK)} per bitcoin.`
           : `Beräknat på ett exempelpris om ${formatCurrency(PRICE_SEK)} per bitcoin.`}
       </p>
-      <SourceNote
-        className="mt-2"
-        source="CoinGecko"
-        href="https://www.coingecko.com/sv"
-        live={live}
-        hardcoded={!live}
-        updatePath={!live ? "features/bitcoin-data/data/metrics.ts → btcSnapshot" : undefined}
-      />
-
-      <Disclaimer className="mt-4" />
     </Card>
   );
 }

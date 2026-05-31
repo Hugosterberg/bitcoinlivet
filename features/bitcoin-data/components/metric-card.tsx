@@ -3,7 +3,7 @@ import { TrendUp, TrendDown } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import { formatPercent } from "@/lib/format";
+import { formatPercent, wrappable } from "@/lib/format";
 
 export function MetricCard({
   label,
@@ -38,16 +38,16 @@ export function MetricCard({
       <div className="flex flex-col gap-1">
         <span
           className={cn(
-            "font-heading font-semibold tracking-tight text-foreground tabular-nums",
+            "font-heading font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]",
             valueClassName ?? "text-2xl sm:text-3xl",
           )}
         >
-          {value}
+          {wrappable(value)}
         </span>
         <div className="flex items-center gap-2">
           {sub ? (
-            <span className="text-sm text-muted-foreground tabular-nums">
-              {sub}
+            <span className="text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
+              {typeof sub === "string" ? wrappable(sub) : sub}
             </span>
           ) : null}
           {hasChange ? (

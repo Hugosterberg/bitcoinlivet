@@ -1,9 +1,18 @@
-import { SUPPLY, btcSnapshot, inflationHistory, type InflationPoint } from "@/features/bitcoin-data/data/metrics";
+import {
+  SUPPLY,
+  btcSnapshot,
+  inflationHistory,
+  priceHistory,
+  type InflationPoint,
+  type PricePoint,
+} from "@/features/bitcoin-data/data/metrics";
 import { dcaConfig, instagramSnapshots } from "@/features/bitcoin-data/data/portfolio";
 import {
-  assetClassEstimates,
+  assetBreakdown,
+  BITCOIN_COLOR,
   ASSET_ESTIMATE_SOURCE,
   ASSET_ESTIMATE_HREF,
+  type AssetGroup,
 } from "@/features/bitcoin-data/data/assets";
 
 /**
@@ -20,6 +29,8 @@ import {
 
 const REVALIDATE_SECONDS = 120;
 const REVALIDATE_HISTORY = 3600;
+/** Long-term yearly price history changes slowly; refresh daily. */
+const REVALIDATE_PRICE_HISTORY = 86_400;
 
 export type BitcoinMarket = {
   priceSek: number;
@@ -100,6 +111,9 @@ export type AssetSlice = {
   valueUsd: number;
   percent: number;
   isBitcoin: boolean;
+  /** "stocks" slices together make up the Aktier total. */
+  group: AssetGroup;
+  color: string;
 };
 
 export type AssetAllocation = {
@@ -134,18 +148,28 @@ export async function getAssetAllocation(): Promise<AssetAllocation> {
   }
 
   const raw = [
-    ...assetClassEstimates.map((a) => ({
+    ...assetBreakdown.map((a) => ({
       name: a.name,
       valueUsd: a.valueUsd,
+      group: a.group,
+      color: a.color,
       isBitcoin: false,
     })),
-    { name: "Bitcoin", valueUsd: btcUsd, isBitcoin: true },
+    {
+      name: "Bitcoin",
+      valueUsd: btcUsd,
+      group: "standalone" as AssetGroup,
+      color: BITCOIN_COLOR,
+      isBitcoin: true,
+    },
   ];
 
   const total = raw.reduce((sum, r) => sum + r.valueUsd, 0);
-  const slices: AssetSlice[] = raw
-    .map((r) => ({ ...r, percent: (r.valueUsd / total) * 100 }))
-    .sort((a, b) => b.valueUsd - a.valueUsd);
+  // Keep the curated order (stocks contiguous); don't re-sort by size.
+  const slices: AssetSlice[] = raw.map((r) => ({
+    ...r,
+    percent: (r.valueUsd / total) * 100,
+  }));
 
   return {
     slices,
@@ -361,6 +385,90 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
       live: false,
       source: "Exempel (live-pris ej tillgängligt)",
     };
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Long-term yearly price history (SEK), for the "Bitcoin i ett längre
+ * perspektiv"-chart. Composed from CryptoCompare BTC/USD (key-less, full
+ * history) × Frankfurter USD→SEK, same approach as the DCA series.
+ * ------------------------------------------------------------------ */
+
+export type PriceHistory = {
+  points: PricePoint[];
+  live: boolean;
+  source: string;
+};
+
+const CRYPTOCOMPARE_ALL =
+  "https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&allData=true";
+
+const PRICE_HISTORY_FIRST_YEAR = 2013;
+
+export async function getBtcPriceHistory(): Promise<PriceHistory> {
+  try {
+    const today = new Date();
+    const fxUrl = `https://api.frankfurter.app/${PRICE_HISTORY_FIRST_YEAR}-01-01..${dateKey(
+      today,
+    )}?from=USD&to=SEK`;
+
+    const [ccRes, fxRes] = await Promise.all([
+      fetch(CRYPTOCOMPARE_ALL, { next: { revalidate: REVALIDATE_PRICE_HISTORY } }),
+      fetch(fxUrl, { next: { revalidate: REVALIDATE_PRICE_HISTORY } }),
+    ]);
+    if (!ccRes.ok) throw new Error(`CryptoCompare HTTP ${ccRes.status}`);
+    if (!fxRes.ok) throw new Error(`Frankfurter HTTP ${fxRes.status}`);
+
+    const ccJson = (await ccRes.json()) as {
+      Data?: { Data?: { time: number; close: number }[] };
+    };
+    const ccArr = (ccJson.Data?.Data ?? []).filter((d) => d.close > 0);
+    if (ccArr.length === 0) throw new Error("Tom prisserie från CryptoCompare");
+
+    // Latest USD close per calendar year (the year-end print).
+    const usdByYear = new Map<number, { day: string; close: number }>();
+    for (const d of ccArr) {
+      const date = new Date(d.time * 1000);
+      const year = date.getUTCFullYear();
+      const day = dateKey(date);
+      const existing = usdByYear.get(year);
+      if (!existing || day > existing.day) usdByYear.set(year, { day, close: d.close });
+    }
+
+    // FX rates sorted ascending, for a carry-forward lookup at each year-end.
+    const fxJson = (await fxRes.json()) as {
+      rates?: Record<string, { SEK?: number }>;
+    };
+    const fxDays = Object.entries(fxJson.rates ?? {})
+      .map(([day, obj]) => [day, obj.SEK] as const)
+      .filter((entry): entry is readonly [string, number] => typeof entry[1] === "number")
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    if (fxDays.length === 0) throw new Error("Tomma växelkurser från Frankfurter");
+
+    const rateOnOrBefore = (day: string): number => {
+      let rate = fxDays[0][1];
+      for (const [d, r] of fxDays) {
+        if (d <= day) rate = r;
+        else break;
+      }
+      return rate;
+    };
+
+    const currentYear = today.getUTCFullYear();
+    const points: PricePoint[] = [];
+    for (let year = PRICE_HISTORY_FIRST_YEAR; year <= currentYear; year++) {
+      const usd = usdByYear.get(year);
+      if (!usd) continue;
+      points.push({
+        year: String(year),
+        priceSek: Math.round(usd.close * rateOnOrBefore(usd.day)),
+      });
+    }
+    if (points.length < 2) throw new Error("För få datapunkter");
+
+    return { points, live: true, source: "CryptoCompare · Frankfurter" };
+  } catch {
+    return { points: priceHistory, live: false, source: "Exempeldata" };
   }
 }
 

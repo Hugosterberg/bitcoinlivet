@@ -400,7 +400,7 @@ export const courseModules: CourseModule[] = [
           },
           {
             type: "paragraph",
-            text: "I dag är ungefär 19,8 miljoner redan utgivna. Resten frigörs långsamt, ända fram till runt år 2140. Eftersom utbudet är känt i förväg kan ingen överraska marknaden med att plötsligt skapa mer.",
+            text: "I dag är ungefär 20 miljoner redan utgivna. Resten frigörs långsamt, ända fram till runt år 2140. Eftersom utbudet är känt i förväg kan ingen överraska marknaden med att plötsligt skapa mer.",
           },
           {
             type: "callout",

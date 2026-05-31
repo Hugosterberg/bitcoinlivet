@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { InstagramLogo } from "@phosphor-icons/react/dist/ssr";
 
 import { siteConfig, footerNav } from "@/lib/site";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
+import { ScrollTopLink } from "@/components/layout/scroll-top-link";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -36,12 +36,12 @@ export function SiteFooter() {
               <ul className="mt-4 space-y-2.5">
                 {group.items.map((item) => (
                   <li key={item.href}>
-                    <Link
+                    <ScrollTopLink
                       href={item.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {item.title}
-                    </Link>
+                    </ScrollTopLink>
                   </li>
                 ))}
               </ul>

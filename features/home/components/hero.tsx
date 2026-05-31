@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/layout/container";
 import { getBitcoinMarket } from "@/features/bitcoin-data/data/live-data";
-import { formatCurrency, formatNumber, formatShare } from "@/lib/format";
+import { formatCurrency, formatNumber, formatShare, wrappable } from "@/lib/format";
 
 export async function Hero() {
   const market = await getBitcoinMarket();
@@ -77,10 +77,12 @@ export async function Hero() {
               <dt className="text-sm font-medium text-muted-foreground">
                 {stat.label}
               </dt>
-              <dd className="mt-2 font-heading text-2xl font-semibold tracking-tight text-foreground tabular-nums">
-                {stat.value}
+              <dd className="mt-2 font-heading text-2xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]">
+                {wrappable(stat.value)}
               </dd>
-              <dd className="mt-1 text-xs text-muted-foreground">{stat.sub}</dd>
+              <dd className="mt-1 text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                {wrappable(stat.sub)}
+              </dd>
             </div>
           ))}
         </dl>

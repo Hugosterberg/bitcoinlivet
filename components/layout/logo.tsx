@@ -1,10 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/site";
 
 /**
- * Brand wordmark with the Bitcoin "₿" glyph. Used in header and footer.
+ * Brand wordmark with the Bitcoin "₿" glyph. Used in header and footer, and
+ * acts as the link home. When you're already on the front page, clicking it
+ * smooth-scrolls to the top rather than doing nothing.
  */
 export function Logo({
   className,
@@ -13,10 +18,15 @@ export function Logo({
   className?: string;
   showWordmark?: boolean;
 }) {
+  const pathname = usePathname();
+
   return (
     <Link
       href="/"
       aria-label={`${siteConfig.name}: startsida`}
+      onClick={() => {
+        if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
       className={cn(
         "group inline-flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,

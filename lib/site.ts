@@ -25,7 +25,6 @@ export const siteConfig = {
 /** Navigation icon key, mapped to a Phosphor icon in
  *  components/layout/site-header.tsx. */
 export type NavIconKey =
-  | "home"
   | "education"
   | "articles"
   | "news"
@@ -43,7 +42,6 @@ export type NavItem = {
 };
 
 export const mainNav: NavItem[] = [
-  { title: "Hem", href: "/", icon: "home" },
   {
     title: "Utbildning",
     href: "/utbildning",
