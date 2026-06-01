@@ -67,6 +67,10 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   category: "finance",
+  icons: {
+    icon: [{ url: "/icon", type: "image/png", sizes: "512x512" }],
+    apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {

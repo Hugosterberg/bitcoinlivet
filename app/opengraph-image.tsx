@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 
+import { BrandMarkTile } from "@/lib/brand-icon";
 import { siteConfig } from "@/lib/site";
 
 export const alt = `${siteConfig.name}: Bitcoin, sparande och köpkraft`;
@@ -24,22 +25,7 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 64,
-              height: 64,
-              borderRadius: 18,
-              background: "#f7931a",
-              color: "#0a0a0a",
-              fontSize: 42,
-              fontWeight: 700,
-            }}
-          >
-            ₿
-          </div>
+          <BrandMarkTile size={64} />
           <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: -0.5 }}>
             {siteConfig.name}
           </div>

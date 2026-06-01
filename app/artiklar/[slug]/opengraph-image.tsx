@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 
+import { BrandMarkTile } from "@/lib/brand-icon";
 import { siteConfig } from "@/lib/site";
 import { getPost, getPostSlugs } from "@/features/blog/data/posts";
 
@@ -38,22 +39,7 @@ export default async function BlogOpengraphImage({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              background: "#f7931a",
-              color: "#0a0a0a",
-              fontSize: 36,
-              fontWeight: 700,
-            }}
-          >
-            ₿
-          </div>
+          <BrandMarkTile size={56} />
           <div style={{ fontSize: 30, fontWeight: 600 }}>{siteConfig.name}</div>
         </div>
 

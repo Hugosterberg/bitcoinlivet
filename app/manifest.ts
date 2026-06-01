@@ -14,8 +14,13 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "sv-SE",
     categories: ["education", "finance"],
     icons: [
-      { src: "/icon", sizes: "512x512", type: "image/png", purpose: "maskable" },
       { src: "/icon", sizes: "512x512", type: "image/png", purpose: "any" },
+      {
+        src: "/icon-maskable",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
       { src: "/apple-icon", sizes: "180x180", type: "image/png" },
     ],
   };
