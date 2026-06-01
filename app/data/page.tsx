@@ -22,7 +22,6 @@ import { FearGreedWidget } from "@/features/bitcoin-data/components/fear-greed";
 import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
 import { BtcPriceChart } from "@/features/bitcoin-data/components/charts/btc-price-chart";
 import { InflationChart } from "@/features/bitcoin-data/components/charts/inflation-chart";
-import { PurchasingPowerChart } from "@/features/bitcoin-data/components/charts/purchasing-power-chart";
 import { InvestmentChart } from "@/features/bitcoin-data/components/charts/investment-chart";
 import { AssetAllocationChart } from "@/features/bitcoin-data/components/charts/asset-allocation-chart";
 import { STOCKS_COLOR } from "@/features/bitcoin-data/data/assets";
@@ -587,30 +586,13 @@ export default async function DataPage() {
           <SavingsCalculator priceSek={market.priceSek} />
         </section>
 
-        {/* Inflation + purchasing power */}
-        <section aria-label="Inflation och köpkraft" className="mt-5 grid gap-5 lg:grid-cols-2">
+        {/* Inflation (SCB) */}
+        <section aria-label="Inflation" className="mt-5">
           <ChartCard
-            title="Inflation per år"
+            title="Inflation per år (enligt SCB)"
             description="Konsumentprisernas förändring (KPI) i Sverige. Höga år markeras i orange."
           >
             <InflationChart height={300} data={inflation.points} />
-          </ChartCard>
-
-          <ChartCard
-            title="Köpkraft över tid"
-            description="Index från start = 100. Kontanter urholkas av inflation, knappa pengar behåller köpkraft."
-          >
-            <div className="mb-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-chart-3" aria-hidden />
-                Kontanter
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="size-2.5 rounded-full bg-bitcoin" aria-hidden />
-                Knappa pengar
-              </span>
-            </div>
-            <PurchasingPowerChart height={260} />
           </ChartCard>
         </section>
 
@@ -624,8 +606,8 @@ export default async function DataPage() {
               Antalet kronor på kontot säger inte allt. Det som avgör din vardag
               är hur mycket de räcker till. När prisnivån stiger köper samma
               belopp mindre, det är därför vi mäter sparande i köpkraft, inte
-              bara i siffror. Grafen ovan illustrerar skillnaden mellan pengar
-              med ett växande utbud och pengar med ett begränsat utbud.
+              bara i siffror. Pengar med ett begränsat utbud har historiskt
+              behållit köpkraften bättre än pengar vars mängd hela tiden växer.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -647,8 +629,7 @@ export default async function DataPage() {
         <Disclaimer className="mt-10 max-w-2xl">
           Pris, marknadsvärde, utbud, nätverksdata, svensk inflation (SCB) och
           prishistorik hämtas live. Min Bitcoinresa beräknas på ett dagligt köp
-          mot historiska priser. Köpkraftsgrafen är exempeldata i utbildande
-          syfte. Detta är inte finansiell rådgivning.
+          mot historiska priser. Detta är inte finansiell rådgivning.
         </Disclaimer>
       </Container>
     </div>

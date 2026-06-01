@@ -72,7 +72,7 @@ export function FeaturesMenu() {
           "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
           active || open
             ? "text-bitcoin"
-            : "text-muted-foreground hover:text-foreground",
+            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
         <SquaresFour size={16} weight={active || open ? "fill" : "regular"} aria-hidden />

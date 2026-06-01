@@ -8,8 +8,8 @@ import {
   X,
   GraduationCap,
   Article,
-  Newspaper,
-  Info,
+  GlobeSimple,
+  IdentificationBadge,
   Books,
   UserCircle,
   SignIn,
@@ -28,8 +28,8 @@ import { useAuthUser } from "@/features/auth/components/use-auth-user";
 const NAV_ICONS: Record<NavIconKey, Icon> = {
   education: GraduationCap,
   articles: Article,
-  news: Newspaper,
-  about: Info,
+  news: GlobeSimple,
+  about: IdentificationBadge,
   glossary: Books,
 };
 
@@ -83,7 +83,7 @@ export function SiteHeader() {
                     "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     active
                       ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                   )}
                 >
                   {NavI ? <NavI size={15} weight={active ? "fill" : "regular"} aria-hidden /> : null}

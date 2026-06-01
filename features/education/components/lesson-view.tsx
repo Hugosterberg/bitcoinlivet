@@ -20,6 +20,7 @@ import { XP_PER_CORRECT } from "@/features/education/data/education";
 import type { Lesson, LessonBlock } from "@/features/education/data/courses";
 import { maxLessonXp } from "@/features/education/data/courses";
 import { Quiz, type QuizResult } from "@/features/education/components/quiz";
+import { trackEvent } from "@/lib/analytics/track";
 import { linkifyGlossary } from "@/features/glossary/components/glossary-linkify";
 import {
   useProgress,
@@ -107,6 +108,18 @@ export function LessonView({
       moduleLessonSlugs,
     });
     setReward(res);
+
+    if (!res.alreadyDone) {
+      trackEvent("lesson_complete", {
+        module: moduleSlug,
+        lesson: lesson.slug,
+        correct: quizResult.correct,
+        total: lesson.quiz.length,
+      });
+      if (res.badgeEarned) {
+        trackEvent("course_complete", { module: moduleSlug });
+      }
+    }
   }
 
   const showReward = reward && !reward.alreadyDone;

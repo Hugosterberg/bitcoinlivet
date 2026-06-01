@@ -1,12 +1,24 @@
 "use server";
 
+import { headers } from "next/headers";
+
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { addNewsletterContact } from "@/lib/resend";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   isValidEmail,
   type SubscribeState,
 } from "@/features/newsletter/types";
+
+async function clientIp(): Promise<string> {
+  const h = await headers();
+  return (
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown"
+  );
+}
 
 /**
  * Server Action that adds an email to the newsletter list.
@@ -21,12 +33,26 @@ export async function subscribeToNewsletter(
   _prev: SubscribeState,
   formData: FormData,
 ): Promise<SubscribeState> {
+  // Honeypot: a hidden field real users never fill. If set, it's a bot —
+  // pretend success without storing anything.
+  if (String(formData.get("company") ?? "").length > 0) {
+    return { status: "ok", message: "Tack! Du är med på listan." };
+  }
+
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
 
   if (!isValidEmail(email)) {
     return {
       status: "invalid",
       message: "Kontrollera e-postadressen och försök igen.",
+    };
+  }
+
+  // Throttle bursts from one client (best-effort, per server instance).
+  if (!rateLimit(`newsletter:${await clientIp()}`, 5, 10 * 60 * 1000)) {
+    return {
+      status: "error",
+      message: "För många försök. Vänta en stund och försök igen.",
     };
   }
 

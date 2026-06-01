@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/halvering`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/funktioner`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/om`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/integritetspolicy`, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   const functionRoutes: MetadataRoute.Sitemap = bitcoinFunctions.map((fn) => ({

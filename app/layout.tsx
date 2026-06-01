@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/site";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteAnalytics } from "@/components/layout/analytics";
+import { CookieConsent } from "@/components/layout/cookie-consent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +69,10 @@ export const metadata: Metadata = {
   category: "finance",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -91,6 +97,8 @@ export default function RootLayout({
         </main>
         <SiteFooter />
         <Analytics />
+        <SiteAnalytics />
+        <CookieConsent />
       </body>
     </html>
   );

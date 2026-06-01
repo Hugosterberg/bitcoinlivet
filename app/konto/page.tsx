@@ -88,8 +88,8 @@ export default async function AccountPage() {
         </div>
 
         <Disclaimer className="mt-12">
-          Vi sparar bara det som behövs för din inlärning. bitcoinlivet erbjuder
-          utbildning, inte finansiell rådgivning.
+          Här sparas bara det som behövs för din inlärning. 
+          Bitcoinlivet erbjuder utbildning, inte finansiell rådgivning.
         </Disclaimer>
       </Container>
     </div>

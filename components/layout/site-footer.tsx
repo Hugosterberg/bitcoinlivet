@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { InstagramLogo } from "@phosphor-icons/react/dist/ssr";
 
 import { siteConfig, footerNav } from "@/lib/site";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { ScrollTopLink } from "@/components/layout/scroll-top-link";
+import { CookieSettingsButton } from "@/components/layout/cookie-settings-button";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -53,9 +55,18 @@ export function SiteFooter() {
           <p>
             &copy; {year} {siteConfig.name}. Allt innehåll är i utbildande syfte.
           </p>
-          <p className="max-w-md text-pretty">
-            Detta är inte finansiell rådgivning. Gör alltid din egen research.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link
+              href="/integritetspolicy"
+              className="transition-colors hover:text-foreground"
+            >
+              Integritetspolicy
+            </Link>
+            <CookieSettingsButton className="cursor-pointer transition-colors hover:text-foreground" />
+            <p className="max-w-md text-pretty">
+              Detta är inte finansiell rådgivning.
+            </p>
+          </div>
         </div>
       </Container>
     </footer>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { EnvelopeSimple, CheckCircle, Warning } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { subscribeToNewsletter } from "@/features/newsletter/data/subscribe";
 import { initialSubscribeState } from "@/features/newsletter/types";
+import { trackEvent } from "@/lib/analytics/track";
 
 export function Newsletter() {
   const [state, formAction, pending] = useActionState(
@@ -15,6 +16,12 @@ export function Newsletter() {
   );
 
   const subscribed = state.status === "ok";
+
+  useEffect(() => {
+    if (state.status === "ok") {
+      trackEvent("newsletter_subscribe", { location: "home" });
+    }
+  }, [state.status]);
   const errored =
     state.status === "invalid" ||
     state.status === "error" ||
@@ -54,22 +61,37 @@ export function Newsletter() {
                 action={formAction}
                 className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row"
               >
+                {/* Honeypot — hidden from people, catches bots. */}
+                <div aria-hidden className="pointer-events-none absolute left-[-9999px] opacity-0">
+                  <label>
+                    Lämna tomt
+                    <input type="text" name="company" tabIndex={-1} autoComplete="off" />
+                  </label>
+                </div>
+
                 <label htmlFor="newsletter-email" className="sr-only">
                   E-postadress
                 </label>
-                <input
-                  id="newsletter-email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="din@epost.se"
-                  aria-invalid={errored || undefined}
-                  className="h-12 w-full rounded-full border border-input bg-background px-5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring"
-                />
+                <div className="group relative w-full">
+                  <EnvelopeSimple
+                    size={18}
+                    aria-hidden
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-bitcoin"
+                  />
+                  <input
+                    id="newsletter-email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="din@epost.se"
+                    aria-invalid={errored || undefined}
+                    className="h-12 w-full rounded-full border border-input bg-background pl-11 pr-5 text-sm text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground/70 hover:border-bitcoin/40 focus-visible:border-bitcoin/70 focus-visible:ring-2 focus-visible:ring-bitcoin/25"
+                  />
+                </div>
                 <Button
                   type="submit"
                   size="xl"
-                  className="rounded-full"
+                  className="rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bitcoin/30 active:translate-y-0"
                   disabled={pending}
                 >
                   {pending ? "Skriver upp …" : "Skriv upp mig"}
@@ -87,8 +109,7 @@ export function Newsletter() {
               </p>
             ) : (
               <p className="mt-4 text-xs text-muted-foreground">
-                Vi sparar bara din e-postadress för utskicken. Detta är inte
-                finansiell rådgivning.
+                Din e-postadress sparas endast för utskick om nytt som händer på bitcoinlivet som du kan tänkas vilja veta om.
               </p>
             )}
           </div>

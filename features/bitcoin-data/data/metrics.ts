@@ -215,29 +215,9 @@ export const priceHistory: PricePoint[] = [
 ];
 
 /**
- * Illustrative purchasing-power comparison: the index value of 100 kr held
- * since 2013, in cash (eroded by inflation) vs the same amount measured
- * against a scarce-money benchmark. Placeholder, for education only.
- */
-export type PurchasingPoint = {
-  year: string;
-  cash: number;
-  hardMoney: number;
-};
-
-export const purchasingPower: PurchasingPoint[] = [
-  { year: "2013", cash: 100, hardMoney: 100 },
-  { year: "2015", cash: 98, hardMoney: 104 },
-  { year: "2017", cash: 95, hardMoney: 121 },
-  { year: "2019", cash: 92, hardMoney: 138 },
-  { year: "2021", cash: 88, hardMoney: 171 },
-  { year: "2023", cash: 80, hardMoney: 205 },
-  { year: "2025", cash: 74, hardMoney: 244 },
-];
-
-/**
- * Illustrative annual consumer-price inflation (%). Placeholder values used
- * to explain why purchasing power changes over time.
+ * Illustrative annual consumer-price inflation (%). Fallback only — the live
+ * series comes from SCB (see getInflation). Used to explain why purchasing
+ * power changes over time.
  */
 export type InflationPoint = { year: string; inflation: number };
 

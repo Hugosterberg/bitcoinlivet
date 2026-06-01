@@ -176,6 +176,22 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+  /* Every clickable control gets the hand cursor; disabled ones a blocked one.
+     (Browsers default <button> to an arrow, which feels unclickable.) */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"],
+  [role="menuitem"],
+  [role="switch"],
+  summary,
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }
 
 @layer utilities {
