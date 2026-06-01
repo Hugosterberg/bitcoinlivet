@@ -61,7 +61,7 @@ export function LearnCta() {
             </div>
           </div>
 
-          <dl className="grid grid-cols-3 gap-3 sm:gap-4">
+          <dl className="grid grid-cols-3 gap-2 sm:gap-4">
             {[
               { value: courseModules.length, label: "Moduler" },
               { value: totalLessons, label: "Lektioner" },
@@ -69,12 +69,12 @@ export function LearnCta() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-border bg-background/40 p-4 text-center sm:p-5"
+                className="rounded-2xl border border-border bg-background/40 px-2 py-3 text-center sm:p-5"
               >
-                <dd className="font-heading text-2xl font-semibold tracking-tight text-bitcoin tabular-nums sm:text-3xl">
+                <dd className="font-heading text-xl font-semibold tracking-tight text-bitcoin tabular-nums sm:text-3xl">
                   {stat.value}
                 </dd>
-                <dt className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                <dt className="mt-1 text-balance text-[11px] leading-snug text-muted-foreground sm:text-sm">
                   {stat.label}
                 </dt>
               </div>

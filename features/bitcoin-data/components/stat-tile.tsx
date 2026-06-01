@@ -15,7 +15,7 @@ export function StatTile({
 }) {
   return (
     <div className="rounded-lg border border-border/60 bg-card/40 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <p className="text-xs font-medium leading-snug text-muted-foreground sm:uppercase sm:tracking-wide">
         {label}
       </p>
       <p className="mt-1.5 font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]">

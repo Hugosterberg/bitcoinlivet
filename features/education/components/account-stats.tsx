@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import {
   Flame,
   Medal,
@@ -10,6 +9,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils";
+import { IconStat } from "@/components/ui/icon-stat";
 import { formatNumber } from "@/lib/format";
 import { getLevelProgress, lessonKey } from "@/features/education/data/education";
 import { courseModules, totalLessons } from "@/features/education/data/courses";
@@ -41,22 +41,6 @@ function Ring({ percent }: { percent: number }) {
         style={{ strokeDasharray: c, strokeDashoffset: offset }}
       />
     </svg>
-  );
-}
-
-function Stat({ icon, value, label }: { icon: ReactNode; value: string; label: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3">
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-bitcoin-muted text-bitcoin">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="font-heading text-lg font-semibold leading-none tracking-tight text-foreground tabular-nums">
-          {value}
-        </p>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{label}</p>
-      </div>
-    </div>
   );
 }
 
@@ -97,21 +81,21 @@ export function AccountStats({ data }: { data: ProgressData }) {
       <div className="mt-4 grid gap-4">
         {/* Level + XP */}
         <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center gap-5">
-            <div className="relative grid place-items-center">
+          <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+            <div className="relative grid shrink-0 place-items-center">
               <Ring percent={lp.percentToNext} />
               <span className="absolute font-heading text-xl font-semibold text-foreground tabular-nums">
                 {lp.current.level}
               </span>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-bitcoin">
                 Nivå {lp.current.level}
               </p>
-              <p className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+              <p className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 {lp.current.name}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+              <p className="mt-1 text-pretty text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
                 {formatNumber(data.xp)} XP
                 {lp.next ? (
                   <> · {formatNumber(lp.xpToNext)} XP till {lp.next.name}</>
@@ -137,23 +121,23 @@ export function AccountStats({ data }: { data: ProgressData }) {
         </div>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+          <IconStat
             icon={<GraduationCap size={18} weight="bold" aria-hidden />}
             value={`${completedCount}/${totalLessons}`}
             label="Lektioner"
           />
-          <Stat
+          <IconStat
             icon={<Flame size={18} weight="fill" aria-hidden />}
             value={`${data.streak}`}
             label={data.streak === 1 ? "dag i rad" : "dagar i rad"}
           />
-          <Stat
+          <IconStat
             icon={<Medal size={18} weight="fill" aria-hidden />}
             value={`${data.badges.length}`}
             label="märken"
           />
-          <Stat
+          <IconStat
             icon={<Lightning size={18} weight="fill" aria-hidden />}
             value={formatNumber(data.xp)}
             label="XP totalt"
@@ -162,12 +146,12 @@ export function AccountStats({ data }: { data: ProgressData }) {
 
         {/* Per-course progress */}
         <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-heading text-base font-semibold tracking-tight text-foreground">
               Genomförda kurser
             </h3>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Trophy size={14} weight="fill" aria-hidden className="text-bitcoin" />
+            <span className="flex items-center gap-1.5 text-pretty text-xs text-muted-foreground">
+              <Trophy size={14} weight="fill" aria-hidden className="shrink-0 text-bitcoin" />
               {percentComplete}% av hela kursen
             </span>
           </div>
@@ -175,14 +159,14 @@ export function AccountStats({ data }: { data: ProgressData }) {
           <ul className="mt-4 flex flex-col gap-4">
             {modules.map((m) => (
               <li key={m.slug}>
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="flex items-center gap-2 font-medium text-foreground">
+                <div className="flex items-start justify-between gap-3 text-sm">
+                  <span className="flex min-w-0 items-center gap-2 font-medium text-foreground">
                     {m.badge ? (
-                      <Medal size={15} weight="fill" aria-hidden className="text-bitcoin" />
+                      <Medal size={15} weight="fill" aria-hidden className="shrink-0 text-bitcoin" />
                     ) : m.done === m.total ? (
-                      <CheckCircle size={15} weight="fill" aria-hidden className="text-emerald-400" />
+                      <CheckCircle size={15} weight="fill" aria-hidden className="shrink-0 text-emerald-400" />
                     ) : null}
-                    {m.title}
+                    <span className="min-w-0 text-pretty">{m.title}</span>
                   </span>
                   <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                     {m.done}/{m.total}

@@ -21,9 +21,11 @@ const HEIGHT_ENDPOINT = "https://mempool.space/api/blocks/tip/height";
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-background/40 p-4">
-      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1 font-heading text-xl font-semibold tracking-tight text-foreground tabular-nums">
+    <div className="rounded-xl border border-border bg-background/40 p-3 sm:p-4">
+      <dt className="text-xs font-medium leading-snug text-muted-foreground [overflow-wrap:anywhere]">
+        {label}
+      </dt>
+      <dd className="mt-1 font-heading text-lg font-semibold tracking-tight text-foreground tabular-nums sm:text-xl">
         {value}
       </dd>
     </div>

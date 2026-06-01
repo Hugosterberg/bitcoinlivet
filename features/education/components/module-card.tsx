@@ -57,7 +57,7 @@ export function ModuleCard({ module }: { module: ModuleCardData }) {
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
+          <h3 className="min-w-0 text-pretty font-heading text-lg font-semibold tracking-tight text-foreground">
             {module.title}
           </h3>
           {complete ? (
@@ -67,7 +67,7 @@ export function ModuleCard({ module }: { module: ModuleCardData }) {
             </span>
           ) : null}
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">{module.subtitle}</p>
+        <p className="mt-1 text-pretty text-sm text-muted-foreground">{module.subtitle}</p>
 
         <div className="mt-4 flex items-center gap-3">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">

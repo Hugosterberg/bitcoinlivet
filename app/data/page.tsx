@@ -90,9 +90,9 @@ function SupplyBar({
   const width = Math.min(100, Math.max(0, percent));
   return (
     <div>
-      <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium text-foreground tabular-nums">
+      <div className="mb-1.5 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3 text-sm">
+        <span className="text-pretty text-muted-foreground">{label}</span>
+        <span className="shrink-0 font-medium text-foreground tabular-nums">
           {width.toLocaleString("sv-SE", { maximumFractionDigits: 1 })} %
         </span>
       </div>
@@ -399,8 +399,8 @@ export default async function DataPage() {
                           <span
                             className={
                               row.slice.isBitcoin
-                                ? "truncate font-medium text-bitcoin"
-                                : "truncate font-medium text-foreground"
+                                ? "min-w-0 font-medium text-bitcoin [overflow-wrap:anywhere]"
+                                : "min-w-0 font-medium text-foreground [overflow-wrap:anywhere]"
                             }
                           >
                             {row.slice.name}
@@ -424,7 +424,7 @@ export default async function DataPage() {
                               className="size-3 shrink-0 rounded-full"
                               style={{ backgroundColor: STOCKS_COLOR }}
                             />
-                            <span className="truncate font-medium text-foreground">
+                            <span className="min-w-0 font-medium text-foreground">
                               Aktier
                             </span>
                           </dt>
@@ -454,7 +454,7 @@ export default async function DataPage() {
                                     className="size-2 shrink-0 rounded-full"
                                     style={{ backgroundColor: s.color }}
                                   />
-                                  <span className="truncate text-muted-foreground">
+                                  <span className="min-w-0 text-muted-foreground [overflow-wrap:anywhere]">
                                     {s.name}
                                   </span>
                                 </span>

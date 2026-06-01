@@ -62,7 +62,7 @@ export default async function AccountPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Inloggad som</p>
-                    <p className="truncate font-heading text-lg font-semibold tracking-tight text-foreground">
+                    <p className="font-heading text-lg font-semibold tracking-tight text-foreground break-all">
                       {user.email ?? "ditt konto"}
                     </p>
                   </div>

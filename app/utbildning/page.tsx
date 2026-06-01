@@ -110,11 +110,11 @@ export default function UtbildningPage() {
 
         {/* Learning path */}
         <section className="mt-14" aria-label="Kursmoduler">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
               Din lärväg
             </h2>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="text-pretty text-sm text-muted-foreground tabular-nums">
               {courseModules.length} moduler · {totalLessons} lektioner ·{" "}
               {formatNumber(totalXp)} XP
             </p>

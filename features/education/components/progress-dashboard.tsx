@@ -1,12 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Flame, Medal, GraduationCap, Trophy } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
 import { getLevelProgress } from "@/features/education/data/education";
 import { formatNumber } from "@/lib/format";
 import { Card } from "@/components/ui/card";
+import { IconStat } from "@/components/ui/icon-stat";
 import { useProgress } from "@/features/education/components/progress-provider";
 
 function Ring({ percent }: { percent: number }) {
@@ -30,30 +30,6 @@ function Ring({ percent }: { percent: number }) {
   );
 }
 
-function Stat({
-  icon,
-  value,
-  label,
-}: {
-  icon: ReactNode;
-  value: string;
-  label: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3">
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-bitcoin-muted text-bitcoin">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="font-heading text-lg font-semibold leading-none tracking-tight text-foreground tabular-nums">
-          {value}
-        </p>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{label}</p>
-      </div>
-    </div>
-  );
-}
-
 export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
   const { data, completedCount, hydrated, reset } = useProgress();
 
@@ -70,21 +46,21 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
       )}
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-5">
-          <div className="relative grid place-items-center">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+          <div className="relative grid shrink-0 place-items-center">
             <Ring percent={lp.percentToNext} />
             <span className="absolute font-heading text-xl font-semibold text-foreground tabular-nums">
               {lp.current.level}
             </span>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-bitcoin">
               Nivå {lp.current.level}
             </p>
-            <p className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+            <p className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               {lp.current.name}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+            <p className="mt-1 text-pretty text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
               {formatNumber(data.xp)} XP
               {lp.next ? (
                 <>
@@ -98,18 +74,18 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
           </div>
         </div>
 
-        <div className="grid w-full max-w-md grid-cols-3 gap-3">
-          <Stat
+        <div className="grid w-full grid-cols-3 gap-2 sm:max-w-md sm:gap-3">
+          <IconStat
             icon={<GraduationCap size={18} weight="bold" aria-hidden />}
             value={`${completedCount}/${totalLessons}`}
             label="Lektioner"
           />
-          <Stat
+          <IconStat
             icon={<Flame size={18} weight="fill" aria-hidden />}
             value={`${data.streak}`}
             label={data.streak === 1 ? "dag i rad" : "dagar i rad"}
           />
-          <Stat
+          <IconStat
             icon={<Medal size={18} weight="fill" aria-hidden />}
             value={`${data.badges.length}`}
             label="märken"
@@ -131,9 +107,9 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
         </div>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-4">
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Trophy size={14} weight="fill" aria-hidden className="text-bitcoin" />
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <p className="flex items-center gap-1.5 text-pretty text-xs text-muted-foreground">
+          <Trophy size={14} weight="fill" aria-hidden className="shrink-0 text-bitcoin" />
           {percentComplete}% av hela kursen klar
         </p>
         {hydrated && completedCount > 0 ? (
