@@ -125,32 +125,6 @@ export default function UtbildningPage() {
             ))}
           </div>
         </section>
-
-        {/* Attribution */}
-        <Card className="mt-12 p-6">
-          <h2 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-            Källa och vidare läsning
-          </h2>
-          <p className="mt-2 text-sm/6 text-muted-foreground">
-            Kursinnehållet är skrivet för bitcoinlivet och inspirerat av det
-            öppna, fria utbildningsmaterialet från Plan ₿ Network. Vill du gräva
-            djupare finns hela deras kursbibliotek öppet på GitHub.
-          </p>
-          <a
-            href="https://github.com/PlanB-Network/bitcoin-educational-content"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin hover:underline"
-          >
-            Plan ₿ Network, bitcoin-educational-content
-            <ArrowSquareOut size={15} weight="bold" aria-hidden />
-          </a>
-        </Card>
-
-        <Disclaimer className="mt-8 max-w-2xl">
-          Materialet är utbildande och förenklat. Detta är inte finansiell
-          rådgivning.
-        </Disclaimer>
       </Container>
     </div>
   );
