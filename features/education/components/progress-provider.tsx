@@ -3,61 +3,64 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 
 import {
-  XP_PER_CORRECT,
-  XP_PER_LESSON,
-  getLevelProgress,
-  lessonKey,
-  nextStreak,
-  todayKey,
-} from "@/features/education/data/education";
+  applyCompletion,
+  initialProgressData,
+  type CompleteArgs,
+  type CompleteResult,
+  type LessonResult,
+  type ProgressData,
+} from "@/features/education/data/progress";
+import { lessonKey } from "@/features/education/data/education";
+import {
+  persistLessonCompletion,
+  resetServerProgress,
+} from "@/features/education/data/progress-sync";
+
+export type { ProgressData, CompleteResult } from "@/features/education/data/progress";
 
 const STORAGE_KEY = "bitcoinlivet:education:v1";
 
-type LessonResult = { correct: number; total: number; xp: number };
-
-export type ProgressData = {
-  lessons: Record<string, LessonResult>;
-  xp: number;
-  streak: number;
-  lastActive: string | null;
-  /** Module slugs the user has fully completed. */
-  badges: string[];
-};
-
-const initialData: ProgressData = {
-  lessons: {},
-  xp: 0,
-  streak: 0,
-  lastActive: null,
-  badges: [],
-};
-
 /* ------------------------------------------------------------------ *
- * Module-level store backed by localStorage. Read via useSyncExternalStore
- * so it stays hydration-safe without refs-in-render or setState-in-effect.
+ * Module-level store. Backed by localStorage for anonymous visitors and
+ * by Supabase for signed-in users. Read via useSyncExternalStore so it
+ * stays hydration-safe without refs-in-render or setState-in-effect.
+ *
+ * Mode:
+ *  - "local"   → anonymous; reads/writes localStorage (unchanged behaviour).
+ *  - "account" → signed in; hydrated from the server, writes sync to Supabase
+ *                and are NOT mirrored to localStorage (so logging out reveals
+ *                the anonymous state again, and devices don't leak progress).
  * ------------------------------------------------------------------ */
 
-let cache: ProgressData = initialData;
+type Mode = "local" | "account";
+
+let cache: ProgressData = initialProgressData;
 let loaded = false;
+let mode: Mode = "local";
 const listeners = new Set<() => void>();
 
-function ensureLoaded(): ProgressData {
-  if (typeof window === "undefined") return initialData;
-  if (!loaded) {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<ProgressData>;
-        cache = {
-          ...initialData,
-          ...parsed,
-          lessons: parsed.lessons ?? {},
-          badges: parsed.badges ?? [],
-        };
-      }
-    } catch {
-      // Ignore corrupt or unavailable storage.
+function readLocalStorage(): ProgressData {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<ProgressData>;
+      return {
+        ...initialProgressData,
+        ...parsed,
+        lessons: parsed.lessons ?? {},
+        badges: parsed.badges ?? [],
+      };
     }
+  } catch {
+    // Ignore corrupt or unavailable storage.
+  }
+  return initialProgressData;
+}
+
+function ensureLoaded(): ProgressData {
+  if (typeof window === "undefined") return initialProgressData;
+  if (!loaded && mode === "local") {
+    cache = readLocalStorage();
     loaded = true;
   }
   return cache;
@@ -70,19 +73,25 @@ function subscribe(cb: () => void): () => void {
   };
 }
 
-function writeStore(next: ProgressData) {
-  cache = next;
-  loaded = true;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  } catch {
-    // Ignore quota or privacy-mode failures.
-  }
+function notify() {
   listeners.forEach((l) => l());
 }
 
+function writeStore(next: ProgressData) {
+  cache = next;
+  loaded = true;
+  if (mode === "local") {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore quota or privacy-mode failures.
+    }
+  }
+  notify();
+}
+
 function getServerSnapshot(): ProgressData {
-  return initialData;
+  return initialProgressData;
 }
 
 // Stable references for the hydration flag store.
@@ -90,62 +99,67 @@ const noopSubscribe = () => () => {};
 const getTrue = () => true;
 const getFalse = () => false;
 
-type CompleteArgs = {
-  moduleSlug: string;
-  lessonSlug: string;
-  correct: number;
-  total: number;
-  /** All lesson slugs in the module, to detect module completion. */
-  moduleLessonSlugs: string[];
-};
+/** Reads the anonymous localStorage progression (for merging on login). */
+export function getLocalProgressSnapshot(): ProgressData {
+  if (typeof window === "undefined") return initialProgressData;
+  return readLocalStorage();
+}
 
-export type CompleteResult = {
-  earnedXp: number;
-  alreadyDone: boolean;
-  badgeEarned: boolean;
-  leveledUp: boolean;
-};
+/**
+ * Switches the store into account mode and seeds it with the user's
+ * server-side progression. Called from <ProgressSync> after a session loads.
+ */
+export function hydrateFromServer(data: ProgressData) {
+  mode = "account";
+  cache = data;
+  loaded = true;
+  notify();
+}
+
+/**
+ * Reverts to anonymous mode and reloads localStorage. Called on sign-out.
+ */
+export function revertToLocalMode() {
+  mode = "local";
+  loaded = false;
+  cache = initialProgressData;
+  ensureLoaded();
+  notify();
+}
 
 function completeLessonInStore(args: CompleteArgs): CompleteResult {
   const prev = ensureLoaded();
-  const key = lessonKey(args.moduleSlug, args.lessonSlug);
+  const { next, result } = applyCompletion(prev, args);
 
-  if (prev.lessons[key]) {
-    return { earnedXp: 0, alreadyDone: true, badgeEarned: false, leveledUp: false };
+  if (result.alreadyDone) return result;
+
+  writeStore(next);
+
+  if (mode === "account") {
+    // Optimistic: UI already reflects `next`. Persist in the background.
+    void persistLessonCompletion(args);
   }
 
-  const earnedXp = XP_PER_LESSON + args.correct * XP_PER_CORRECT;
-  const lessons = {
-    ...prev.lessons,
-    [key]: { correct: args.correct, total: args.total, xp: earnedXp },
-  };
-
-  const moduleDone = args.moduleLessonSlugs.every(
-    (slug) => lessons[lessonKey(args.moduleSlug, slug)],
-  );
-  const badgeEarned = moduleDone && !prev.badges.includes(args.moduleSlug);
-  const badges = badgeEarned ? [...prev.badges, args.moduleSlug] : prev.badges;
-
-  const today = todayKey();
-  const streak = nextStreak(prev.streak, prev.lastActive, today);
-  const nextXp = prev.xp + earnedXp;
-  const leveledUp =
-    getLevelProgress(nextXp).current.level > getLevelProgress(prev.xp).current.level;
-
-  writeStore({ lessons, xp: nextXp, streak, lastActive: today, badges });
-
-  return { earnedXp, alreadyDone: false, badgeEarned, leveledUp };
+  return result;
 }
 
 function resetStore() {
-  cache = initialData;
+  if (mode === "account") {
+    void resetServerProgress();
+    cache = initialProgressData;
+    loaded = true;
+    notify();
+    return;
+  }
+
+  cache = initialProgressData;
   loaded = true;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
   } catch {
     // Ignore.
   }
-  listeners.forEach((l) => l());
+  notify();
 }
 
 /**

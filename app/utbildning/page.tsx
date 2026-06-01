@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { ProgressDashboard } from "@/features/education/components/progress-dashboard";
+import { SignInPrompt } from "@/features/auth/components/sign-in-prompt";
 import { ModuleCard, type ModuleCardData } from "@/features/education/components/module-card";
 import { courseModules, maxLessonXp, totalLessons, totalXp } from "@/features/education/data/courses";
 import { formatNumber } from "@/lib/format";
@@ -83,8 +84,10 @@ export default function UtbildningPage() {
           </p>
         </header>
 
-        {/* Progress dashboard */}
-        <div className="mt-10">
+        {/* Save-progress nudge (hidden once logged in) + progress dashboard.
+            flex gap so a hidden prompt leaves no empty space. */}
+        <div className="mt-10 flex flex-col gap-6">
+          <SignInPrompt />
           <ProgressDashboard totalLessons={totalLessons} />
         </div>
 

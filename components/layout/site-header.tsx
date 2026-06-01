@@ -11,6 +11,8 @@ import {
   Newspaper,
   Info,
   Books,
+  UserCircle,
+  SignIn,
   type Icon,
 } from "@phosphor-icons/react";
 
@@ -21,6 +23,7 @@ import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { FeaturesMenu } from "@/components/layout/features-menu";
 import { DataCta } from "@/components/layout/data-cta";
+import { useAuthUser } from "@/features/auth/components/use-auth-user";
 
 const NAV_ICONS: Record<NavIconKey, Icon> = {
   education: GraduationCap,
@@ -38,6 +41,12 @@ function isActive(pathname: string, href: string): boolean {
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { signedIn } = useAuthUser();
+
+  // Label/icon reflect auth state; both route to /konto (sign in/up or account).
+  const accountActive = isActive(pathname, "/konto");
+  const accountLabel = signedIn ? "Konto" : "Logga in";
+  const AccountIcon = signedIn ? UserCircle : SignIn;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/65">
@@ -90,8 +99,33 @@ export function SiteHeader() {
           })}
         </ul>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <DataCta className="gap-1.5 px-3.5 py-2 text-xs xl:gap-2 xl:px-5 xl:py-2.5 xl:text-sm" />
+          <span aria-hidden className="h-5 w-px bg-border/70" />
+          {signedIn ? (
+            <Link
+              href="/konto"
+              aria-label="Konto"
+              aria-current={accountActive ? "page" : undefined}
+              className={cn(
+                "grid size-9 place-items-center rounded-full transition-colors hover:bg-muted",
+                accountActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <UserCircle size={22} weight={accountActive ? "fill" : "regular"} aria-hidden />
+            </Link>
+          ) : (
+            <Link
+              href="/konto"
+              aria-current={accountActive ? "page" : undefined}
+              className={cn(
+                "text-sm font-medium transition-colors",
+                accountActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Logga in
+            </Link>
+          )}
         </div>
 
         <button
@@ -170,6 +204,24 @@ export function SiteHeader() {
                 </div>,
               ];
             })}
+            <Link
+              href="/konto"
+              aria-current={accountActive ? "page" : undefined}
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium transition-colors",
+                accountActive
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <AccountIcon
+                size={18}
+                weight={accountActive || signedIn ? "fill" : "regular"}
+                aria-hidden
+              />
+              {accountLabel}
+            </Link>
             <DataCta className="mt-2 h-11 w-full" onClick={() => setOpen(false)} />
           </Container>
         </div>

@@ -1,21 +1,24 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { EnvelopeSimple, CheckCircle } from "@phosphor-icons/react";
+import { useActionState } from "react";
+import { EnvelopeSimple, CheckCircle, Warning } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
+import { subscribeToNewsletter } from "@/features/newsletter/data/subscribe";
+import { initialSubscribeState } from "@/features/newsletter/types";
 
 export function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [state, formAction, pending] = useActionState(
+    subscribeToNewsletter,
+    initialSubscribeState,
+  );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    // TODO(newsletter): connect to a real email provider (e.g. an API route).
-    if (!email) return;
-    setSubmitted(true);
-  }
+  const subscribed = state.status === "ok";
+  const errored =
+    state.status === "invalid" ||
+    state.status === "error" ||
+    state.status === "unconfigured";
 
   return (
     <section className="py-16 sm:py-20 lg:py-24">
@@ -38,17 +41,17 @@ export function Newsletter() {
               inget spam och ingen hype, och du kan avregistrera dig när du vill.
             </p>
 
-            {submitted ? (
+            {subscribed ? (
               <p
                 role="status"
                 className="mt-8 inline-flex items-center gap-2 rounded-full border border-bitcoin/30 bg-bitcoin-muted px-4 py-2.5 text-sm font-medium text-bitcoin"
               >
                 <CheckCircle size={18} weight="fill" aria-hidden />
-                Tack! Du är med på listan (demo).
+                {state.message}
               </p>
             ) : (
               <form
-                onSubmit={handleSubmit}
+                action={formAction}
                 className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row"
               >
                 <label htmlFor="newsletter-email" className="sr-only">
@@ -56,23 +59,38 @@ export function Newsletter() {
                 </label>
                 <input
                   id="newsletter-email"
+                  name="email"
                   type="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="din@epost.se"
+                  aria-invalid={errored || undefined}
                   className="h-12 w-full rounded-full border border-input bg-background px-5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring"
                 />
-                <Button type="submit" size="xl" className="rounded-full">
-                  Skriv upp mig
+                <Button
+                  type="submit"
+                  size="xl"
+                  className="rounded-full"
+                  disabled={pending}
+                >
+                  {pending ? "Skriver upp …" : "Skriv upp mig"}
                 </Button>
               </form>
             )}
 
-            <p className="mt-4 text-xs text-muted-foreground">
-              Platshållare för anmälningslistan. Detta är inte finansiell
-              rådgivning.
-            </p>
+            {errored ? (
+              <p
+                role="alert"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-400"
+              >
+                <Warning size={16} weight="fill" aria-hidden />
+                {state.message}
+              </p>
+            ) : (
+              <p className="mt-4 text-xs text-muted-foreground">
+                Vi sparar bara din e-postadress för utskicken. Detta är inte
+                finansiell rådgivning.
+              </p>
+            )}
           </div>
         </div>
       </Container>
