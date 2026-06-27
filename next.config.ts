@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   // Allow MDX/Markdown files to be treated as pages and route content.
@@ -20,4 +21,6 @@ const withMDX = createMDX({
   extension: /\.mdx?$/,
 });
 
-export default withMDX(nextConfig);
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+export default withNextIntl(withMDX(nextConfig));

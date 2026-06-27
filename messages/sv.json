@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "education": "Utbildning",
+    "educationDesc": "Interaktiv Bitcoinskola",
+    "functions": "Funktioner",
+    "articles": "Artiklar",
+    "articlesDesc": "Guider och artiklar",
+    "news": "Nyheter",
+    "newsDesc": "Veckans Bitcoinnyheter",
+    "about": "Om",
+    "aboutDesc": "Om bitcoinlivet",
+    "glossary": "Ordlista",
+    "glossaryDesc": "Bitcoinbegrepp förklarade"
+  },
+  "footer": {
+    "explore": "Utforska",
+    "learn": "Lär dig",
+    "home": "Hem",
+    "news": "Nyheter",
+    "articles": "Artiklar",
+    "data": "Bitcoindata",
+    "about": "Om bitcoinlivet",
+    "education": "Bitcoinskolan",
+    "glossary": "Ordlista",
+    "halving": "Halveringen",
+    "beginnerGuides": "Nybörjarguider",
+    "saving": "Sparande"
+  }
+}

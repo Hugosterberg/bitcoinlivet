@@ -11,9 +11,10 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/env";
  * No-ops when Supabase isn't configured yet, so the site keeps working
  * before the project exists.
  */
-export async function updateSession(request: NextRequest) {
-  const response = NextResponse.next({ request });
-
+export async function updateSession(
+  request: NextRequest,
+  response: NextResponse = NextResponse.next({ request }),
+) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return response;
   }

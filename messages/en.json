@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "education": "Learn",
+    "educationDesc": "Interactive Bitcoin school",
+    "functions": "Features",
+    "articles": "Articles",
+    "articlesDesc": "Guides and articles",
+    "news": "News",
+    "newsDesc": "This week in Bitcoin",
+    "about": "About",
+    "aboutDesc": "About bitcoinerlife",
+    "glossary": "Glossary",
+    "glossaryDesc": "Bitcoin terms explained"
+  },
+  "footer": {
+    "explore": "Explore",
+    "learn": "Learn",
+    "home": "Home",
+    "news": "News",
+    "articles": "Articles",
+    "data": "Bitcoin data",
+    "about": "About bitcoinerlife",
+    "education": "Bitcoin school",
+    "glossary": "Glossary",
+    "halving": "The halving",
+    "beginnerGuides": "Beginner guides",
+    "saving": "Saving"
+  }
+}
