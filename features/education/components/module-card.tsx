@@ -10,21 +10,24 @@ import { useProgress } from "@/features/education/components/progress-provider";
 
 export type ModuleCardData = {
   index: number;
+  /** Stable Plan B partId (progress key). */
+  id: string;
   slug: string;
   href: string;
   title: string;
   subtitle: string;
   icon: ModuleIconKey;
-  lessonSlugs: string[];
+  /** Stable Plan B chapterIds (progress keys). */
+  lessonIds: string[];
   xp: number;
 };
 
 export function ModuleCard({ module }: { module: ModuleCardData }) {
   const { isLessonComplete, hydrated } = useProgress();
 
-  const total = module.lessonSlugs.length;
+  const total = module.lessonIds.length;
   const done = hydrated
-    ? module.lessonSlugs.filter((slug) => isLessonComplete(module.slug, slug)).length
+    ? module.lessonIds.filter((id) => isLessonComplete(module.id, id)).length
     : 0;
   const percent = total ? Math.round((done / total) * 100) : 0;
   const complete = done === total && total > 0;

@@ -1,20 +1,31 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
 
 import { Container } from "@/components/layout/container";
 import { LessonView } from "@/features/education/components/lesson-view";
-import { courseModules, getAdjacentLessons, getLesson } from "@/features/education/data/courses";
+import {
+  getAdjacentLessons,
+  getCourseModules,
+  getLesson,
+} from "@/features/education/data/courses";
+import { routing, type Locale } from "@/i18n/routing";
 
-type Params = { modul: string; lektion: string };
+type Params = { locale: Locale; modul: string; lektion: string };
 
 export const dynamicParams = false;
 
 export function generateStaticParams(): Params[] {
-  return courseModules.flatMap((module) =>
-    module.lessons.map((lesson) => ({
-      modul: module.slug,
-      lektion: lesson.slug,
-    })),
+  // Return the full params (incl. locale) so only valid locale+slug combos
+  // build — slugs are localized, so the valid set differs per locale.
+  return routing.locales.flatMap((locale) =>
+    getCourseModules(locale).flatMap((module) =>
+      module.lessons.map((lesson) => ({
+        locale,
+        modul: module.slug,
+        lektion: lesson.slug,
+      })),
+    ),
   );
 }
 
@@ -23,8 +34,8 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { modul, lektion } = await params;
-  const found = getLesson(modul, lektion);
+  const { locale, modul, lektion } = await params;
+  const found = getLesson(locale, modul, lektion);
   if (!found) return {};
   const { module, lesson } = found;
   return {
@@ -49,21 +60,22 @@ export default async function LessonPage({
 }: {
   params: Promise<Params>;
 }) {
-  const { modul, lektion } = await params;
-  const found = getLesson(modul, lektion);
+  const { locale, modul, lektion } = await params;
+  setRequestLocale(locale);
+  const found = getLesson(locale, modul, lektion);
   if (!found) notFound();
 
   const { module, lesson } = found;
-  const { prev, next } = getAdjacentLessons(module.slug, lesson.slug);
+  const { prev, next } = getAdjacentLessons(locale, module.slug, lesson.slug);
 
   return (
     <div className="py-14 sm:py-20">
       <Container>
         <LessonView
-          moduleSlug={module.slug}
+          moduleId={module.id}
           moduleTitle={module.title}
           moduleHref={`/utbildning/${module.slug}`}
-          moduleLessonSlugs={module.lessons.map((l) => l.slug)}
+          moduleLessonIds={module.lessons.map((l) => l.id)}
           lesson={lesson}
           prevHref={lessonHref(prev)}
           nextHref={lessonHref(next)}

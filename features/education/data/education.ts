@@ -19,15 +19,15 @@ export type Level = {
 
 /**
  * Level thresholds tuned to the total XP available in the course
- * (≈1200 XP at full completion).
+ * (≈2570 XP at full completion of Plan B btc101).
  */
 export const LEVELS: Level[] = [
   { level: 1, name: "Nyfiken", minXp: 0 },
-  { level: 2, name: "Utforskare", minXp: 120 },
-  { level: 3, name: "Sparare", minXp: 300 },
-  { level: 4, name: "Långsiktig", minXp: 540 },
-  { level: 5, name: "Kunnig", minXp: 820 },
-  { level: 6, name: "Bitcoiner", minXp: 1100 },
+  { level: 2, name: "Utforskare", minXp: 250 },
+  { level: 3, name: "Sparare", minXp: 640 },
+  { level: 4, name: "Långsiktig", minXp: 1150 },
+  { level: 5, name: "Kunnig", minXp: 1750 },
+  { level: 6, name: "Bitcoiner", minXp: 2350 },
 ];
 
 export type LevelProgress = {

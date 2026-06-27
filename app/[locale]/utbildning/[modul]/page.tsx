@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
 import { ArrowLeft, Lightning } from "@phosphor-icons/react/dist/ssr";
 
 import { Container } from "@/components/layout/container";
 import { ModuleIcon } from "@/features/education/components/module-icon";
 import { LessonList } from "@/features/education/components/lesson-list";
-import { courseModules, getModule, maxLessonXp } from "@/features/education/data/courses";
+import { getCourseModules, getModule, maxLessonXp } from "@/features/education/data/courses";
+import { routing, type Locale } from "@/i18n/routing";
 import { formatNumber } from "@/lib/format";
 
-type Params = { modul: string };
+type Params = { locale: Locale; modul: string };
 
 export const dynamicParams = false;
 
 export function generateStaticParams(): Params[] {
-  return courseModules.map((m) => ({ modul: m.slug }));
+  return routing.locales.flatMap((locale) =>
+    getCourseModules(locale).map((m) => ({ locale, modul: m.slug })),
+  );
 }
 
 export async function generateMetadata({
@@ -22,8 +26,8 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const { modul } = await params;
-  const mod = getModule(modul);
+  const { locale, modul } = await params;
+  const mod = getModule(locale, modul);
   if (!mod) return {};
   return {
     title: `${mod.title}: Bitcoinskolan`,
@@ -43,8 +47,9 @@ export default async function ModulePage({
 }: {
   params: Promise<Params>;
 }) {
-  const { modul } = await params;
-  const mod = getModule(modul);
+  const { locale, modul } = await params;
+  setRequestLocale(locale);
+  const mod = getModule(locale, modul);
   if (!mod) notFound();
 
   const moduleXp = mod.lessons.reduce((sum, l) => sum + maxLessonXp(l), 0);
@@ -87,9 +92,10 @@ export default async function ModulePage({
 
           <section className="mt-8" aria-label="Lektioner">
             <LessonList
-              moduleSlug={mod.slug}
+              moduleId={mod.id}
               basePath={basePath}
               lessons={mod.lessons.map((l) => ({
+                id: l.id,
                 slug: l.slug,
                 title: l.title,
                 summary: l.summary,

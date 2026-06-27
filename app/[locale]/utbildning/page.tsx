@@ -13,8 +13,17 @@ import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { ProgressDashboard } from "@/features/education/components/progress-dashboard";
 import { SignInPrompt } from "@/features/auth/components/sign-in-prompt";
+import { setRequestLocale } from "next-intl/server";
+
 import { ModuleCard, type ModuleCardData } from "@/features/education/components/module-card";
-import { courseModules, maxLessonXp, totalLessons, totalXp } from "@/features/education/data/courses";
+import {
+  getCourseModules,
+  maxLessonXp,
+  moduleCount,
+  totalLessons,
+  totalXp,
+} from "@/features/education/data/courses";
+import type { Locale } from "@/i18n/routing";
 import { formatNumber } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -31,16 +40,19 @@ export const metadata: Metadata = {
   },
 };
 
-const moduleCards: ModuleCardData[] = courseModules.map((module, i) => ({
-  index: i + 1,
-  slug: module.slug,
-  href: `/utbildning/${module.slug}`,
-  title: module.title,
-  subtitle: module.subtitle,
-  icon: module.icon,
-  lessonSlugs: module.lessons.map((l) => l.slug),
-  xp: module.lessons.reduce((sum, l) => sum + maxLessonXp(l), 0),
-}));
+function buildModuleCards(locale: Locale): ModuleCardData[] {
+  return getCourseModules(locale).map((module, i) => ({
+    index: i + 1,
+    id: module.id,
+    slug: module.slug,
+    href: `/utbildning/${module.slug}`,
+    title: module.title,
+    subtitle: module.subtitle,
+    icon: module.icon,
+    lessonIds: module.lessons.map((l) => l.id),
+    xp: module.lessons.reduce((sum, l) => sum + maxLessonXp(l), 0),
+  }));
+}
 
 const howItWorks = [
   {
@@ -60,7 +72,15 @@ const howItWorks = [
   },
 ];
 
-export default function UtbildningPage() {
+export default async function UtbildningPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const moduleCards = buildModuleCards(locale);
+
   return (
     <div className="py-14 sm:py-20">
       <Container>
@@ -115,7 +135,7 @@ export default function UtbildningPage() {
               Din lärväg
             </h2>
             <p className="text-pretty text-sm text-muted-foreground tabular-nums">
-              {courseModules.length} moduler · {totalLessons} lektioner ·{" "}
+              {moduleCount} moduler · {totalLessons} lektioner ·{" "}
               {formatNumber(totalXp)} XP
             </p>
           </div>

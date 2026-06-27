@@ -18,7 +18,8 @@ import {
 
 export type { ProgressData, CompleteResult } from "@/features/education/data/progress";
 
-const STORAGE_KEY = "bitcoinlivet:education:v1";
+const STORAGE_KEY = "bitcoinlivet:education:v2";
+const LEGACY_STORAGE_KEY = "bitcoinlivet:education:v1";
 
 /* ------------------------------------------------------------------ *
  * Module-level store. Backed by localStorage for anonymous visitors and
@@ -50,6 +51,23 @@ function readLocalStorage(): ProgressData {
         lessons: parsed.lessons ?? {},
         badges: parsed.badges ?? [],
       };
+    }
+    // One-time migration from the bespoke-course era (v1). The curriculum
+    // changed to Plan B btc101 with new (UUID) lesson keys, so per-lesson
+    // completions and badges no longer map — keep XP/streak as credit, reset
+    // the rest, then upgrade the key.
+    const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) {
+      const old = JSON.parse(legacy) as Partial<ProgressData>;
+      const migrated: ProgressData = {
+        ...initialProgressData,
+        xp: typeof old.xp === "number" ? old.xp : 0,
+        streak: typeof old.streak === "number" ? old.streak : 0,
+        lastActive: old.lastActive ?? null,
+      };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return migrated;
     }
   } catch {
     // Ignore corrupt or unavailable storage.

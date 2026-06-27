@@ -6,88 +6,43 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle,
-  Info,
-  Lightbulb,
   Lightning,
   Medal,
   Sparkle,
   TrendUp,
-  Warning,
 } from "@phosphor-icons/react";
 
-import { cn } from "@/lib/utils";
 import { XP_PER_CORRECT } from "@/features/education/data/education";
-import type { Lesson, LessonBlock } from "@/features/education/data/courses";
+import type { Lesson } from "@/features/education/data/courses";
 import { maxLessonXp } from "@/features/education/data/courses";
 import { Quiz, type QuizResult } from "@/features/education/components/quiz";
 import { trackEvent } from "@/lib/analytics/track";
-import { linkifyGlossary } from "@/features/glossary/components/glossary-linkify";
 import {
   useProgress,
   type CompleteResult,
 } from "@/features/education/components/progress-provider";
 
-function Block({ block }: { block: LessonBlock }) {
-  switch (block.type) {
-    case "heading":
-      return (
-        <h2 className="mt-8 font-heading text-xl font-semibold tracking-tight text-foreground">
-          {block.text}
-        </h2>
-      );
-    case "paragraph":
-      return (
-        <p className="text-base/8 text-muted-foreground">
-          {linkifyGlossary(block.text)}
-        </p>
-      );
-    case "list":
-      return (
-        <ul className="flex flex-col gap-2">
-          {block.items.map((item, i) => (
-            <li key={i} className="flex gap-3 text-base/7 text-muted-foreground">
-              <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-bitcoin" aria-hidden />
-              <span>{linkifyGlossary(item)}</span>
-            </li>
-          ))}
-        </ul>
-      );
-    case "callout": {
-      const config = {
-        info: { Icon: Info, className: "border-bitcoin/25 bg-bitcoin-muted text-bitcoin" },
-        tip: { Icon: Lightbulb, className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
-        warning: { Icon: Warning, className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
-      }[block.tone];
-      const { Icon } = config;
-      return (
-        <div className={cn("flex gap-3 rounded-xl border p-4", config.className)}>
-          <Icon size={20} weight="fill" aria-hidden className="mt-0.5 shrink-0" />
-          <p className="text-sm/6 text-foreground">{linkifyGlossary(block.text)}</p>
-        </div>
-      );
-    }
-  }
-}
-
 export function LessonView({
-  moduleSlug,
+  moduleId,
   moduleTitle,
   moduleHref,
-  moduleLessonSlugs,
+  moduleLessonIds,
   lesson,
   prevHref,
   nextHref,
 }: {
-  moduleSlug: string;
+  /** Stable Plan B partId — locale-neutral progress key. */
+  moduleId: string;
   moduleTitle: string;
   moduleHref: string;
-  moduleLessonSlugs: string[];
+  /** Stable Plan B chapterIds for the module, to detect module completion. */
+  moduleLessonIds: string[];
   lesson: Lesson;
   prevHref: string | null;
   nextHref: string | null;
 }) {
   const { isLessonComplete, completeLesson, hydrated } = useProgress();
-  const alreadyComplete = hydrated && isLessonComplete(moduleSlug, lesson.slug);
+  const alreadyComplete = hydrated && isLessonComplete(moduleId, lesson.id);
 
   const [quizResult, setQuizResult] = useState<QuizResult>({
     answered: 0,
@@ -101,23 +56,23 @@ export function LessonView({
 
   function handleComplete() {
     const res = completeLesson({
-      moduleSlug,
-      lessonSlug: lesson.slug,
+      moduleSlug: moduleId,
+      lessonSlug: lesson.id,
       correct: quizResult.correct,
       total: lesson.quiz.length,
-      moduleLessonSlugs,
+      moduleLessonSlugs: moduleLessonIds,
     });
     setReward(res);
 
     if (!res.alreadyDone) {
       trackEvent("lesson_complete", {
-        module: moduleSlug,
+        module: moduleId,
         lesson: lesson.slug,
         correct: quizResult.correct,
         total: lesson.quiz.length,
       });
       if (res.badgeEarned) {
-        trackEvent("course_complete", { module: moduleSlug });
+        trackEvent("course_complete", { module: moduleId });
       }
     }
   }
@@ -157,11 +112,33 @@ export function LessonView({
         <p className="mt-3 text-pretty text-lg/8 text-muted-foreground">{lesson.summary}</p>
       </header>
 
-      <div className="mt-8 flex flex-col gap-4">
-        {lesson.blocks.map((block, i) => (
-          <Block key={i} block={block} />
-        ))}
-      </div>
+      <div
+        className="course-content mt-8"
+        dangerouslySetInnerHTML={{ __html: lesson.html }}
+      />
+
+      {/* Content attribution (CC BY-SA 4.0). */}
+      <p className="mt-8 text-xs text-muted-foreground">
+        Innehåll från{" "}
+        <a
+          href="https://planb.network"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline decoration-bitcoin/40 underline-offset-2 hover:decoration-bitcoin"
+        >
+          Plan ₿ Network
+        </a>
+        , licensierat under{" "}
+        <a
+          href="https://creativecommons.org/licenses/by-sa/4.0/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline decoration-bitcoin/40 underline-offset-2 hover:decoration-bitcoin"
+        >
+          CC BY-SA 4.0
+        </a>
+        .
+      </p>
 
       {/* Quiz */}
       {lesson.quiz.length > 0 ? (

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { setRequestLocale } from "next-intl/server";
 import { UserCircle, GraduationCap, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +24,13 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const user = await getCurrentUser();
   const progress = user ? await loadServerProgress() : null;
 
@@ -80,7 +88,7 @@ export default async function AccountPage() {
                 </div>
               </Card>
 
-              {progress ? <AccountStats data={progress} /> : null}
+              {progress ? <AccountStats data={progress} locale={locale} /> : null}
             </>
           ) : (
             <AuthForm />

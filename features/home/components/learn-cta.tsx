@@ -8,7 +8,7 @@ import {
 
 import { Section } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
-import { courseModules, totalLessons, totalXp } from "@/features/education/data/courses";
+import { moduleCount, totalLessons, totalXp } from "@/features/education/data/courses";
 
 const HIGHLIGHTS = [
   { icon: Trophy, label: "Samla XP & nivåer" },
@@ -63,7 +63,7 @@ export function LearnCta() {
 
           <dl className="grid grid-cols-3 gap-2 sm:gap-4">
             {[
-              { value: courseModules.length, label: "Moduler" },
+              { value: moduleCount, label: "Moduler" },
               { value: totalLessons, label: "Lektioner" },
               { value: totalXp, label: "XP att samla" },
             ].map((stat) => (

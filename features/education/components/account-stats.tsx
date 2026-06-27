@@ -12,8 +12,9 @@ import { cn } from "@/lib/utils";
 import { IconStat } from "@/components/ui/icon-stat";
 import { formatNumber } from "@/lib/format";
 import { getLevelProgress, lessonKey } from "@/features/education/data/education";
-import { courseModules, totalLessons } from "@/features/education/data/courses";
+import { getCourseModules, totalLessons } from "@/features/education/data/courses";
 import type { ProgressData } from "@/features/education/data/progress";
+import type { Locale } from "@/i18n/routing";
 
 /** Formats a YYYY-MM-DD day key as a long Swedish date. */
 function formatDay(day: string | null): string {
@@ -49,23 +50,23 @@ function Ring({ percent }: { percent: number }) {
  * progression (`ProgressData` from Supabase). Reuses the same XP/level/streak
  * helpers as the client dashboard so the numbers always agree.
  */
-export function AccountStats({ data }: { data: ProgressData }) {
+export function AccountStats({ data, locale }: { data: ProgressData; locale: Locale }) {
   const lp = getLevelProgress(data.xp);
   const completedCount = Object.keys(data.lessons).length;
   const percentComplete = totalLessons
     ? Math.round((completedCount / totalLessons) * 100)
     : 0;
 
-  const modules = courseModules.map((m) => {
+  const modules = getCourseModules(locale).map((m) => {
     const done = m.lessons.filter(
-      (l) => data.lessons[lessonKey(m.slug, l.slug)],
+      (l) => data.lessons[lessonKey(m.id, l.id)],
     ).length;
     return {
       slug: m.slug,
       title: m.title,
       done,
       total: m.lessons.length,
-      badge: data.badges.includes(m.slug),
+      badge: data.badges.includes(m.id),
       pct: m.lessons.length ? Math.round((done / m.lessons.length) * 100) : 0,
     };
   });

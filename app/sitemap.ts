@@ -2,11 +2,14 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/site";
 import { getAllPosts } from "@/features/blog/data/posts";
-import { courseModules } from "@/features/education/data/courses";
+import { getCourseModules } from "@/features/education/data/courses";
 import { bitcoinFunctions } from "@/features/functions/data/functions";
+import { routing } from "@/i18n/routing";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
+  // Sitemap is sv-only for now; per-domain (host-derived) sitemaps land in Phase 2.
+  const courseModules = getCourseModules(routing.defaultLocale);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },

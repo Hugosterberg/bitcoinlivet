@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useProgress } from "@/features/education/components/progress-provider";
 
 export type LessonListItem = {
+  /** Stable Plan B chapterId (progress key). */
+  id: string;
   slug: string;
   title: string;
   summary: string;
@@ -14,11 +16,12 @@ export type LessonListItem = {
 };
 
 export function LessonList({
-  moduleSlug,
+  moduleId,
   basePath,
   lessons,
 }: {
-  moduleSlug: string;
+  /** Stable Plan B partId (progress key). */
+  moduleId: string;
   basePath: string;
   lessons: LessonListItem[];
 }) {
@@ -27,7 +30,7 @@ export function LessonList({
   return (
     <ol className="flex flex-col gap-3">
       {lessons.map((lesson, i) => {
-        const done = hydrated && isLessonComplete(moduleSlug, lesson.slug);
+        const done = hydrated && isLessonComplete(moduleId, lesson.id);
         return (
           <li key={lesson.slug}>
             <Link
