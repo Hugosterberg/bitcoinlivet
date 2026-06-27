@@ -20,7 +20,7 @@ import {
  *
  * - Bitcoin market data: CoinGecko (price, market cap and supply in SEK).
  * - Recommended network fees: mempool.space.
- * - Investment history (DCA): CoinGecko historical SEK prices.
+ * - Investment history (DCA): Coinbase BTC/USD × Frankfurter USD→SEK.
  *
  * All cache with `revalidate` so we stay within free rate limits, and all
  * degrade gracefully (return a `live: false` fallback) if the request fails,
@@ -256,6 +256,64 @@ function buildSeries(
   return { points, totalInvested: cumInvested, totalBtc: cumBtc, lastPrice };
 }
 
+/**
+ * Daily BTC/USD closes from Coinbase Exchange for [start, end], keyed by
+ * YYYY-MM-DD. Key-less and not geo-blocked server-side. Coinbase caps each
+ * response at 300 candles, so we page in ~290-day windows. Candles arrive as
+ * `[time, low, high, open, close, volume]`; the close is index 4.
+ */
+async function fetchCoinbaseDailyUsd(
+  start: Date,
+  end: Date,
+  revalidate: number,
+): Promise<Map<string, number>> {
+  const usdByDay = new Map<string, number>();
+  const windowDays = 290;
+  const cursor = new Date(start.getTime());
+
+  while (cursor.getTime() <= end.getTime()) {
+    const winEnd = new Date(cursor.getTime());
+    winEnd.setUTCDate(winEnd.getUTCDate() + windowDays);
+    const segEnd = winEnd.getTime() < end.getTime() ? winEnd : end;
+
+    const url =
+      "https://api.exchange.coinbase.com/products/BTC-USD/candles" +
+      `?granularity=86400&start=${cursor.toISOString()}&end=${segEnd.toISOString()}`;
+    const res = await fetch(url, { next: { revalidate } });
+    if (!res.ok) throw new Error(`Coinbase HTTP ${res.status}`);
+
+    const rows = (await res.json()) as number[][];
+    for (const row of rows) {
+      const close = row[4];
+      if (close > 0) usdByDay.set(dateKey(new Date(row[0] * 1000)), close);
+    }
+
+    cursor.setUTCDate(cursor.getUTCDate() + windowDays + 1);
+  }
+
+  if (usdByDay.size === 0) throw new Error("Tom prisserie från Coinbase");
+  return usdByDay;
+}
+
+/** Frankfurter daily USD→SEK rates for a range, keyed by YYYY-MM-DD. */
+async function fetchSekRates(
+  startKey: string,
+  endKey: string,
+  revalidate: number,
+): Promise<Map<string, number>> {
+  const url = `https://api.frankfurter.dev/v1/${startKey}..${endKey}?from=USD&to=SEK`;
+  const res = await fetch(url, { next: { revalidate } });
+  if (!res.ok) throw new Error(`Frankfurter HTTP ${res.status}`);
+
+  const json = (await res.json()) as { rates?: Record<string, { SEK?: number }> };
+  const byDay = new Map<string, number>();
+  for (const [date, obj] of Object.entries(json.rates ?? {})) {
+    if (typeof obj.SEK === "number") byDay.set(date, obj.SEK);
+  }
+  if (byDay.size === 0) throw new Error("Tomma växelkurser från Frankfurter");
+  return byDay;
+}
+
 export async function getInvestmentHistory(): Promise<InvestmentHistory> {
   const { dailySek, startDate } = dcaConfig;
   const start = new Date(`${startDate}T00:00:00Z`);
@@ -292,38 +350,15 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
 
   try {
     // The free CoinGecko history caps at 365 days, so compose a SEK series
-    // from CryptoCompare BTC/USD (long, key-less) × Frankfurter USD→SEK rates.
-    const limit = Math.min(days + 5, 2000);
-    const ccUrl = `https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=${limit}`;
-    const fxUrl = `https://api.frankfurter.app/${startDate}..${dateKey(today)}?from=USD&to=SEK`;
-
-    const [ccRes, fxRes] = await Promise.all([
-      fetch(ccUrl, { next: { revalidate: REVALIDATE_HISTORY } }),
-      fetch(fxUrl, { next: { revalidate: REVALIDATE_HISTORY } }),
+    // from Coinbase BTC/USD (key-less, geo-safe) × Frankfurter USD→SEK rates.
+    const [usdByDay, fxByDay] = await Promise.all([
+      fetchCoinbaseDailyUsd(start, today, REVALIDATE_HISTORY),
+      fetchSekRates(startDate, dateKey(today), REVALIDATE_HISTORY),
     ]);
-    if (!ccRes.ok) throw new Error(`CryptoCompare HTTP ${ccRes.status}`);
-    if (!fxRes.ok) throw new Error(`Frankfurter HTTP ${fxRes.status}`);
-
-    const ccJson = (await ccRes.json()) as {
-      Data?: { Data?: { time: number; close: number }[] };
-    };
-    const ccArr = ccJson.Data?.Data?.filter((d) => d.close > 0) ?? [];
-    if (ccArr.length === 0) throw new Error("Tom prisserie från CryptoCompare");
-
-    const usdByDay = new Map<string, number>();
-    for (const d of ccArr) usdByDay.set(dateKey(new Date(d.time * 1000)), d.close);
-
-    const fxJson = (await fxRes.json()) as {
-      rates?: Record<string, { SEK?: number }>;
-    };
-    const fxByDay = new Map<string, number>();
-    for (const [date, obj] of Object.entries(fxJson.rates ?? {})) {
-      if (typeof obj.SEK === "number") fxByDay.set(date, obj.SEK);
-    }
 
     // Build a continuous SEK price for every day, carrying forward the last
     // known USD price and FX rate over weekends/gaps.
-    let lastUsd = ccArr[0].close;
+    let lastUsd = usdByDay.get(dateKey(start)) ?? [...usdByDay.values()][0];
     const sortedFx = [...fxByDay.values()];
     let lastRate = sortedFx.length ? sortedFx[0] : 10.5;
     const sekByDay = new Map<string, number>();
@@ -359,7 +394,7 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
       startDate,
       days,
       live: true,
-      source: "CryptoCompare · Frankfurter",
+      source: "Coinbase · Frankfurter",
     };
   } catch {
     // Fallback: invested is deterministic; value uses a single fallback price.
@@ -400,51 +435,29 @@ export type PriceHistory = {
   source: string;
 };
 
-const CRYPTOCOMPARE_ALL =
-  "https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&allData=true";
-
-const PRICE_HISTORY_FIRST_YEAR = 2013;
+/** Coinbase BTC/USD daily candles reach back to mid-2015. */
+const COINBASE_HISTORY_START = "2015-01-01";
 
 export async function getBtcPriceHistory(): Promise<PriceHistory> {
   try {
     const today = new Date();
-    const fxUrl = `https://api.frankfurter.app/${PRICE_HISTORY_FIRST_YEAR}-01-01..${dateKey(
-      today,
-    )}?from=USD&to=SEK`;
+    const start = new Date(`${COINBASE_HISTORY_START}T00:00:00Z`);
 
-    const [ccRes, fxRes] = await Promise.all([
-      fetch(CRYPTOCOMPARE_ALL, { next: { revalidate: REVALIDATE_PRICE_HISTORY } }),
-      fetch(fxUrl, { next: { revalidate: REVALIDATE_PRICE_HISTORY } }),
+    const [usdByDay, fxByDay] = await Promise.all([
+      fetchCoinbaseDailyUsd(start, today, REVALIDATE_PRICE_HISTORY),
+      fetchSekRates(COINBASE_HISTORY_START, dateKey(today), REVALIDATE_PRICE_HISTORY),
     ]);
-    if (!ccRes.ok) throw new Error(`CryptoCompare HTTP ${ccRes.status}`);
-    if (!fxRes.ok) throw new Error(`Frankfurter HTTP ${fxRes.status}`);
-
-    const ccJson = (await ccRes.json()) as {
-      Data?: { Data?: { time: number; close: number }[] };
-    };
-    const ccArr = (ccJson.Data?.Data ?? []).filter((d) => d.close > 0);
-    if (ccArr.length === 0) throw new Error("Tom prisserie från CryptoCompare");
 
     // Latest USD close per calendar year (the year-end print).
     const usdByYear = new Map<number, { day: string; close: number }>();
-    for (const d of ccArr) {
-      const date = new Date(d.time * 1000);
-      const year = date.getUTCFullYear();
-      const day = dateKey(date);
+    for (const [day, close] of usdByDay) {
+      const year = Number(day.slice(0, 4));
       const existing = usdByYear.get(year);
-      if (!existing || day > existing.day) usdByYear.set(year, { day, close: d.close });
+      if (!existing || day > existing.day) usdByYear.set(year, { day, close });
     }
 
     // FX rates sorted ascending, for a carry-forward lookup at each year-end.
-    const fxJson = (await fxRes.json()) as {
-      rates?: Record<string, { SEK?: number }>;
-    };
-    const fxDays = Object.entries(fxJson.rates ?? {})
-      .map(([day, obj]) => [day, obj.SEK] as const)
-      .filter((entry): entry is readonly [string, number] => typeof entry[1] === "number")
-      .sort((a, b) => a[0].localeCompare(b[0]));
-    if (fxDays.length === 0) throw new Error("Tomma växelkurser från Frankfurter");
-
+    const fxDays = [...fxByDay.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     const rateOnOrBefore = (day: string): number => {
       let rate = fxDays[0][1];
       for (const [d, r] of fxDays) {
@@ -454,19 +467,20 @@ export async function getBtcPriceHistory(): Promise<PriceHistory> {
       return rate;
     };
 
-    const currentYear = today.getUTCFullYear();
-    const points: PricePoint[] = [];
-    for (let year = PRICE_HISTORY_FIRST_YEAR; year <= currentYear; year++) {
-      const usd = usdByYear.get(year);
-      if (!usd) continue;
-      points.push({
-        year: String(year),
-        priceSek: Math.round(usd.close * rateOnOrBefore(usd.day)),
-      });
+    // Start from the settled historical year-end prices (so the pre-Coinbase
+    // years 2013–2014 stay intact), then overlay live SEK values for every
+    // year Coinbase covers (2015→today).
+    const byYear = new Map<string, number>(priceHistory.map((p) => [p.year, p.priceSek]));
+    for (const [year, usd] of usdByYear) {
+      byYear.set(String(year), Math.round(usd.close * rateOnOrBefore(usd.day)));
     }
+
+    const points: PricePoint[] = [...byYear.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([year, priceSek]) => ({ year, priceSek }));
     if (points.length < 2) throw new Error("För få datapunkter");
 
-    return { points, live: true, source: "CryptoCompare · Frankfurter" };
+    return { points, live: true, source: "Coinbase · Frankfurter" };
   } catch {
     return { points: priceHistory, live: false, source: "Exempeldata" };
   }
