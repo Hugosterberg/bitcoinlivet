@@ -17,7 +17,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import { MetricCard } from "@/features/bitcoin-data/components/metric-card";
 import { SatsCalculator } from "@/features/bitcoin-data/components/sats-calculator";
 import { SavingsCalculator } from "@/features/bitcoin-data/components/savings-calculator";
@@ -63,7 +63,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
-      url: "/data",
+      url: localizedUrl(locale, "/data"),
       type: "website",
     },
   };

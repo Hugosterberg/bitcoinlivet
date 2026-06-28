@@ -15,7 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -31,7 +31,7 @@ export async function generateMetadata({
     openGraph: {
       title: t("ogTitle"),
       description: t("ogDesc"),
-      url: "/om",
+      url: localizedUrl(locale, "/om"),
       type: "website",
     },
   };

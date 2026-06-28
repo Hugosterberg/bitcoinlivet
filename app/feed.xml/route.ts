@@ -1,5 +1,6 @@
 import { getSiteConfig } from "@/lib/site";
 import { getHostLocale } from "@/lib/host-locale";
+import { localizedUrl } from "@/lib/seo";
 import { getAllPosts } from "@/features/blog/data/posts";
 
 /** Escape the five XML predefined entities. */
@@ -41,7 +42,7 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(site.name)}, ${feedTitle}</title>
-    <link>${base}/artiklar</link>
+    <link>${localizedUrl(locale, "/artiklar")}</link>
     <description>${escapeXml(site.description)}</description>
     <language>${lang}</language>
     <lastBuildDate>${updated}</lastBuildDate>

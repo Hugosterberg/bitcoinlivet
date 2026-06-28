@@ -17,7 +17,7 @@ import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import {
   getBitcoinMarket,
   getRecommendedFees,
@@ -52,7 +52,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
-      url: "/nyheter",
+      url: localizedUrl(locale, "/nyheter"),
       type: "website",
     },
   };

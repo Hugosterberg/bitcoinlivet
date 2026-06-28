@@ -25,7 +25,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
-      url: "/ordlista",
+      url: localizedUrl(locale, "/ordlista"),
       type: "website",
     },
   };

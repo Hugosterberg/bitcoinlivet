@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Container } from "@/components/layout/container";
 import { LessonView } from "@/features/education/components/lesson-view";
@@ -8,8 +8,10 @@ import {
   getAdjacentLessons,
   getCourseModules,
   getLesson,
+  getLessonSlugsById,
 } from "@/features/education/data/courses";
 import { routing, type Locale } from "@/i18n/routing";
+import { buildLessonAlternates, localizedUrl } from "@/lib/seo";
 
 type Params = { locale: Locale; modul: string; lektion: string };
 
@@ -38,14 +40,18 @@ export async function generateMetadata({
   const found = getLesson(locale, modul, lektion);
   if (!found) return {};
   const { module, lesson } = found;
+  const t = await getTranslations({ locale, namespace: "education" });
   return {
     title: `${lesson.title}: ${module.title}`,
     description: lesson.summary,
-    alternates: { canonical: `/utbildning/${module.slug}/${lesson.slug}` },
+    alternates: buildLessonAlternates(locale, getLessonSlugsById(module.id, lesson.id)),
     openGraph: {
-      title: `${lesson.title} · Bitcoinskolan`,
+      title: `${lesson.title} · ${t("schoolBadge")}`,
       description: lesson.summary,
-      url: `/utbildning/${module.slug}/${lesson.slug}`,
+      url: localizedUrl(locale, {
+        pathname: "/utbildning/[modul]/[lektion]",
+        params: { modul: module.slug, lektion: lesson.slug },
+      }),
       type: "article",
     },
   };

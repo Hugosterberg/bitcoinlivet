@@ -5,7 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import { BlogExplorer } from "@/features/blog/components/blog-explorer";
 import {
   getAllPosts,
@@ -28,7 +28,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
-      url: "/artiklar",
+      url: localizedUrl(locale, "/artiklar"),
       type: "website",
     },
   };

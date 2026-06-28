@@ -8,7 +8,7 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 import { getFunctionMenu } from "@/features/functions/data/functions";
 
@@ -27,7 +27,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
-      url: "/funktioner",
+      url: localizedUrl(locale, "/funktioner"),
       type: "website",
     },
   };

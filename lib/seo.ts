@@ -53,3 +53,33 @@ export function buildSlugAlternates(
 
   return { canonical: url(locale), languages };
 }
+
+/** Alternates for a course module page (`/utbildning/[modul]`). */
+export function buildModuleAlternates(
+  locale: Locale,
+  slugs: Record<Locale, string>,
+): NonNullable<Metadata["alternates"]> {
+  const url = (l: Locale) =>
+    localizedUrl(l, { pathname: "/utbildning/[modul]", params: { modul: slugs[l] } });
+
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) languages[l] = url(l);
+  languages["x-default"] = url(routing.defaultLocale);
+
+  return { canonical: url(locale), languages };
+}
+
+/** Alternates for a course lesson page (`/utbildning/[modul]/[lektion]`). */
+export function buildLessonAlternates(
+  locale: Locale,
+  slugs: Record<Locale, { modul: string; lektion: string }>,
+): NonNullable<Metadata["alternates"]> {
+  const url = (l: Locale) =>
+    localizedUrl(l, { pathname: "/utbildning/[modul]/[lektion]", params: slugs[l] });
+
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) languages[l] = url(l);
+  languages["x-default"] = url(routing.defaultLocale);
+
+  return { canonical: url(locale), languages };
+}

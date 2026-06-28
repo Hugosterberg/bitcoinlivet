@@ -23,7 +23,7 @@ import {
 } from "@/features/education/data/courses";
 import type { Locale } from "@/i18n/routing";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata({
@@ -41,7 +41,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
-      url: "/utbildning",
+      url: localizedUrl(locale, "/utbildning"),
       type: "website",
     },
   };

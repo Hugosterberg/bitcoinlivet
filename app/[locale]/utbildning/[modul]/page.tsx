@@ -7,8 +7,14 @@ import { ArrowLeft, Lightning } from "@phosphor-icons/react/dist/ssr";
 import { Container } from "@/components/layout/container";
 import { ModuleIcon } from "@/features/education/components/module-icon";
 import { LessonList } from "@/features/education/components/lesson-list";
-import { getCourseModules, getModule, maxLessonXp } from "@/features/education/data/courses";
+import {
+  getCourseModules,
+  getModule,
+  getModuleSlugsById,
+  maxLessonXp,
+} from "@/features/education/data/courses";
 import { routing, type Locale } from "@/i18n/routing";
+import { buildModuleAlternates, localizedUrl } from "@/lib/seo";
 import { formatNumber } from "@/lib/format";
 
 type Params = { locale: Locale; modul: string };
@@ -29,14 +35,16 @@ export async function generateMetadata({
   const { locale, modul } = await params;
   const mod = getModule(locale, modul);
   if (!mod) return {};
+  const t = await getTranslations({ locale, namespace: "education" });
+  const school = t("schoolBadge");
   return {
-    title: `${mod.title}: Bitcoinskolan`,
+    title: `${mod.title}: ${school}`,
     description: mod.subtitle,
-    alternates: { canonical: `/utbildning/${mod.slug}` },
+    alternates: buildModuleAlternates(locale, getModuleSlugsById(mod.id)),
     openGraph: {
-      title: `${mod.title} · Bitcoinskolan`,
+      title: `${mod.title} · ${school}`,
       description: mod.subtitle,
-      url: `/utbildning/${mod.slug}`,
+      url: localizedUrl(locale, { pathname: "/utbildning/[modul]", params: { modul: mod.slug } }),
       type: "website",
     },
   };
