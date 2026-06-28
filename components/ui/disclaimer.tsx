@@ -10,7 +10,8 @@ export function Disclaimer({
   children,
 }: {
   className?: string;
-  children?: React.ReactNode;
+  /** Localized notice text — always pass it from the caller's messages. */
+  children: React.ReactNode;
 }) {
   return (
     <p
@@ -25,9 +26,7 @@ export function Disclaimer({
         aria-hidden
         className="mt-0.5 shrink-0 text-bitcoin"
       />
-      <span>
-        {children ?? "Detta är inte finansiell rådgivning."}
-      </span>
+      <span>{children}</span>
     </p>
   );
 }

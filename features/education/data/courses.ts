@@ -90,6 +90,36 @@ export function getLesson(
   return { module: mod, lesson };
 }
 
+/**
+ * Maps a module's stable id to its slug in every locale, for hreflang/sitemap
+ * alternates across domains (course slugs are localized).
+ */
+export function getModuleSlugsById(moduleId: string): Record<Locale, string> {
+  const slugs = {} as Record<Locale, string>;
+  for (const locale of routing.locales) {
+    const mod = getCourseModules(locale).find((m) => m.id === moduleId);
+    if (mod) slugs[locale] = mod.slug;
+  }
+  return slugs;
+}
+
+/**
+ * Maps a lesson's stable id (within a module) to its `{ modul, lektion }` slug
+ * pair in every locale, for hreflang/sitemap alternates.
+ */
+export function getLessonSlugsById(
+  moduleId: string,
+  lessonId: string,
+): Record<Locale, { modul: string; lektion: string }> {
+  const out = {} as Record<Locale, { modul: string; lektion: string }>;
+  for (const locale of routing.locales) {
+    const mod = getCourseModules(locale).find((m) => m.id === moduleId);
+    const lesson = mod?.lessons.find((l) => l.id === lessonId);
+    if (mod && lesson) out[locale] = { modul: mod.slug, lektion: lesson.slug };
+  }
+  return out;
+}
+
 /** Previous/next lesson in the global course flow. */
 export function getAdjacentLessons(
   locale: Locale,

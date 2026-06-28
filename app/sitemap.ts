@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
 
 import { getAllPosts, getPostSlugsById } from "@/features/blog/data/posts";
-import { getCourseModules } from "@/features/education/data/courses";
+import {
+  getCourseModules,
+  getModuleSlugsById,
+  getLessonSlugsById,
+} from "@/features/education/data/courses";
 import { getFunctions, getFunctionSlugsById } from "@/features/functions/data/functions";
 import { routing, type Locale } from "@/i18n/routing";
 import { getHostLocale } from "@/lib/host-locale";
@@ -46,14 +50,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return languages;
   };
 
-  // Current-locale URL only — used where cross-locale slugs aren't mapped yet.
-  const localEntry = (
-    href: Href,
-    opts: Omit<MetadataRoute.Sitemap[number], "url" | "alternates">,
-  ): MetadataRoute.Sitemap[number] => ({
-    url: localizedUrl(locale, href),
-    ...opts,
-  });
+  const moduleLanguages = (slugs: Record<Locale, string>): Record<string, string> => {
+    const languages: Record<string, string> = {};
+    for (const l of routing.locales) {
+      languages[l] = localizedUrl(l, { pathname: "/utbildning/[modul]", params: { modul: slugs[l] } });
+    }
+    return languages;
+  };
+
+  const lessonLanguages = (
+    slugs: Record<Locale, { modul: string; lektion: string }>,
+  ): Record<string, string> => {
+    const languages: Record<string, string> = {};
+    for (const l of routing.locales) {
+      languages[l] = localizedUrl(l, {
+        pathname: "/utbildning/[modul]/[lektion]",
+        params: slugs[l],
+      });
+    }
+    return languages;
+  };
 
   const staticRoutes: MetadataRoute.Sitemap = [
     entry("/", { changeFrequency: "weekly", priority: 1 }),
@@ -77,22 +93,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  // Courses use localized slugs; emit the current-locale URL only until their
-  // cross-locale slug mapping is wired (no wrong hreflang links).
   const courseRoutes: MetadataRoute.Sitemap = courseModules.flatMap((module) => [
-    localEntry(
-      { pathname: "/utbildning/[modul]", params: { modul: module.slug } },
-      { changeFrequency: "monthly", priority: 0.6 },
-    ),
-    ...module.lessons.map((lesson) =>
-      localEntry(
-        {
-          pathname: "/utbildning/[modul]/[lektion]",
-          params: { modul: module.slug, lektion: lesson.slug },
-        },
-        { changeFrequency: "monthly", priority: 0.5 },
-      ),
-    ),
+    {
+      url: localizedUrl(locale, { pathname: "/utbildning/[modul]", params: { modul: module.slug } }),
+      alternates: { languages: moduleLanguages(getModuleSlugsById(module.id)) },
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    ...module.lessons.map((lesson) => ({
+      url: localizedUrl(locale, {
+        pathname: "/utbildning/[modul]/[lektion]",
+        params: { modul: module.slug, lektion: lesson.slug },
+      }),
+      alternates: {
+        languages: lessonLanguages(getLessonSlugsById(module.id, lesson.id)),
+      },
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
   ]);
 
   const postRoutes: MetadataRoute.Sitemap = getAllPosts(locale).map((post) => ({

@@ -8,6 +8,8 @@ import {
   ChatCircle,
 } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
+import { getSiteConfig } from "@/lib/site";
 import { Section, SectionHeading } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { formatNumber } from "@/lib/format";
@@ -19,10 +21,10 @@ import {
   type InstagramLivePost,
 } from "@/features/home/data/instagram";
 
-function FollowButton({ label }: { label: string }) {
+function FollowButton({ label, href }: { label: string; href: string }) {
   return (
     <Button asChild size="lg" variant="outline" className="h-10 rounded-full px-5 text-sm">
-      <a href={instagram.profileUrl} target="_blank" rel="noopener noreferrer">
+      <a href={href} target="_blank" rel="noopener noreferrer">
         <InstagramLogo weight="fill" aria-hidden />
         {label}
       </a>
@@ -122,7 +124,10 @@ function LivePostCard({
 export async function InstagramFeed() {
   const { profile, posts: livePosts } = await getInstagramFeed(3);
   const t = await getTranslations("home");
-  const locale = await getLocale();
+  const locale = (await getLocale()) as Locale;
+  const site = getSiteConfig(locale);
+  const handle = site.instagramHandle;
+  const profileUrl = site.instagram;
   const hasLive = livePosts.length > 0;
   const hasManual = instagram.posts.length > 0;
 
@@ -131,11 +136,11 @@ export async function InstagramFeed() {
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <SectionHeading
           eyebrow={t("instagramEyebrow")}
-          title={t("instagramTitle", { handle: instagram.handle })}
+          title={t("instagramTitle", { handle })}
           description={t("instagramDescription")}
         />
         <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-          <FollowButton label={t("instagramFollow", { handle: instagram.handle })} />
+          <FollowButton label={t("instagramFollow", { handle })} href={profileUrl} />
           {profile?.followersCount ? (
             <p className="text-xs text-muted-foreground">
               <span className="font-semibold text-foreground tabular-nums">
@@ -155,7 +160,7 @@ export async function InstagramFeed() {
                 key={post.id}
                 post={post}
                 locale={locale}
-                fallbackLabel={t("instagramPostFrom", { handle: instagram.handle })}
+                fallbackLabel={t("instagramPostFrom", { handle })}
               />
             ))}
           </div>
@@ -178,13 +183,13 @@ export async function InstagramFeed() {
             ))}
           </div>
         ) : (
-          <PlaceholderGrid label={t("instagramPostsHere", { handle: instagram.handle })} />
+          <PlaceholderGrid label={t("instagramPostsHere", { handle })} />
         )}
       </div>
 
       <div className="mt-8 flex justify-center">
         <Link
-          href={instagram.profileUrl}
+          href={profileUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin transition-colors hover:text-bitcoin/80"

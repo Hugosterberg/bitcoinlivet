@@ -2,9 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/lib/site";
+import type { Locale } from "@/i18n/routing";
+
+/** Brand wordmark split into a lead and an accent (the accent is Bitcoin-orange). */
+const WORDMARK: Record<Locale, { lead: string; accent: string }> = {
+  sv: { lead: "bitcoin", accent: "livet" },
+  en: { lead: "bitcoiner", accent: "life" },
+};
 
 /**
  * Brand wordmark with the Bitcoin "₿" glyph. Used in header and footer, and
@@ -19,11 +26,13 @@ export function Logo({
   showWordmark?: boolean;
 }) {
   const pathname = usePathname();
+  const locale = useLocale() as Locale;
+  const { lead, accent } = WORDMARK[locale];
 
   return (
     <Link
       href="/"
-      aria-label={`${siteConfig.name}: startsida`}
+      aria-label={locale === "sv" ? `${lead}${accent}: startsida` : `${lead}${accent}: home`}
       onClick={() => {
         if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
       }}
@@ -40,7 +49,8 @@ export function Logo({
       </span>
       {showWordmark ? (
         <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
-          bitcoin<span className="text-bitcoin">livet</span>
+          {lead}
+          <span className="text-bitcoin">{accent}</span>
         </span>
       ) : null}
     </Link>
