@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowLeft, Clock } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { getSiteConfig } from "@/lib/site";
 import { PostCard } from "@/features/blog/components/post-card";
 import { formatDate } from "@/lib/format";
 import { getAllPosts, getPost, getPostSlugs } from "@/features/blog/data/posts";
@@ -19,7 +22,7 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: Locale; slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost(slug);
@@ -50,9 +53,13 @@ export async function generateMetadata({
 export default async function BlogPostPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: Locale; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("articles");
+  const tFooter = await getTranslations("footer");
+  const site = getSiteConfig(locale);
   const post = getPost(slug);
   if (!post) notFound();
 
@@ -73,7 +80,7 @@ export default async function BlogPostPage({
           className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={16} weight="bold" aria-hidden />
-          Tillbaka till artiklarna
+          {t("backToArticles")}
         </Link>
 
         <header className="mt-8 border-b border-border pb-8">
@@ -83,7 +90,7 @@ export default async function BlogPostPage({
             </Link>
             <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
               <Clock size={14} weight="bold" aria-hidden />
-              {meta.readingTime} min läsning
+              {t("readingTime", { minutes: meta.readingTime })}
             </span>
           </div>
 
@@ -96,7 +103,7 @@ export default async function BlogPostPage({
 
           <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
             <span className="font-medium text-foreground">
-              {meta.author ?? "bitcoinlivet"}
+              {meta.author ?? site.name}
             </span>
             <span aria-hidden>·</span>
             <time dateTime={meta.date} className="tabular-nums">
@@ -109,13 +116,13 @@ export default async function BlogPostPage({
           <Content />
         </div>
 
-        <Disclaimer className="mt-12" />
+        <Disclaimer className="mt-12">{tFooter("notAdvice")}</Disclaimer>
       </Container>
 
       {relatedPosts.length > 0 ? (
         <Container className="mt-20">
           <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-            Läs vidare
+            {t("readMore")}
           </h2>
           <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {relatedPosts.map((p) => (

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { getSiteConfig } from "@/lib/site";
 import { BlogExplorer } from "@/features/blog/components/blog-explorer";
 import {
   categories,
@@ -10,29 +13,42 @@ import {
   type CategorySlug,
 } from "@/features/blog/data/posts";
 
-export const metadata: Metadata = {
-  title: "Artiklar",
-  description:
-    "Guider och artiklar om Bitcoin, sparande, inflation och köpkraft, skrivna lugnt och på svenska.",
-  alternates: { canonical: "/artiklar" },
-  openGraph: {
-    title: "Artiklar · bitcoinlivet",
-    description:
-      "Guider och artiklar om Bitcoin, sparande, inflation och köpkraft.",
-    url: "/artiklar",
-    type: "website",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "articles" });
+  const site = getSiteConfig(locale);
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: { canonical: "/artiklar" },
+    openGraph: {
+      title: `${t("ogTitle")} · ${site.name}`,
+      description: t("ogDesc"),
+      url: "/artiklar",
+      type: "website",
+    },
+  };
+}
 
 function isCategory(value: string | undefined): value is CategorySlug {
   return !!value && value in categories;
 }
 
 export default async function BlogPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: Locale }>;
   searchParams: Promise<{ kategori?: string }>;
 }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("articles");
+
   const { kategori } = await searchParams;
   const active = isCategory(kategori) ? kategori : undefined;
 
@@ -44,14 +60,13 @@ export default async function BlogPage({
       <Container>
         <header className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-            Artiklar
+            {t("eyebrow")}
           </p>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Förstå Bitcoin och din ekonomi
+            {t("title")}
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            Tydliga guider om Bitcoin, sparande, inflation och köpkraft. Sök
-            eller välj ett ämne nedan.
+            {t("lead")}
           </p>
         </header>
 
@@ -64,8 +79,7 @@ export default async function BlogPage({
         </div>
 
         <Disclaimer className="mt-14 max-w-2xl">
-          Allt innehåll är i utbildande syfte. Detta är inte finansiell
-          rådgivning.
+          {t("disclaimer")}
         </Disclaimer>
       </Container>
     </div>
