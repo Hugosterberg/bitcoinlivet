@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FloppyDisk, UserCirclePlus, SignIn, Trophy } from "@phosphor-icons/react";
 
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -14,6 +15,8 @@ import { useAuthUser } from "@/features/auth/components/use-auth-user";
  */
 export function SignInPrompt() {
   const { signedIn, loading } = useAuthUser();
+  const t = useTranslations("education");
+  const ta = useTranslations("auth");
 
   if (!isSupabaseConfigured || loading || signedIn) return null;
 
@@ -29,22 +32,18 @@ export function SignInPrompt() {
             <FloppyDisk size={22} weight="fill" aria-hidden />
           </span>
           <div>
-            <h2 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-              Spara dina poäng och avklarade kurser
-            </h2>
+            <h2 className="font-heading text-lg font-semibold tracking-tight text-foreground">{t("savePromptTitle")}</h2>
             <p className="mt-1 max-w-xl text-pretty text-sm/6 text-muted-foreground">
-              Skapa ett konto eller logga in så sparas din XP, dina märken och
-              dina genomförda lektioner, så att du kan fortsätta där du slutade
-              på alla dina enheter.
+              {t("savePromptText")}
             </p>
             <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               <li className="inline-flex items-center gap-1.5">
                 <Trophy size={14} weight="fill" className="text-bitcoin" aria-hidden />
-                XP och märken sparade
+                {t("xpBadgesSaved")}
               </li>
               <li className="inline-flex items-center gap-1.5">
                 <FloppyDisk size={14} weight="fill" className="text-bitcoin" aria-hidden />
-                Synkas mellan enheter
+                {t("syncedDevices")}
               </li>
             </ul>
           </div>
@@ -56,14 +55,14 @@ export function SignInPrompt() {
             className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-bitcoin px-5 text-sm font-semibold text-bitcoin-foreground transition-opacity hover:opacity-90"
           >
             <UserCirclePlus size={17} weight="fill" aria-hidden />
-            Skapa konto
+            {ta("signUp")}
           </Link>
           <Link
             href="/konto"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border px-5 text-sm font-medium text-foreground transition-colors hover:border-bitcoin/50 hover:text-bitcoin"
           >
             <SignIn size={17} weight="bold" aria-hidden />
-            Logga in
+            {ta("signIn")}
           </Link>
         </div>
       </div>

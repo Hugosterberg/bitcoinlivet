@@ -20,6 +20,11 @@
     "signIn": "Sign in",
     "features": "Features"
   },
+  "common": {
+    "dataCta": "See Bitcoin data",
+    "cookieSettings": "Cookie settings",
+    "featuresLearnMore": "Learn more about Bitcoin"
+  },
   "language": {
     "label": "Language",
     "sv": "Svenska",
@@ -104,6 +109,10 @@
     "lastActivity": "Last activity:",
     "noActivity": "No activity yet",
     "notStarted": "You haven't started yet. Complete your first lesson and your stats will appear here.",
+    "savePromptTitle": "Save your points and completed courses",
+    "savePromptText": "Create an account or sign in and your XP, badges and completed lessons are saved, so you can continue where you left off on all your devices.",
+    "xpBadgesSaved": "XP and badges saved",
+    "syncedDevices": "Synced across devices",
     "levels": {
       "1": "Curious",
       "2": "Explorer",
@@ -218,6 +227,20 @@
     "errGeneric": "Something went wrong.",
     "saving": "Saving …",
     "saveNewPassword": "Save new password"
+  },
+  "account": {
+    "metaTitle": "Account",
+    "metaDesc": "Sign in to save your course progress and continue where you left off, on all your devices.",
+    "eyebrow": "Your account",
+    "loggedIn": "Signed in",
+    "signInOrCreate": "Sign in or create an account",
+    "lead": "With an account your course progress, XP and badges are saved so you can continue where you left off, on whichever device you like.",
+    "notEnabled": "Sign-in isn't enabled yet. For now your progress is saved locally in this browser.",
+    "loggedInAs": "Signed in as",
+    "yourAccount": "your account",
+    "toSchool": "To the Bitcoin school",
+    "signOut": "Sign out",
+    "signingOut": "Signing out …"
   },
   "newsletter": {
     "title": "Follow along as the site grows",

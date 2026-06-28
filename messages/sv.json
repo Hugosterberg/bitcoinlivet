@@ -20,6 +20,11 @@
     "signIn": "Logga in",
     "features": "Funktioner"
   },
+  "common": {
+    "dataCta": "Se Bitcoindata",
+    "cookieSettings": "Cookie-inställningar",
+    "featuresLearnMore": "Lär dig mer om Bitcoin"
+  },
   "language": {
     "label": "Språk",
     "sv": "Svenska",
@@ -104,6 +109,10 @@
     "lastActivity": "Senaste aktivitet:",
     "noActivity": "Ingen aktivitet än",
     "notStarted": "Du har inte börjat än. Gör din första lektion så fylls statistiken i här.",
+    "savePromptTitle": "Spara dina poäng och avklarade kurser",
+    "savePromptText": "Skapa ett konto eller logga in så sparas din XP, dina märken och dina genomförda lektioner, så att du kan fortsätta där du slutade på alla dina enheter.",
+    "xpBadgesSaved": "XP och märken sparade",
+    "syncedDevices": "Synkas mellan enheter",
     "levels": {
       "1": "Nyfiken",
       "2": "Utforskare",
@@ -218,6 +227,20 @@
     "errGeneric": "Något gick fel.",
     "saving": "Sparar …",
     "saveNewPassword": "Spara nytt lösenord"
+  },
+  "account": {
+    "metaTitle": "Konto",
+    "metaDesc": "Logga in för att spara din kursprogression och fortsätta där du slutade, på alla dina enheter.",
+    "eyebrow": "Ditt konto",
+    "loggedIn": "Inloggad",
+    "signInOrCreate": "Logga in eller skapa konto",
+    "lead": "Med ett konto sparas din kursprogression, XP och dina märken så att du kan fortsätta där du slutade, på vilken enhet du vill.",
+    "notEnabled": "Inloggning är inte aktiverad ännu. Din progression sparas så länge lokalt i den här webbläsaren.",
+    "loggedInAs": "Inloggad som",
+    "yourAccount": "ditt konto",
+    "toSchool": "Till Bitcoinskolan",
+    "signOut": "Logga ut",
+    "signingOut": "Loggar ut …"
   },
   "newsletter": {
     "title": "Häng med när sidan växer",

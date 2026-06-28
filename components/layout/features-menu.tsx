@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SquaresFour, CaretDown, ArrowRight } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -17,6 +18,8 @@ import { FunctionIcon } from "@/features/functions/components/function-icon";
  */
 export function FeaturesMenu() {
   const pathname = usePathname();
+  const t = useTranslations("header");
+  const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -76,7 +79,7 @@ export function FeaturesMenu() {
         )}
       >
         <SquaresFour size={16} weight={active || open ? "fill" : "regular"} aria-hidden />
-        Funktioner
+        {t("features")}
         <CaretDown
           size={12}
           weight="bold"
@@ -121,7 +124,7 @@ export function FeaturesMenu() {
                 onClick={() => setOpen(false)}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-bitcoin transition-colors hover:text-bitcoin/80"
               >
-                Lär dig mer om Bitcoin
+                {tc("featuresLearnMore")}
                 <ArrowRight size={15} weight="bold" aria-hidden />
               </Link>
             </div>

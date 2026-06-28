@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { resetConsent } from "@/components/layout/consent-store";
 
 /**
@@ -7,9 +9,10 @@ import { resetConsent } from "@/components/layout/consent-store";
  * analytics-cookie choice at any time (a GDPR best practice).
  */
 export function CookieSettingsButton({ className }: { className?: string }) {
+  const t = useTranslations("common");
   return (
     <button type="button" onClick={resetConsent} className={className}>
-      Cookie-inställningar
+      {t("cookieSettings")}
     </button>
   );
 }

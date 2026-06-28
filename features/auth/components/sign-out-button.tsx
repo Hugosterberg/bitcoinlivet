@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { SignOut } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
  * the cleared session.
  */
 export function SignOutButton() {
+  const t = useTranslations("account");
   const [pending, setPending] = useState(false);
 
   async function handleSignOut() {
@@ -32,7 +34,7 @@ export function SignOutButton() {
       onClick={handleSignOut}
     >
       <SignOut weight="bold" aria-hidden />
-      {pending ? "Loggar ut …" : "Logga ut"}
+      {pending ? t("signingOut") : t("signOut")}
     </Button>
   );
 }

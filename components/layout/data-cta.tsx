@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ChartLineUp } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils";
@@ -15,6 +18,7 @@ export function DataCta({
   className?: string;
   onClick?: () => void;
 }) {
+  const t = useTranslations("common");
   return (
     <Link
       href="/data"
@@ -34,7 +38,7 @@ export function DataCta({
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-bitcoin-foreground/70" />
         <span className="relative inline-flex size-2 rounded-full bg-bitcoin-foreground" />
       </span>
-      Se Bitcoindata
+      {t("dataCta")}
       <ChartLineUp
         size={16}
         weight="bold"
