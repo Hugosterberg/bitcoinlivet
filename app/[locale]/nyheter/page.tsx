@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   CurrencyBtc,
   Lightning,
@@ -11,9 +12,11 @@ import {
   ArrowRight,
 } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { getSiteConfig } from "@/lib/site";
 import {
   getBitcoinMarket,
   getRecommendedFees,
@@ -33,19 +36,26 @@ import {
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Nyheter: senaste om Bitcoin",
-  description:
-    "Ett lugnt urval Bitcoinnyheter från den senaste veckan, hämtade från bitcoinfokuserade källor, plus en snabb överblick av läget i SEK. Utan hype.",
-  alternates: { canonical: "/nyheter" },
-  openGraph: {
-    title: "Nyheter · bitcoinlivet",
-    description:
-      "Veckans Bitcoinnyheter från bitcoinfokuserade källor, plus läget just nu i SEK. Minimalt och utan hype.",
-    url: "/nyheter",
-    type: "website",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "news" });
+  const site = getSiteConfig(locale);
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: { canonical: "/nyheter" },
+    openGraph: {
+      title: `${t("ogTitle")} · ${site.name}`,
+      description: t("ogDesc"),
+      url: "/nyheter",
+      type: "website",
+    },
+  };
+}
 
 function SnapshotTile({
   icon,
@@ -86,7 +96,15 @@ function SnapshotTile({
   );
 }
 
-export default async function BitcoinTodayPage() {
+export default async function BitcoinTodayPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("news");
+
   const [market, fees, fearGreed, height, news] = await Promise.all([
     getBitcoinMarket(),
     getRecommendedFees(),
@@ -104,50 +122,48 @@ export default async function BitcoinTodayPage() {
         <header className="max-w-3xl">
           <div className="flex items-center gap-3">
             <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-              Nyheter
+              {t("eyebrow")}
             </p>
-            <Badge variant="outline">Senaste veckan</Badge>
+            <Badge variant="outline">{t("badge")}</Badge>
           </div>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Senaste nytt om Bitcoin
+            {t("title")}
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            Ett lugnt urval rubriker från den senaste veckan, hämtade från
-            bitcoinfokuserade källor, plus en snabb överblick av läget. Tänk
-            långsiktigt: det här är en överblick, inte en uppmaning att agera.
+            {t("lead")}
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            Uppdaterad {formatDate(today)}
+            {t("updated", { date: formatDate(today) })}
           </p>
         </header>
 
         {/* Snapshot */}
-        <section aria-label="Läget just nu" className="mt-10">
+        <section aria-label={t("snapshotLabel")} className="mt-10">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SnapshotTile
               icon={<CurrencyBtc size={18} weight="bold" aria-hidden />}
-              label="Pris"
+              label={t("tilePrice")}
               value={formatCurrency(market.priceSek)}
-              sub={`${formatPercent(market.change24h)} senaste dygnet`}
+              sub={t("priceChange", { percent: formatPercent(market.change24h) })}
               tone={market.change24h >= 0 ? "up" : "down"}
             />
             <SnapshotTile
               icon={<Lightning size={18} weight="fill" aria-hidden />}
-              label="Avgift (snabbast)"
+              label={t("tileFee")}
               value={fees ? `${fees.fastestFee} sat/vB` : "–"}
-              sub={fees ? "för nästa block" : "ej tillgänglig nu"}
+              sub={fees ? t("feeForNext") : t("feeUnavailable")}
             />
             <SnapshotTile
               icon={<Gauge size={18} weight="fill" aria-hidden />}
-              label="Marknadshumör"
+              label={t("tileMood")}
               value={fearGreed ? `${fearGreed.value}/100` : "–"}
-              sub={fearGreed ? fearGreed.label : "ej tillgängligt nu"}
+              sub={fearGreed ? fearGreed.label : t("moodUnavailable")}
             />
             <SnapshotTile
               icon={<Timer size={18} weight="bold" aria-hidden />}
-              label="Till halvering"
-              value={halving ? `${formatNumber(halving.blocksRemaining)} block` : "–"}
-              sub={halving ? `≈ ${formatDate(halving.estimatedDate)}` : "ej tillgängligt nu"}
+              label={t("tileHalving")}
+              value={halving ? t("halvingBlocks", { blocks: formatNumber(halving.blocksRemaining) }) : "–"}
+              sub={halving ? `≈ ${formatDate(halving.estimatedDate)}` : t("halvingUnavailable")}
             />
           </div>
           <div className="mt-4 flex justify-end">
@@ -155,26 +171,24 @@ export default async function BitcoinTodayPage() {
               href="/data"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
             >
-              Se hela dashboarden
+              {t("seeDashboard")}
               <ArrowRight size={15} weight="bold" aria-hidden />
             </Link>
           </div>
         </section>
 
         {/* Headlines */}
-        <section aria-label="Veckans rubriker" className="mt-12">
+        <section aria-label={t("headlinesLabel")} className="mt-12">
           <div className="flex items-center gap-2.5">
             <span className="grid size-9 place-items-center rounded-full bg-bitcoin-muted text-bitcoin">
               <Newspaper size={18} weight="fill" aria-hidden />
             </span>
             <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-              Veckans rubriker
+              {t("headlinesTitle")}
             </h2>
           </div>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Ett urval rubriker från den senaste veckan, från bitcoinfokuserade
-            källor. Jag länkar vidare och republicerar inget, läs källkritiskt
-            och kom ihåg att nyheter ofta är brus i det långa loppet.
+            {t("headlinesIntro")}
           </p>
 
           {news.items.length > 0 ? (
@@ -214,27 +228,23 @@ export default async function BitcoinTodayPage() {
           ) : (
             <div className="mt-6 rounded-2xl border border-dashed border-border bg-card/40 px-6 py-16 text-center">
               <p className="font-heading text-lg font-semibold text-foreground">
-                Inga rubriker just nu
+                {t("noHeadlinesTitle")}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Nyhetskällorna svarar inte för tillfället. Titta in igen om en
-                stund, flödet uppdateras automatiskt.
+                {t("noHeadlinesText")}
               </p>
             </div>
           )}
 
           {news.sources.length > 0 ? (
             <p className="mt-4 text-xs text-muted-foreground">
-              Källor: {news.sources.join(" · ")}. Uppdateras automatiskt varje
-              timme.
+              {t("sources", { sources: news.sources.join(" · ") })}
             </p>
           ) : null}
         </section>
 
         <Disclaimer className="mt-12 max-w-2xl">
-          Överblicken hämtas live och rubrikerna kommer från externa källor som
-          jag inte styr över. Detta är inte finansiell rådgivning, och nyheter
-          bör sällan styra långsiktiga beslut.
+          {t("disclaimer")}
         </Disclaimer>
       </Container>
     </div>
