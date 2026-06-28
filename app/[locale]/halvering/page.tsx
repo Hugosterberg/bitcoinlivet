@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { getSiteConfig } from "@/lib/site";
 import { HalvingCountdown } from "@/features/bitcoin-data/components/halving-countdown";
 import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
 import { getBitcoinMarket } from "@/features/bitcoin-data/data/live-data";
@@ -20,23 +23,38 @@ import {
 } from "@/features/bitcoin-data/data/metrics";
 import { formatNumber, formatShare } from "@/lib/format";
 
-export const metadata: Metadata = {
-  title: "Bitcoinhalveringen: så fungerar den",
-  description:
-    "Vad är Bitcoinhalveringen? Live nedräkning till nästa halvering, blocktid, historik över tidigare halveringar och en lugn förklaring av varför utbudet är förutsägbart.",
-  alternates: { canonical: "/halvering" },
-  openGraph: {
-    title: "Bitcoinhalveringen · bitcoinlivet",
-    description:
-      "Live nedräkning, blocktid, historik och en enkel förklaring av Bitcoins halvering.",
-    url: "/halvering",
-    type: "website",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "halving" });
+  const site = getSiteConfig(locale);
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: { canonical: "/halvering" },
+    openGraph: {
+      title: `${t("ogTitle")} · ${site.name}`,
+      description: t("ogDesc"),
+      url: "/halvering",
+      type: "website",
+    },
+  };
+}
 
 export const revalidate = 300;
 
-export default async function HalvingPage() {
+export default async function HalvingPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("halving");
+
   const market = await getBitcoinMarket();
   const supply = getSupplyTimeline(
     market.circulatingSupply,
@@ -53,16 +71,13 @@ export default async function HalvingPage() {
       <Container>
         <header className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-            Halveringen
+            {t("eyebrow")}
           </p>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Bitcoins inbyggda klocka
+            {t("title")}
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            Ungefär vart fjärde år halveras takten som nya bitcoin skapas i. Det
-            är regeln som gör utbudet förutsägbart och långsamt leder mot taket
-            på 21 miljoner. Här är nedräkningen, hur block och tid hänger ihop,
-            historiken och varför det spelar roll.
+            {t("lead")}
           </p>
         </header>
 
@@ -71,120 +86,106 @@ export default async function HalvingPage() {
           <HalvingCountdown />
           <Card className="flex flex-col gap-4 p-6 sm:p-8">
             <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              Vad är en halvering?
+              {t("whatIsTitle")}
             </h2>
             <p className="text-base/7 text-muted-foreground">
-              Varje gång en ny bunt transaktioner (ett block) läggs till i
-              blockkedjan skapas det nya bitcoin som belöning till den som säkrar
-              nätverket. Var {formatNumber(BLOCKS_PER_HALVING)}:e block, ungefär
-              vart fjärde år, halveras den belöningen.
+              {t("whatIsP1", { blocks: formatNumber(BLOCKS_PER_HALVING) })}
             </p>
             <p className="text-base/7 text-muted-foreground">
-              Resultatet är ett utbud som ökar allt långsammare och vars takt
-              är känd i förväg, ända fram till den sista bitcoinen runt år 2140.
-              Ingen kan ändra på det i efterhand.
+              {t("whatIsP2")}
             </p>
             <Link
               href="/artiklar/bitcoin-sunda-pengar"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
             >
-              Läs: Vad gör Bitcoin till sunda pengar?
+              {t("readSoundMoney")}
               <ArrowRight size={15} weight="bold" aria-hidden />
             </Link>
           </Card>
         </section>
 
         {/* Block & time */}
-        <section aria-label="Block och tid" className="mt-5">
+        <section aria-label={t("blockTimeLabel")} className="mt-5">
           <Card className="p-6 sm:p-8">
             <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              Block &amp; tid
+              {t("blockTimeTitle")}
             </h2>
             <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-              Halveringen mäts i block, inte i kalenderdagar. Bitcoin är byggt
-              så att ett nytt block i snitt ska tas fram var {MINUTES_PER_BLOCK}
-              :e minut, men enskilda block kan ta både kortare och längre tid.
+              {t("blockTimeIntro", { minutes: MINUTES_PER_BLOCK })}
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatTile
-                label="Måltid per block"
-                value={`≈ ${MINUTES_PER_BLOCK} min`}
-                sub="i snitt, enligt protokollet"
+                label={t("statTargetTime")}
+                value={t("statTargetTimeValue", { minutes: MINUTES_PER_BLOCK })}
+                sub={t("statTargetTimeSub")}
               />
               <StatTile
-                label="Block per halvering"
+                label={t("statBlocksPerHalving")}
                 value={formatNumber(BLOCKS_PER_HALVING)}
-                sub="≈ 4 år vid måltiden"
+                sub={t("statBlocksPerHalvingSub")}
               />
               <StatTile
-                label="Svårighetsjustering"
-                value={`var ${formatNumber(DIFFICULTY_ADJUSTMENT_BLOCKS)} block`}
-                sub={`≈ var ${DIFFICULTY_ADJUSTMENT_DAYS}:e dag`}
+                label={t("statDifficulty")}
+                value={t("statDifficultyValue", { blocks: formatNumber(DIFFICULTY_ADJUSTMENT_BLOCKS) })}
+                sub={t("statDifficultySub", { days: DIFFICULTY_ADJUSTMENT_DAYS })}
               />
               <StatTile
-                label="Block per dygn"
-                value={`≈ ${BLOCKS_PER_DAY}`}
-                sub={`vid ${MINUTES_PER_BLOCK} min/block`}
+                label={t("statBlocksPerDay")}
+                value={t("statBlocksPerDayValue", { blocks: BLOCKS_PER_DAY })}
+                sub={t("statBlocksPerDaySub", { minutes: MINUTES_PER_BLOCK })}
               />
             </div>
 
             <div className="mt-6 rounded-xl border border-border/60 bg-background/40 p-4 sm:p-5">
               <h3 className="text-sm font-medium text-foreground">
-                Varför vet vi inte exakt när halveringen sker?
+                {t("whyNotExactTitle")}
               </h3>
               <ul className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
-                <li>
-                  Block kommer inte exakt var {MINUTES_PER_BLOCK}:e minut. Ibland
-                  går det snabbare, ibland långsammare, det är normalt.
-                </li>
-                <li>
-                  Nätverket justerar svårighetsgraden ungefär var{" "}
-                  {DIFFICULTY_ADJUSTMENT_DAYS}:e dag så medeltiden hålls nära
-                  målet, även när datorkraften (hash rate) förändras.
-                </li>
-                <li>
-                  Hash rate kan öka eller minska snabbt om nya gruvor startar
-                  eller stänger. Därför är halveringsdatumet en uppskattning
-                  baserad på nuvarande tempo, inte ett exakt klockslag.
-                </li>
+                <li>{t("whyNotExact1", { minutes: MINUTES_PER_BLOCK })}</li>
+                <li>{t("whyNotExact2", { days: DIFFICULTY_ADJUSTMENT_DAYS })}</li>
+                <li>{t("whyNotExact3")}</li>
               </ul>
             </div>
           </Card>
         </section>
 
         {/* Current epoch supply */}
-        <section aria-label="Utbud i nuvarande epok" className="mt-5">
+        <section aria-label={t("supplyLabel")} className="mt-5">
           <Card className="p-6 sm:p-8">
             <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              Utbud i nuvarande epok
+              {t("supplyTitle")}
             </h2>
             <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-              Sedan halveringen i april 2024 är blockbelöningen{" "}
-              {fmtYears(supply.currentReward, 4)} BTC. Nästa halvering sänker den
-              till {fmtYears(supply.currentReward / 2, 4)} BTC.
+              {t("supplyIntro", {
+                reward: fmtYears(supply.currentReward, 4),
+                nextReward: fmtYears(supply.currentReward / 2, 4),
+              })}
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatTile
-                label="Blockbelöning nu"
+                label={t("statRewardNow")}
                 value={`${fmtYears(supply.currentReward, 4)} BTC`}
-                sub="halveras vid nästa epok"
+                sub={t("statRewardNowSub")}
               />
               <StatTile
-                label="Nytt utbud per dag"
-                value={`≈ ${formatNumber(Math.round(supply.perDay))} BTC`}
-                sub={`vid ~${BLOCKS_PER_DAY} block/dygn`}
+                label={t("statNewSupplyPerDay")}
+                value={t("statNewSupplyPerDayValue", { btc: formatNumber(Math.round(supply.perDay)) })}
+                sub={t("statNewSupplyPerDaySub", { blocks: BLOCKS_PER_DAY })}
               />
               <StatTile
-                label="Andel utgivet"
+                label={t("statIssuedShare")}
                 value={formatShare(supply.issuedPercent)}
-                sub={`${formatNumber(Math.round(market.circulatingSupply))} av ${formatNumber(market.maxSupply)} BTC`}
+                sub={t("statIssuedShareSub", {
+                  issued: formatNumber(Math.round(market.circulatingSupply)),
+                  max: formatNumber(market.maxSupply),
+                })}
               />
               <StatTile
-                label="Kvar att utvinna"
-                value={`${formatNumber(Math.round(supply.remaining))} BTC`}
-                sub={`till cirka år ${supply.lastCoinYear}`}
+                label={t("statRemaining")}
+                value={t("statRemainingValue", { btc: formatNumber(Math.round(supply.remaining)) })}
+                sub={t("statRemainingSub", { year: supply.lastCoinYear })}
               />
             </div>
           </Card>
@@ -194,10 +195,10 @@ export default async function HalvingPage() {
         <section className="mt-5">
           <Card className="p-6 sm:p-8">
             <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              Alla halveringar
+              {t("historyTitle")}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Från 50 BTC per block vid starten till allt mindre för varje epok.
+              {t("historyIntro")}
             </p>
 
             <div className="mt-6 w-full overflow-x-auto">
@@ -205,19 +206,19 @@ export default async function HalvingPage() {
                 <thead>
                   <tr className="text-muted-foreground">
                     <th className="border-b border-border px-3 py-2 font-semibold">
-                      Halvering
+                      {t("colHalving")}
                     </th>
                     <th className="border-b border-border px-3 py-2 font-semibold">
-                      Block
+                      {t("colBlock")}
                     </th>
                     <th className="border-b border-border px-3 py-2 font-semibold">
-                      Tidpunkt
+                      {t("colTime")}
                     </th>
                     <th className="border-b border-border px-3 py-2 text-right font-semibold">
-                      Blockbelöning
+                      {t("colReward")}
                     </th>
                     <th className="border-b border-border px-3 py-2 font-semibold">
-                      Status
+                      {t("colStatus")}
                     </th>
                   </tr>
                 </thead>
@@ -225,7 +226,7 @@ export default async function HalvingPage() {
                   {halvingHistory.map((event) => (
                     <tr key={event.number} className="align-middle">
                       <td className="border-b border-border px-3 py-3 font-medium text-foreground">
-                        {event.number === 0 ? "Start (genesis)" : `#${event.number}`}
+                        {event.number === 0 ? t("genesis") : `#${event.number}`}
                       </td>
                       <td className="border-b border-border px-3 py-3 tabular-nums text-muted-foreground">
                         {formatNumber(event.block)}
@@ -241,9 +242,9 @@ export default async function HalvingPage() {
                       </td>
                       <td className="border-b border-border px-3 py-3">
                         {event.past ? (
-                          <Badge variant="outline">Inträffad</Badge>
+                          <Badge variant="outline">{t("statusPast")}</Badge>
                         ) : (
-                          <Badge variant="bitcoin">Kommande</Badge>
+                          <Badge variant="bitcoin">{t("statusUpcoming")}</Badge>
                         )}
                       </td>
                     </tr>
@@ -258,40 +259,33 @@ export default async function HalvingPage() {
         <section className="mt-5">
           <Card className="flex flex-col gap-4 p-6 sm:p-8">
             <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              Varför halveringen spelar roll
+              {t("whyMattersTitle")}
             </h2>
             <p className="max-w-3xl text-base/7 text-muted-foreground">
-              Vanliga pengar kan tryckas i obegränsad mängd. Bitcoin går åt
-              motsatt håll: tillflödet av nya mynt minskar enligt ett schema som
-              ingen kan rucka på. Det gör knappheten trovärdig, du kan räkna ut
-              exakt hur många bitcoin som finns vid en viss tidpunkt.
+              {t("whyMattersP1")}
             </p>
             <p className="max-w-3xl text-base/7 text-muted-foreground">
-              Halveringen är alltså inte en händelse att tajma, utan en
-              illustration av en princip: förutsägbara, knappa pengar. Det är
-              den principen jag tycker är värd att förstå.
+              {t("whyMattersP2")}
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/data"
                 className="text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
               >
-                Se Bitcoindata live
+                {t("seeDataLive")}
               </Link>
               <Link
                 href="/utbildning"
                 className="text-sm font-medium text-bitcoin underline decoration-bitcoin/40 underline-offset-4 hover:decoration-bitcoin"
               >
-                Lär dig i Bitcoinskolan
+                {t("learnInSchool")}
               </Link>
             </div>
           </Card>
         </section>
 
         <Disclaimer className="mt-10 max-w-2xl">
-          Nedräkningen hämtas live från blockkedjan; beräknat datum är en
-          uppskattning utifrån ~{MINUTES_PER_BLOCK} minuter per block. Detta är
-          inte finansiell rådgivning.
+          {t("disclaimer", { minutes: MINUTES_PER_BLOCK })}
         </Disclaimer>
       </Container>
     </div>
