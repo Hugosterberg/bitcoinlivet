@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
-import { siteConfig } from "@/lib/site";
+import { getSiteConfig } from "@/lib/site";
 import { CookieSettingsButton } from "@/components/layout/cookie-settings-button";
 
-export const metadata: Metadata = {
-  title: "Integritetspolicy",
-  description:
-    "Så hanterar bitcoinlivet dina uppgifter: konton, nyhetsbrev, cookies och analys, samt dina rättigheter enligt GDPR.",
-  alternates: { canonical: "/integritetspolicy" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "privacy" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: { canonical: "/integritetspolicy" },
+  };
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -23,90 +32,87 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("privacy");
+  const site = getSiteConfig(locale);
+
   return (
     <div className="py-14 sm:py-20">
       <Container className="max-w-3xl">
         <header>
           <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-            Integritet
+            {t("eyebrow")}
           </p>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Integritetspolicy
+            {t("title")}
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            Den här sidan förklarar vilka uppgifter {siteConfig.name} samlar in,
-            varför, och vilka rättigheter du har. Vi samlar bara in det som
-            behövs och säljer aldrig dina uppgifter.
+            {t("lead", { name: site.name })}
           </p>
         </header>
 
-        <Section title="Vilka uppgifter vi samlar in">
+        <Section title={t("collectTitle")}>
           <ul className="space-y-2">
             <li>
-              <strong className="text-foreground">Konto:</strong> om du skapar ett
-              konto lagras din e-postadress och din kursprogression (XP, märken,
-              genomförda lektioner) så att du kan fortsätta på flera enheter.
+              <strong className="text-foreground">{t("collectAccountLabel")}</strong>{" "}
+              {t("collectAccountText")}
             </li>
             <li>
-              <strong className="text-foreground">Nyhetsbrev:</strong> om du
-              anmäler dig lagras din e-postadress och att du samtyckt till
-              utskick. Du kan avregistrera dig när som helst.
+              <strong className="text-foreground">{t("collectNewsletterLabel")}</strong>{" "}
+              {t("collectNewsletterText")}
             </li>
             <li>
-              <strong className="text-foreground">Analys:</strong> anonym
-              statistik om hur sidan används (besök, sidvisningar, ungefärlig
-              källa). Detaljerad analys aktiveras bara med ditt samtycke.
+              <strong className="text-foreground">{t("collectAnalyticsLabel")}</strong>{" "}
+              {t("collectAnalyticsText")}
             </li>
           </ul>
         </Section>
 
-        <Section title="Cookies och analys">
+        <Section title={t("cookiesTitle")}>
           <p>
-            <strong className="text-foreground">Google Analytics</strong> och{" "}
-            <strong className="text-foreground">Microsoft Clarity</strong> (samt
-            eventuell annonsmätning) använder cookies och laddas{" "}
-            <strong className="text-foreground">först efter ditt samtycke</strong> i
-            cookie-rutan. Du kan ändra ditt val när som helst:
+            <strong className="text-foreground">Google Analytics</strong>{" "}
+            {t("cookiesP1Before")}{" "}
+            <strong className="text-foreground">Microsoft Clarity</strong>{" "}
+            {t("cookiesP1After")}{" "}
+            <strong className="text-foreground">{t("cookiesP1Strong")}</strong>{" "}
+            {t("cookiesP1End")}
           </p>
           <p>
             <CookieSettingsButton className="cursor-pointer font-medium text-bitcoin underline underline-offset-4 transition-colors hover:text-bitcoin/80" />
           </p>
         </Section>
 
-        <Section title="Rättslig grund">
-          <p>
-            Konto- och nyhetsbrevsuppgifter behandlas för att leverera tjänsten
-            respektive med stöd av ditt samtycke. Cookies för analys och annonser
-            sätts endast med ditt samtycke (GDPR art. 6.1 a och ePrivacy).
-          </p>
+        <Section title={t("legalTitle")}>
+          <p>{t("legalText")}</p>
         </Section>
 
-        <Section title="Dina rättigheter">
-          <p>
-            Du har rätt att få tillgång till, rätta och radera dina uppgifter,
-            samt att återkalla ditt samtycke. Vill du radera ditt konto eller
-            avregistrera dig från nyhetsbrevet, hör av dig så hjälper vi dig.
-          </p>
+        <Section title={t("rightsTitle")}>
+          <p>{t("rightsText")}</p>
         </Section>
 
-        <Section title="Kontakt">
+        <Section title={t("contactTitle")}>
           <p>
-            Frågor om dina uppgifter? Kontakta oss via{" "}
+            {t("contactBefore")}{" "}
             <a
-              href={siteConfig.instagram}
+              href={site.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-bitcoin underline underline-offset-4 hover:text-bitcoin/80"
             >
-              {siteConfig.instagramHandle}
+              {site.instagramHandle}
             </a>{" "}
-            eller läs mer{" "}
+            {t("contactMiddle")}{" "}
             <Link
               href="/om"
               className="font-medium text-bitcoin underline underline-offset-4 hover:text-bitcoin/80"
             >
-              om bitcoinlivet
+              {t("contactLink")}
             </Link>
             .
           </p>
