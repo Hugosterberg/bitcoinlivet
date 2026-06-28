@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PiggyBank } from "@phosphor-icons/react";
 
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import {
  * about future value — it is about habit and accumulation, not returns.
  */
 export function SavingsCalculator({ priceSek }: { priceSek: number }) {
+  const t = useTranslations("savingsCalc");
   const monthlyId = useId();
   const yearsId = useId();
   const [monthly, setMonthly] = useState(1000);
@@ -40,10 +42,10 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
         </span>
         <div>
           <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-            Sparkalkylator
+            {t("title")}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Hur regelbundet sparande växer
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -55,7 +57,7 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
               htmlFor={monthlyId}
               className="flex items-center justify-between text-sm font-medium text-foreground"
             >
-              <span>Belopp per månad</span>
+              <span>{t("amountPerMonth")}</span>
               <span className="tabular-nums text-bitcoin">
                 {formatCurrency(monthly)}
               </span>
@@ -72,7 +74,7 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
               aria-describedby={`${monthlyId}-hint`}
             />
             <p id={`${monthlyId}-hint`} className="mt-1 text-xs text-muted-foreground">
-              100 till 10 000 kr
+              {t("monthRange")}
             </p>
           </div>
 
@@ -81,9 +83,9 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
               htmlFor={yearsId}
               className="flex items-center justify-between text-sm font-medium text-foreground"
             >
-              <span>Antal år</span>
+              <span>{t("years")}</span>
               <span className="tabular-nums text-bitcoin">
-                {years} {years === 1 ? "år" : "år"}
+                {t("yearsValue", { years })}
               </span>
             </label>
             <input
@@ -96,14 +98,14 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
               onChange={(e) => setYears(Number(e.target.value))}
               className="mt-3 w-full accent-bitcoin"
             />
-            <p className="mt-1 text-xs text-muted-foreground">1 till 30 år</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("yearsRange")}</p>
           </div>
         </div>
 
         <div className="flex flex-col justify-center gap-4 rounded-2xl border border-border bg-background/40 p-5">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Totalt insatt
+              {t("totalDeposited")}
             </p>
             <p className="mt-1 font-heading text-2xl font-semibold tracking-tight text-foreground tabular-nums">
               {formatCurrency(result.invested)}
@@ -111,10 +113,10 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
           </div>
           <div className="border-t border-border pt-4">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Vid dagens pris
+              {t("atTodaysPrice")}
             </p>
             <p className="mt-1 font-heading text-xl font-semibold tracking-tight text-bitcoin tabular-nums">
-              {formatNumber(Math.round(result.totalSats))} sats
+              {t("sats", { sats: formatNumber(Math.round(result.totalSats)) })}
             </p>
             <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
               ≈ {formatNumber(result.totalBtc, { maximumFractionDigits: 4 })} BTC
@@ -124,9 +126,11 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
       </div>
 
       <p className="mt-5 text-xs text-muted-foreground">
-        Visar hur mycket du sätter in och hur många sats det motsvarar{" "}
-        <strong className="font-medium text-foreground">vid dagens pris</strong>.
-        Priset rör sig upp och ner, detta är ingen prognos om framtida värde.
+        {t.rich("note", {
+          b: (chunks) => (
+            <strong className="font-medium text-foreground">{chunks}</strong>
+          ),
+        })}
       </p>
     </Card>
   );

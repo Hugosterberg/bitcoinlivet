@@ -10,6 +10,8 @@ import {
   YAxis,
 } from "recharts";
 
+import { useTranslations } from "next-intl";
+
 import type { InvestmentPoint } from "@/features/bitcoin-data/data/live-data";
 import { formatCompact, formatCurrency, formatNumber } from "@/lib/format";
 import { axisTick, chartColors, ChartTooltipCard } from "./chart-theme";
@@ -21,6 +23,7 @@ export function InvestmentChart({
   data: InvestmentPoint[];
   height?: number;
 }) {
+  const t = useTranslations("charts");
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
@@ -59,17 +62,17 @@ export function InvestmentChart({
                 title={label}
                 rows={[
                   {
-                    label: "Värde",
+                    label: t("value"),
                     value: formatCurrency(point.value),
                     color: chartColors.bitcoin,
                   },
                   {
-                    label: "Investerat",
+                    label: t("invested"),
                     value: formatCurrency(point.invested),
                     color: chartColors.gray,
                   },
                   {
-                    label: "Innehav",
+                    label: t("holdings"),
                     value: `${formatNumber(point.btc, { maximumFractionDigits: 5 })} BTC`,
                   },
                 ]}
@@ -80,7 +83,7 @@ export function InvestmentChart({
         <Area
           type="monotone"
           dataKey="invested"
-          name="Investerat"
+          name={t("invested")}
           stroke={chartColors.gray}
           strokeWidth={2}
           fill="url(#investedFill)"
@@ -89,7 +92,7 @@ export function InvestmentChart({
         <Area
           type="monotone"
           dataKey="value"
-          name="Värde"
+          name={t("value")}
           stroke={chartColors.bitcoin}
           strokeWidth={2}
           fill="url(#valueFill)"

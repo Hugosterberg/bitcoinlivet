@@ -1,15 +1,10 @@
 "use client";
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { useTranslations } from "next-intl";
 
 import type { AssetSlice } from "@/features/bitcoin-data/data/live-data";
 import { ChartTooltipCard } from "./chart-theme";
-
-function biljoner(valueUsd: number): string {
-  return `${(valueUsd / 1_000_000_000_000).toLocaleString("sv-SE", {
-    maximumFractionDigits: 1,
-  })} biljoner USD`;
-}
 
 function percent(value: number): string {
   return `${value.toLocaleString("sv-SE", {
@@ -24,6 +19,13 @@ export function AssetAllocationChart({
   data: AssetSlice[];
   height?: number;
 }) {
+  const t = useTranslations("charts");
+  const trillions = (valueUsd: number): string =>
+    t("trillionsUsd", {
+      value: (valueUsd / 1_000_000_000_000).toLocaleString("sv-SE", {
+        maximumFractionDigits: 1,
+      }),
+    });
   return (
     <ResponsiveContainer width="100%" height={height}>
       <PieChart>
@@ -52,11 +54,11 @@ export function AssetAllocationChart({
                 title={slice.name}
                 rows={[
                   {
-                    label: "Andel",
+                    label: t("share"),
                     value: percent(slice.percent),
                     color: slice.color,
                   },
-                  { label: "Värde", value: biljoner(slice.valueUsd) },
+                  { label: t("value"), value: trillions(slice.valueUsd) },
                 ]}
               />
             );

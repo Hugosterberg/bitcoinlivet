@@ -1,20 +1,23 @@
+import { getTranslations } from "next-intl/server";
 import { Lightning, Gauge } from "@phosphor-icons/react/dist/ssr";
 
 import { Card } from "@/components/ui/card";
 import type { RecommendedFees } from "@/features/bitcoin-data/data/live-data";
 
-const TIERS: {
-  key: keyof Omit<RecommendedFees, "live">;
-  label: string;
-  hint: string;
-}[] = [
-  { key: "fastestFee", label: "Snabbast", hint: "~10 min" },
-  { key: "halfHourFee", label: "Halvtimme", hint: "~30 min" },
-  { key: "hourFee", label: "Timme", hint: "~60 min" },
-  { key: "economyFee", label: "Ekonomi", hint: "lågprio" },
-];
+export async function FeesWidget({ fees }: { fees: RecommendedFees | null }) {
+  const t = await getTranslations("feesWidget");
 
-export function FeesWidget({ fees }: { fees: RecommendedFees | null }) {
+  const TIERS: {
+    key: keyof Omit<RecommendedFees, "live">;
+    label: string;
+    hint: string;
+  }[] = [
+    { key: "fastestFee", label: t("fastest"), hint: "~10 min" },
+    { key: "halfHourFee", label: t("halfHour"), hint: "~30 min" },
+    { key: "hourFee", label: t("hour"), hint: "~60 min" },
+    { key: "economyFee", label: t("economy"), hint: t("economyHint") },
+  ];
+
   return (
     <Card className="flex flex-col p-6">
       <div className="flex items-center justify-between gap-3">
@@ -24,15 +27,15 @@ export function FeesWidget({ fees }: { fees: RecommendedFees | null }) {
           </span>
           <div>
             <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-              Nätverksavgifter
+              {t("title")}
             </h3>
-            <p className="text-xs text-muted-foreground">Live · mempool.space</p>
+            <p className="text-xs text-muted-foreground">{t("source")}</p>
           </div>
         </div>
         {fees?.live ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-400">
             <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden />
-            Live
+            {t("live")}
           </span>
         ) : null}
       </div>
@@ -59,14 +62,14 @@ export function FeesWidget({ fees }: { fees: RecommendedFees | null }) {
             ))}
           </dl>
           <p className="mt-4 text-xs text-muted-foreground">
-            Avgift per virtuell byte just nu. Lägre avgift = längre väntetid.
+            {t("note")}
           </p>
         </>
       ) : (
         <div className="mt-6 flex min-h-[160px] flex-col items-center justify-center gap-3 text-center">
           <Gauge size={28} weight="bold" aria-hidden className="text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            Avgiftsdata är inte tillgänglig just nu. Försök igen om en stund.
+            {t("unavailable")}
           </p>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Gauge } from "@phosphor-icons/react/dist/ssr";
 
 import { Card } from "@/components/ui/card";
@@ -16,7 +17,8 @@ function pointFor(value: number, radius: number) {
   };
 }
 
-export function FearGreedWidget({ data }: { data: FearGreed | null }) {
+export async function FearGreedWidget({ data }: { data: FearGreed | null }) {
+  const t = await getTranslations("fearGreed");
   return (
     <Card className="flex flex-col p-6">
       <div className="flex items-center justify-between gap-3">
@@ -26,15 +28,15 @@ export function FearGreedWidget({ data }: { data: FearGreed | null }) {
           </span>
           <div>
             <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-              Marknadshumör
+              {t("title")}
             </h3>
-            <p className="text-xs text-muted-foreground">Fear &amp; Greed-index</p>
+            <p className="text-xs text-muted-foreground">{t("source")}</p>
           </div>
         </div>
         {data?.live ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-400">
             <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden />
-            Live
+            {t("live")}
           </span>
         ) : null}
       </div>
@@ -42,7 +44,7 @@ export function FearGreedWidget({ data }: { data: FearGreed | null }) {
       {data ? (
         <>
           <div className="mt-4 flex flex-col items-center">
-            <svg viewBox="0 0 200 116" className="w-full max-w-[260px]" role="img" aria-label={`Index ${data.value} av 100: ${data.label}`}>
+            <svg viewBox="0 0 200 116" className="w-full max-w-[260px]" role="img" aria-label={t("ariaIndex", { value: data.value, label: data.label })}>
               <defs>
                 <linearGradient id="fngArc" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="var(--destructive)" />
@@ -83,15 +85,14 @@ export function FearGreedWidget({ data }: { data: FearGreed | null }) {
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Mäter marknadens känsloläge från 0 (extrem rädsla) till 100 (extrem
-            girighet). Det är ett stämningsläge, inte en köp- eller säljsignal.
+            {t("note")}
           </p>
         </>
       ) : (
         <div className="mt-6 flex min-h-[180px] flex-col items-center justify-center gap-3 text-center">
           <Gauge size={28} weight="bold" aria-hidden className="text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            Marknadshumör är inte tillgängligt just nu. Försök igen om en stund.
+            {t("unavailable")}
           </p>
         </div>
       )}

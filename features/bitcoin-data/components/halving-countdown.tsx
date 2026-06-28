@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Timer, ArrowClockwise, WarningCircle } from "@phosphor-icons/react";
 
 import { Card } from "@/components/ui/card";
@@ -33,6 +34,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 export function HalvingCountdown() {
+  const t = useTranslations("halvingCountdown");
   const [state, setState] = useState<State>({ status: "loading" });
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -66,15 +68,15 @@ export function HalvingCountdown() {
           </span>
           <div>
             <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-              Nästa halvering
+              {t("title")}
             </h3>
-            <p className="text-xs text-muted-foreground">Live · mempool.space</p>
+            <p className="text-xs text-muted-foreground">{t("source")}</p>
           </div>
         </div>
         {state.status === "ready" ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-400">
             <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden />
-            Live
+            {t("live")}
           </span>
         ) : null}
       </div>
@@ -82,7 +84,7 @@ export function HalvingCountdown() {
       <div className="mt-6 min-h-[180px]">
         {state.status === "loading" ? (
           <div className="space-y-3" aria-busy="true" aria-live="polite">
-            <span className="sr-only">Hämtar blockhöjd …</span>
+            <span className="sr-only">{t("loading")}</span>
             <div className="h-16 animate-pulse rounded-xl bg-muted" />
             <div className="grid grid-cols-3 gap-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -96,7 +98,7 @@ export function HalvingCountdown() {
           <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
             <WarningCircle size={28} weight="bold" aria-hidden className="text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              Kunde inte hämta blockdata just nu.
+              {t("error")}
             </p>
             <button
               type="button"
@@ -107,7 +109,7 @@ export function HalvingCountdown() {
               className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-bitcoin/50 hover:text-bitcoin"
             >
               <ArrowClockwise size={15} weight="bold" aria-hidden />
-              Försök igen
+              {t("retry")}
             </button>
           </div>
         ) : null}
@@ -116,7 +118,7 @@ export function HalvingCountdown() {
           <div>
             <div className="rounded-xl bg-bitcoin-muted p-4">
               <p className="text-xs font-medium text-bitcoin">
-                Block kvar till halvering #{state.info.halvingNumber}
+                {t("blocksLeft", { number: state.info.halvingNumber })}
               </p>
               <p className="mt-1 font-heading text-3xl font-semibold tracking-tight text-foreground tabular-nums">
                 {formatNumber(state.info.blocksRemaining)}
@@ -124,26 +126,31 @@ export function HalvingCountdown() {
             </div>
 
             <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Stat label="Blockhöjd nu" value={formatNumber(state.info.height)} />
+              <Stat label={t("blockHeightNow")} value={formatNumber(state.info.height)} />
               <Stat
-                label="Halveringsblock"
+                label={t("halvingBlock")}
                 value={formatNumber(state.info.nextHalvingBlock)}
               />
               <Stat
-                label="Måltid per block"
-                value={`≈ ${MINUTES_PER_BLOCK} min`}
+                label={t("targetTime")}
+                value={t("targetTimeValue", { minutes: MINUTES_PER_BLOCK })}
               />
               <Stat
-                label="Beräknat datum"
+                label={t("estimatedDate")}
                 value={formatDate(state.info.estimatedDate)}
               />
             </dl>
 
             <div className="mt-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Genom nuvarande epok</span>
+                <span>{t("throughEpoch")}</span>
                 <span className="tabular-nums">
-                  {state.info.epochProgress.toFixed(1).replace(".", ",")} %
+                  {t("epochPercent", {
+                    percent: formatNumber(state.info.epochProgress, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    }),
+                  })}
                 </span>
               </div>
               <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
@@ -156,24 +163,12 @@ export function HalvingCountdown() {
 
             <div className="mt-4 rounded-xl border border-border/60 bg-background/40 p-4">
               <p className="text-sm font-medium text-foreground">
-                Varför bara ungefär?
+                {t("whyApproxTitle")}
               </p>
               <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
-                <li>
-                  Bitcoin är byggt så att ett nytt block i snitt ska tas fram
-                  var {MINUTES_PER_BLOCK}:e minut, men enskilda block kan ta
-                  både kortare och längre tid.
-                </li>
-                <li>
-                  Svårighetsgraden justeras ungefär var {DIFFICULTY_ADJUSTMENT_DAYS}:e
-                  dag så medeltiden hålls nära målet, även när datorkraften i
-                  nätverket förändras.
-                </li>
-                <li>
-                  Hash rate (hur mycket beräkningskraft som tävlar) kan öka eller
-                  minska snabbt, därför är halveringsdatumet en uppskattning,
-                  inte ett exakt klockslag.
-                </li>
+                <li>{t("whyApprox1", { minutes: MINUTES_PER_BLOCK })}</li>
+                <li>{t("whyApprox2", { days: DIFFICULTY_ADJUSTMENT_DAYS })}</li>
+                <li>{t("whyApprox3")}</li>
               </ul>
             </div>
           </div>

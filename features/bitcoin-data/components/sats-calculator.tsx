@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowsDownUp } from "@phosphor-icons/react";
 
 import { btcSnapshot } from "@/features/bitcoin-data/data/metrics";
@@ -24,6 +25,7 @@ export function SatsCalculator({
   /** Whether the price came from a live source. */
   live?: boolean;
 } = {}) {
+  const t = useTranslations("satsCalc");
   const PRICE_SEK = priceSek;
   const sekId = useId();
   const satsId = useId();
@@ -54,10 +56,10 @@ export function SatsCalculator({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-            Satskalkylator
+            {t("title")}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Räkna om mellan kronor och satoshis.
+            {t("subtitle")}
           </p>
         </div>
         <span className="grid size-10 shrink-0 place-items-center rounded-full bg-bitcoin-muted text-bitcoin">
@@ -71,7 +73,7 @@ export function SatsCalculator({
             htmlFor={sekId}
             className="text-sm font-medium text-muted-foreground"
           >
-            Belopp i kronor
+            {t("amountInKronor")}
           </label>
           <div className="flex items-center rounded-xl border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring">
             <input
@@ -82,7 +84,7 @@ export function SatsCalculator({
               placeholder="0"
               className="h-12 w-full bg-transparent font-mono text-lg tabular-nums text-foreground outline-none placeholder:text-muted-foreground/60"
             />
-            <span className="ml-2 text-sm font-medium text-muted-foreground">kr</span>
+            <span className="ml-2 text-sm font-medium text-muted-foreground">{t("kr")}</span>
           </div>
         </div>
 
@@ -91,7 +93,7 @@ export function SatsCalculator({
             htmlFor={satsId}
             className="text-sm font-medium text-muted-foreground"
           >
-            Motsvarar
+            {t("equals")}
           </label>
           <div className="flex items-center rounded-xl border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring">
             <input
@@ -102,7 +104,7 @@ export function SatsCalculator({
               placeholder="0"
               className="h-12 w-full bg-transparent font-mono text-lg tabular-nums text-foreground outline-none placeholder:text-muted-foreground/60"
             />
-            <span className="ml-2 text-sm font-medium text-muted-foreground">sats</span>
+            <span className="ml-2 text-sm font-medium text-muted-foreground">{t("sats")}</span>
           </div>
           <p className="text-xs text-muted-foreground tabular-nums">
             ≈ {formatNumber(btc, { maximumFractionDigits: 8 })} BTC
@@ -118,15 +120,15 @@ export function SatsCalculator({
             onClick={() => handleSek(String(amount))}
             className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-bitcoin/50 hover:text-bitcoin"
           >
-            {formatNumber(amount)} kr
+            {t("quickKr", { amount: formatNumber(amount) })}
           </button>
         ))}
       </div>
 
       <p className="mt-auto pt-5 text-xs text-muted-foreground">
         {live
-          ? `Beräknat på aktuellt pris om ${formatCurrency(PRICE_SEK)} per bitcoin.`
-          : `Beräknat på ett exempelpris om ${formatCurrency(PRICE_SEK)} per bitcoin.`}
+          ? t("noteLive", { price: formatCurrency(PRICE_SEK) })
+          : t("noteExample", { price: formatCurrency(PRICE_SEK) })}
       </p>
     </Card>
   );

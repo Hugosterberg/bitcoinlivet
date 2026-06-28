@@ -10,6 +10,8 @@ import {
   YAxis,
 } from "recharts";
 
+import { useTranslations } from "next-intl";
+
 import { priceHistory, type PricePoint } from "@/features/bitcoin-data/data/metrics";
 import { formatCompact, formatCurrency } from "@/lib/format";
 import { axisTick, chartColors, ChartTooltipCard } from "./chart-theme";
@@ -22,6 +24,7 @@ export function BtcPriceChart({
   /** Yearly close points; defaults to the static example series. */
   data?: PricePoint[];
 }) {
+  const t = useTranslations("charts");
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart
@@ -57,7 +60,7 @@ export function BtcPriceChart({
                 title={label}
                 rows={[
                   {
-                    label: "Pris (årsslut)",
+                    label: t("priceYearEnd"),
                     value: formatCurrency(Number(payload[0].value), "SEK"),
                     color: chartColors.bitcoin,
                   },
