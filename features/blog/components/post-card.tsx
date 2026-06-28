@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowRight, Clock } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ export function PostCard({
   featured?: boolean;
   className?: string;
 }) {
+  const t = useTranslations("articles");
   return (
     <Link
       href={post.href}
@@ -34,7 +36,7 @@ export function PostCard({
           <Badge variant="bitcoin">{post.categoryLabel}</Badge>
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Clock size={13} weight="bold" aria-hidden />
-            {post.readingTime} min
+            {t("cardMinutes", { minutes: post.readingTime })}
           </span>
         </div>
 
@@ -64,7 +66,7 @@ export function PostCard({
             {formatDateShort(post.date)}
           </time>
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin">
-            Läs mer
+            {t("cardReadMore")}
             <ArrowRight
               size={16}
               weight="bold"

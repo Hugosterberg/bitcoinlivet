@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ function LevelBadge({ level }: { level: GlossaryLevel }) {
 }
 
 export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
+  const t = useTranslations("glossaryExplorer");
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<LevelFilter>(null);
   const deferredQuery = useDeferredValue(query);
@@ -67,7 +69,7 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
     <div>
       {/* Search */}
       <label className="relative block">
-        <span className="sr-only">Sök i ordlistan</span>
+        <span className="sr-only">{t("searchLabel")}</span>
         <MagnifyingGlass
           size={18}
           weight="bold"
@@ -78,14 +80,14 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Sök efter ett begrepp …"
+          placeholder={t("searchPlaceholder")}
           className="h-12 w-full rounded-full border border-input bg-background pl-11 pr-11 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring"
         />
         {query ? (
           <button
             type="button"
             onClick={() => setQuery("")}
-            aria-label="Rensa sökning"
+            aria-label={t("clearSearch")}
             className="absolute right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X size={15} weight="bold" aria-hidden />
@@ -96,7 +98,7 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
       {/* Level filter */}
       <div className="mt-5">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Visa nivå
+          {t("showLevel")}
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <button
@@ -110,7 +112,7 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
                 : "border-border text-muted-foreground hover:border-bitcoin/40 hover:text-foreground",
             )}
           >
-            Alla
+            {t("all")}
             <span className="text-xs tabular-nums opacity-70">{terms.length}</span>
           </button>
           {glossaryLevels.map((l) => {
@@ -140,14 +142,14 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
           {level === null
-            ? "Alla begrepp. Filtrera på nivå om du vill börja enkelt eller gräva djupare."
+            ? t("allTermsHint")
             : levelMeta(level).description + "."}
         </p>
       </div>
 
       {/* Letter index */}
       {groups.length > 0 ? (
-        <nav aria-label="Hoppa till bokstav" className="mt-8 flex flex-wrap gap-2">
+        <nav aria-label={t("jumpToLetter")} className="mt-8 flex flex-wrap gap-2">
           {groups.map(([letter]) => (
             <a
               key={letter}
@@ -167,7 +169,7 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
             <section
               key={letter}
               id={`bokstav-${letter}`}
-              aria-label={`Begrepp på ${letter}`}
+              aria-label={t("termsStartingWith", { letter })}
               className="scroll-mt-24"
             >
               <h2 className="font-heading text-2xl font-semibold tracking-tight text-bitcoin">
@@ -194,10 +196,10 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
       ) : (
         <div className="mt-10 rounded-2xl border border-dashed border-border bg-card/40 px-6 py-16 text-center">
           <p className="font-heading text-lg font-semibold text-foreground">
-            Inga begrepp matchar
+            {t("noMatches")}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Prova ett annat sökord eller välj en annan nivå.
+            {t("tryAnother")}
           </p>
         </div>
       )}

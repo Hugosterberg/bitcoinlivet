@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -8,14 +9,6 @@ import { categories, type CategorySlug, type Post } from "@/features/blog/data/p
 import { PostCard } from "@/features/blog/components/post-card";
 
 type FilterSlug = CategorySlug | null;
-
-const FILTERS: { slug: FilterSlug; label: string }[] = [
-  { slug: null, label: "Alla" },
-  ...(Object.entries(categories) as [
-    CategorySlug,
-    (typeof categories)[CategorySlug],
-  ][]).map(([slug, c]) => ({ slug: slug as FilterSlug, label: c.label })),
-];
 
 function matches(post: Post, query: string): boolean {
   const q = query.trim().toLowerCase();
@@ -36,10 +29,19 @@ export function BlogExplorer({
   featured: Post;
   initialCategory?: CategorySlug;
 }) {
+  const t = useTranslations("blogExplorer");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<FilterSlug>(initialCategory ?? null);
   const deferredQuery = useDeferredValue(query);
   const searching = query.trim().length > 0;
+
+  const FILTERS: { slug: FilterSlug; label: string }[] = [
+    { slug: null, label: t("all") },
+    ...(Object.entries(categories) as [
+      CategorySlug,
+      (typeof categories)[CategorySlug],
+    ][]).map(([slug, c]) => ({ slug: slug as FilterSlug, label: c.label })),
+  ];
 
   const results = useMemo(() => {
     return posts.filter(
@@ -57,7 +59,7 @@ export function BlogExplorer({
     <div>
       <div className="flex flex-col gap-4">
         <label className="relative block">
-          <span className="sr-only">Sök artiklar</span>
+          <span className="sr-only">{t("searchLabel")}</span>
           <MagnifyingGlass
             size={18}
             weight="bold"
@@ -68,14 +70,14 @@ export function BlogExplorer({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Sök bland artiklar …"
+            placeholder={t("searchPlaceholder")}
             className="h-12 w-full rounded-full border border-input bg-background pl-11 pr-11 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label="Rensa sökning"
+              aria-label={t("clearSearch")}
               className="absolute right-3 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <X size={15} weight="bold" aria-hidden />
@@ -83,7 +85,7 @@ export function BlogExplorer({
           ) : null}
         </label>
 
-        <nav aria-label="Filtrera artiklar efter kategori">
+        <nav aria-label={t("filterByCategory")}>
           <ul className="flex flex-wrap gap-2">
             {FILTERS.map((item) => {
               const isActive = (item.slug ?? null) === (category ?? null);
@@ -110,22 +112,22 @@ export function BlogExplorer({
       </div>
 
       {showFeatured ? (
-        <section className="mt-12" aria-label="Utvald artikel">
+        <section className="mt-12" aria-label={t("featuredLabel")}>
           <PostCard post={featured} featured />
         </section>
       ) : null}
 
-      <section className="mt-12" aria-label="Artiklar">
+      <section className="mt-12" aria-label={t("articlesLabel")}>
         <div className="mb-6 flex items-baseline justify-between gap-4">
           <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
             {searching
-              ? "Sökresultat"
+              ? t("searchResults")
               : category
                 ? categories[category].label
-                : "Fler artiklar"}
+                : t("moreArticles")}
           </h2>
           <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
-            {results.length} {results.length === 1 ? "artikel" : "artiklar"}
+            {t("count", { count: results.length })}
           </span>
         </div>
 
@@ -139,13 +141,11 @@ export function BlogExplorer({
           <div className="rounded-2xl border border-dashed border-border bg-card/40 px-6 py-16 text-center">
             <p className="font-heading text-lg font-semibold text-foreground">
               {searching
-                ? `Inga träffar för \u201d${query.trim()}\u201d`
-                : "Inga artiklar i den här kategorin ännu"}
+                ? t("noHitsSearch", { query: query.trim() })
+                : t("noHitsCategory")}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              {searching
-                ? "Prova ett annat sökord eller rensa filtret."
-                : "Jag fyller på löpande. Titta gärna i en annan kategori under tiden."}
+              {searching ? t("tryAnotherSearch") : t("tryAnotherCategory")}
             </p>
           </div>
         )}
