@@ -4,13 +4,11 @@ import {
   Lightning,
   Flame,
   Medal,
-  ArrowSquareOut,
 } from "@phosphor-icons/react/dist/ssr";
 
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Disclaimer } from "@/components/ui/disclaimer";
 import { ProgressDashboard } from "@/features/education/components/progress-dashboard";
 import { SignInPrompt } from "@/features/auth/components/sign-in-prompt";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -24,21 +22,29 @@ import {
   totalXp,
 } from "@/features/education/data/courses";
 import type { Locale } from "@/i18n/routing";
+import { getSiteConfig } from "@/lib/site";
 import { formatNumber } from "@/lib/format";
 
-export const metadata: Metadata = {
-  title: "Utbildning: Bitcoinskolan",
-  description:
-    "Lär dig Bitcoin steg för steg i en interaktiv kurs på svenska. Samla XP, höj din nivå och håll din streak vid liv. Helt gratis.",
-  alternates: { canonical: "/utbildning" },
-  openGraph: {
-    title: "Bitcoinskolan · bitcoinlivet",
-    description:
-      "Interaktiv Bitcoinutbildning på svenska med XP, nivåer och kunskapsfrågor.",
-    url: "/utbildning",
-    type: "website",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "education" });
+  const site = getSiteConfig(locale);
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: { canonical: "/utbildning" },
+    openGraph: {
+      title: `${t("ogTitle")} · ${site.name}`,
+      description: t("ogDesc"),
+      url: "/utbildning",
+      type: "website",
+    },
+  };
+}
 
 function buildModuleCards(locale: Locale): ModuleCardData[] {
   return getCourseModules(locale).map((module, i) => ({
@@ -110,7 +116,7 @@ export default async function UtbildningPage({
         </div>
 
         {/* How it works */}
-        <section className="mt-12" aria-label="Så funkar det">
+        <section className="mt-12" aria-label={t("howItWorksLabel")}>
           <div className="grid gap-4 sm:grid-cols-3">
             {howItWorks.map((item) => (
               <Card key={item.title} className="p-5">
@@ -127,7 +133,7 @@ export default async function UtbildningPage({
         </section>
 
         {/* Learning path */}
-        <section className="mt-14" aria-label="Kursmoduler">
+        <section className="mt-14" aria-label={t("modulesLabel")}>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
               {t("yourPath")}

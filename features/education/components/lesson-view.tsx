@@ -84,7 +84,7 @@ export function LessonView({
   return (
     <article className="mx-auto max-w-2xl">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground" aria-label="Brödsmulor">
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground" aria-label={t("breadcrumbs")}>
         <Link href="/utbildning" className="hover:text-foreground">{t("schoolBadge")}</Link>
         <span aria-hidden>/</span>
         <Link href={moduleHref} className="hover:text-foreground">
@@ -242,7 +242,7 @@ export function LessonView({
             href={nextHref}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            Nästa
+            {t("next")}
             <ArrowRight size={15} weight="bold" aria-hidden />
           </Link>
         ) : (
