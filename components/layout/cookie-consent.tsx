@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Cookie } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { useConsent, setConsent } from "@/components/layout/consent-store";
  */
 export function CookieConsent() {
   const { consent, hydrated } = useConsent();
+  const t = useTranslations("consent");
 
   // Only render once hydrated and while the choice is still undecided, so it
   // never flashes for returning visitors or causes hydration mismatches.
@@ -20,7 +22,7 @@ export function CookieConsent() {
   return (
     <div
       role="dialog"
-      aria-label="Cookie-samtycke"
+      aria-label={t("ariaLabel")}
       className="fixed inset-x-4 bottom-4 z-[60] mx-auto max-w-md duration-500 animate-in fade-in slide-in-from-bottom-4 sm:inset-x-auto sm:right-6 sm:bottom-6"
     >
       <div className="relative overflow-hidden rounded-2xl border border-border bg-graphite/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-md">
@@ -33,14 +35,11 @@ export function CookieConsent() {
             <span className="grid size-8 place-items-center rounded-lg bg-bitcoin-muted text-bitcoin">
               <Cookie size={18} weight="fill" aria-hidden />
             </span>
-            <h2 className="font-heading text-sm font-semibold tracking-tight text-foreground">
-              Cookies för analys
-            </h2>
+            <h2 className="font-heading text-sm font-semibold tracking-tight text-foreground">{t("title")}</h2>
           </div>
 
           <p className="mt-3 text-sm/6 text-muted-foreground">
-            Här används anonym statistik för att förstå hur sidan används och göra
-            den bättre. Du väljer själv, det påverkar inte innehållet.
+            {t("body")}
           </p>
 
           <div className="mt-4 flex gap-2">
@@ -48,17 +47,13 @@ export function CookieConsent() {
               type="button"
               onClick={() => setConsent("granted")}
               className="h-9 flex-1 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bitcoin/30"
-            >
-              Acceptera
-            </Button>
+            >{t("accept")}</Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setConsent("denied")}
               className="h-9 flex-1 rounded-full text-sm"
-            >
-              Avböj
-            </Button>
+            >{t("decline")}</Button>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Warning,
   EnvelopeSimple,
@@ -31,6 +32,8 @@ const submitClass =
   "rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bitcoin/30 active:translate-y-0";
 
 export function AuthForm() {
+  const t = useTranslations("auth");
+  const locale = useLocale();
   const [tab, setTab] = useState<Tab>("in");
   const [resetView, setResetView] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -58,11 +61,11 @@ export function AuthForm() {
 
     const email = String(event.currentTarget.email.value ?? "").trim().toLowerCase();
     if (!isSupabaseConfigured) {
-      setError("Inloggning är inte aktiverad ännu (se docs/SUPABASE.md).");
+      setError(t("errNotEnabled"));
       return;
     }
     if (!isValidEmail(email)) {
-      setError("Kontrollera e-postadressen.");
+      setError(t("errCheckEmail"));
       return;
     }
 
@@ -73,11 +76,11 @@ export function AuthForm() {
     });
     setPending(false);
     if (resetError) {
-      setError("Kunde inte skicka återställningslänk. Försök igen.");
+      setError(t("errResetFailed"));
       return;
     }
     // Always show success (don't reveal whether the address exists).
-    setInfo("Om adressen finns hos oss har vi skickat en återställningslänk.");
+    setInfo(t("resetSent"));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -94,11 +97,11 @@ export function AuthForm() {
     if (honeypot && honeypot.length > 0) return;
 
     if (!isSupabaseConfigured) {
-      setError("Inloggning är inte aktiverad ännu (se docs/SUPABASE.md).");
+      setError(t("errNotEnabled"));
       return;
     }
     if (!isValidEmail(email)) {
-      setError("Kontrollera e-postadressen.");
+      setError(t("errCheckEmail"));
       return;
     }
 
@@ -113,7 +116,7 @@ export function AuthForm() {
         password,
       });
       if (signInError) {
-        setError("Fel e-post eller lösenord.");
+        setError(t("errWrongCredentials"));
         setPending(false);
         return;
       }
@@ -124,7 +127,7 @@ export function AuthForm() {
 
     // Sign up
     if (password.length < 8) {
-      setError("Lösenordet måste vara minst 8 tecken.");
+      setError(t("errPwTooShort"));
       setPending(false);
       return;
     }
@@ -143,11 +146,12 @@ export function AuthForm() {
         data: {
           marketing_consent: consent,
           marketing_consent_at: consent ? new Date().toISOString() : null,
+          preferred_language: locale,
         },
       },
     });
     if (signUpError) {
-      setError("Kunde inte skapa konto. Försök igen.");
+      setError(t("errSignupFailed"));
       setPending(false);
       return;
     }
@@ -160,7 +164,7 @@ export function AuthForm() {
 
     if (!data.session) {
       // Email confirmation is on → no session yet.
-      setInfo("Konto skapat. Bekräfta din e-post för att logga in.");
+      setInfo(t("confirmEmail"));
       setPending(false);
       return;
     }
@@ -201,18 +205,15 @@ export function AuthForm() {
       <div className="relative">
         {resetView ? (
           <div className="text-center">
-            <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              Återställ lösenord
-            </h2>
+            <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">{t("resetTitle")}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Skriv in din e-postadress, så skickar vi en länk för att välja ett
-              nytt lösenord.
+              {t("resetLead")}
             </p>
 
             <form onSubmit={handleResetRequest} className="mt-6 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5 text-left">
                 <label htmlFor="reset-email" className="text-sm font-medium text-foreground">
-                  E-postadress
+                  {t("emailLabel")}
                 </label>
                 <div className="group relative">
                   <EnvelopeSimple size={18} aria-hidden className={iconClass} />
@@ -222,7 +223,7 @@ export function AuthForm() {
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="din@epost.se"
+                    placeholder={t("emailPlaceholder")}
                     className={cn(fieldBase, "pl-11 pr-4")}
                   />
                 </div>
@@ -236,7 +237,7 @@ export function AuthForm() {
                 className={submitClass}
                 disabled={pending}
               >
-                {pending ? "Skickar …" : "Skicka återställningslänk"}
+                {pending ? t("sending") : t("sendResetLink")}
               </Button>
             </form>
 
@@ -244,21 +245,19 @@ export function AuthForm() {
               type="button"
               onClick={() => showReset(false)}
               className="mt-5 cursor-pointer text-sm font-medium text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-bitcoin"
-            >
-              Tillbaka till inloggning
-            </button>
+            >{t("backToSignIn")}</button>
           </div>
         ) : (
           <>
             <div
               role="tablist"
-              aria-label="Logga in eller skapa konto"
+              aria-label={t("tablistLabel")}
               className="grid grid-cols-2 gap-1 rounded-full border border-border bg-background/60 p-1"
             >
               {(
                 [
-                  ["in", "Logga in"],
-                  ["up", "Skapa konto"],
+                  ["in", t("signIn")],
+                  ["up", t("signUp")],
                 ] as const
               ).map(([value, label]) => (
                 <button
@@ -282,15 +281,13 @@ export function AuthForm() {
             <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
               {/* Honeypot — hidden from people, catches bots. */}
               <div aria-hidden className="pointer-events-none absolute left-[-9999px] opacity-0">
-                <label>
-                  Lämna tomt
-                  <input type="text" name="company" tabIndex={-1} autoComplete="off" />
+                <label>{t("leaveEmpty")}<input type="text" name="company" tabIndex={-1} autoComplete="off" />
                 </label>
               </div>
 
               <div className="flex flex-col gap-1.5 text-left">
                 <label htmlFor="auth-email" className="text-sm font-medium text-foreground">
-                  E-postadress
+                  {t("emailLabel")}
                 </label>
                 <div className="group relative">
                   <EnvelopeSimple size={18} aria-hidden className={iconClass} />
@@ -300,16 +297,14 @@ export function AuthForm() {
                     type="email"
                     required
                     autoComplete="email"
-                    placeholder="din@epost.se"
+                    placeholder={t("emailPlaceholder")}
                     className={cn(fieldBase, "pl-11 pr-4")}
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="auth-password" className="text-sm font-medium text-foreground">
-                  Lösenord
-                </label>
+                <label htmlFor="auth-password" className="text-sm font-medium text-foreground">{t("passwordLabel")}</label>
                 <div className="group relative">
                   <LockKey size={18} aria-hidden className={iconClass} />
                   <input
@@ -319,13 +314,13 @@ export function AuthForm() {
                     required
                     minLength={tab === "up" ? 8 : undefined}
                     autoComplete={tab === "up" ? "new-password" : "current-password"}
-                    placeholder={tab === "up" ? "Minst 8 tecken" : "Ditt lösenord"}
+                    placeholder={tab === "up" ? t("pwPlaceholderSignup") : t("pwPlaceholderSignin")}
                     className={cn(fieldBase, "pl-11 pr-12")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPw((v) => !v)}
-                    aria-label={showPw ? "Dölj lösenord" : "Visa lösenord"}
+                    aria-label={showPw ? t("hidePassword") : t("showPassword")}
                     className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 cursor-pointer place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     {showPw ? (
@@ -345,8 +340,7 @@ export function AuthForm() {
                     className="mt-0.5 size-4 shrink-0 cursor-pointer rounded border-input bg-background text-bitcoin accent-bitcoin focus-visible:ring-2 focus-visible:ring-ring"
                   />
                   <span>
-                    Ja, håll mig uppdaterad om nya kurser, verktyg, funktioner och annat som händer på Bitcoinlivet. 
-                    Du kan när som helst välja att sluta få mejl.
+                    {t("marketingConsent")}
                   </span>
                 </label>
               ) : null}
@@ -360,16 +354,16 @@ export function AuthForm() {
                 disabled={pending}
               >
                 {pending ? (
-                  "Ett ögonblick …"
+                  t("oneMoment")
                 ) : tab === "in" ? (
                   <>
                     <SignIn size={18} weight="bold" aria-hidden />
-                    Logga in
+                    {t("signIn")}
                   </>
                 ) : (
                   <>
                     <UserCirclePlus size={18} weight="fill" aria-hidden />
-                    Skapa konto
+                    {t("signUp")}
                   </>
                 )}
               </Button>
@@ -381,9 +375,7 @@ export function AuthForm() {
                   type="button"
                   onClick={() => showReset(true)}
                   className="cursor-pointer text-sm font-medium text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-bitcoin"
-                >
-                  Glömt lösenord?
-                </button>
+                >{t("forgotPassword")}</button>
               </div>
             ) : null}
           </>
