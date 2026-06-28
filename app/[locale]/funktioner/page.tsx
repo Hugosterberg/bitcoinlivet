@@ -1,42 +1,58 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { getSiteConfig } from "@/lib/site";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 import { functionMenu } from "@/features/functions/data/functions";
 
-export const metadata: Metadata = {
-  title: "Funktioner: så fungerar Bitcoin",
-  description:
-    "Bitcoins viktigaste egenskaper, förklarade en i taget: begränsat utbud, halveringen, decentralisering, säkerhet, snabba betalningar, köpkraft och transparens.",
-  alternates: { canonical: "/funktioner" },
-  openGraph: {
-    title: "Funktioner · bitcoinlivet",
-    description:
-      "Bitcoins viktigaste egenskaper, förklarade en i taget och varför de spelar roll.",
-    url: "/funktioner",
-    type: "website",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "functions" });
+  const site = getSiteConfig(locale);
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: { canonical: "/funktioner" },
+    openGraph: {
+      title: `${t("ogTitle")} · ${site.name}`,
+      description: t("ogDesc"),
+      url: "/funktioner",
+      type: "website",
+    },
+  };
+}
 
-export default function FunctionsPage() {
+export default async function FunctionsPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("functions");
+
   return (
     <div className="py-14 sm:py-20">
       <Container>
         <header className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-            Funktioner
+            {t("eyebrow")}
           </p>
           <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Vad som gör Bitcoin till sunda pengar
+            {t("title")}
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            Bitcoins styrka ligger inte i en enskild egenskap, utan i hur de
-            hänger ihop. Här går vi igenom de viktigaste, en i taget, och varför
-            de spelar roll i relation till hur pengar fungerar i dag.
+            {t("lead")}
           </p>
         </header>
 
@@ -54,7 +70,7 @@ export default function FunctionsPage() {
                   {fn.description}
                 </p>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin">
-                  Läs mer
+                  {t("readMore")}
                   <ArrowRight
                     size={14}
                     weight="bold"
@@ -68,8 +84,7 @@ export default function FunctionsPage() {
         </div>
 
         <Disclaimer className="mt-12 max-w-2xl">
-          Innehållet är utbildning om hur Bitcoin fungerar, inte finansiell
-          rådgivning.
+          {t("listDisclaimer")}
         </Disclaimer>
       </Container>
     </div>

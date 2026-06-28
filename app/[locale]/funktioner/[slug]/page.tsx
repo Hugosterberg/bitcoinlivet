@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   ArrowLeft,
   ArrowRight,
@@ -9,9 +10,11 @@ import {
   Check,
 } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { getSiteConfig } from "@/lib/site";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 import {
   bitcoinFunctions,
@@ -28,17 +31,18 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: Locale; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const fn = getFunction(slug);
   if (!fn) return {};
+  const site = getSiteConfig(locale);
   return {
     title: fn.title,
     description: fn.metaDescription,
     alternates: { canonical: `/funktioner/${fn.slug}` },
     openGraph: {
-      title: `${fn.title} · bitcoinlivet`,
+      title: `${fn.title} · ${site.name}`,
       description: fn.metaDescription,
       url: `/funktioner/${fn.slug}`,
       type: "article",
@@ -49,9 +53,11 @@ export async function generateMetadata({
 export default async function FunctionPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: Locale; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("functions");
   const fn = getFunction(slug);
   if (!fn) notFound();
 
@@ -68,7 +74,7 @@ export default async function FunctionPage({
           className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={15} weight="bold" aria-hidden />
-          Alla funktioner
+          {t("allFunctions")}
         </Link>
 
         {/* Hero */}
@@ -78,7 +84,7 @@ export default async function FunctionPage({
               <FunctionIcon icon={fn.icon} size={28} weight="bold" aria-hidden />
             </span>
             <p className="text-sm font-semibold uppercase tracking-wide text-bitcoin">
-              Funktion
+              {t("eyebrowSingle")}
             </p>
           </div>
           <h1 className="mt-5 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
@@ -95,13 +101,13 @@ export default async function FunctionPage({
         </header>
 
         {/* Idag vs Bitcoin */}
-        <section aria-label="Idag jämfört med Bitcoin" className="mt-10">
+        <section aria-label={t("compareLabel")} className="mt-10">
           <Card className="grid gap-px overflow-hidden bg-border sm:grid-cols-2">
             <div className="bg-card p-6 sm:p-8">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <X size={18} weight="bold" aria-hidden />
                 <h2 className="text-sm font-semibold uppercase tracking-wide">
-                  Så fungerar det idag
+                  {t("todayTitle")}
                 </h2>
               </div>
               <ul className="mt-4 flex flex-col gap-3">
@@ -116,7 +122,7 @@ export default async function FunctionPage({
               <div className="flex items-center gap-2 text-bitcoin">
                 <Check size={18} weight="bold" aria-hidden />
                 <h2 className="text-sm font-semibold uppercase tracking-wide">
-                  Med Bitcoin
+                  {t("withBitcoinTitle")}
                 </h2>
               </div>
               <ul className="mt-4 flex flex-col gap-3">
@@ -147,10 +153,10 @@ export default async function FunctionPage({
         </div>
 
         {/* Takeaways */}
-        <section aria-label="I korthet" className="mt-12 max-w-3xl">
+        <section aria-label={t("takeawaysLabel")} className="mt-12 max-w-3xl">
           <Card className="p-6 sm:p-8">
             <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-              I korthet
+              {t("takeawaysTitle")}
             </h2>
             <ul className="mt-4 flex flex-col gap-3">
               {fn.takeaways.map((point) => (
@@ -170,9 +176,9 @@ export default async function FunctionPage({
 
         {/* Related links */}
         {fn.related.length > 0 ? (
-          <section aria-label="Läs vidare" className="mt-10 max-w-3xl">
+          <section aria-label={t("readFurtherLabel")} className="mt-10 max-w-3xl">
             <h2 className="font-heading text-base font-semibold tracking-tight text-foreground">
-              Läs vidare
+              {t("readFurtherTitle")}
             </h2>
             <div className="mt-4 flex flex-wrap gap-3">
               {fn.related.map((link) => (
@@ -216,9 +222,7 @@ export default async function FunctionPage({
         </nav>
 
         <Disclaimer className="mt-10 max-w-2xl">
-          Det här är utbildning om hur Bitcoin fungerar, inte finansiell
-          rådgivning. Gör alltid din egen research innan du fattar ekonomiska
-          beslut.
+          {t("disclaimer")}
         </Disclaimer>
       </Container>
     </div>
