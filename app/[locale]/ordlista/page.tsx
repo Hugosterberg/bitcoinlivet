@@ -6,9 +6,9 @@ import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { GlossaryExplorer } from "@/features/glossary/components/glossary-explorer";
-import { sortedGlossary } from "@/features/glossary/data/glossary";
+import { getSortedGlossary } from "@/features/glossary/data/glossary";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -39,13 +39,13 @@ export default async function GlossaryPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("glossary");
-  const site = getSiteConfig(locale);
+  const sortedGlossary = getSortedGlossary(locale);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "DefinedTermSet",
     name: t("schemaName"),
-    url: `${site.url}/ordlista`,
+    url: localizedUrl(locale, "/ordlista"),
     hasDefinedTerm: sortedGlossary.map((term) => ({
       "@type": "DefinedTerm",
       name: term.term,

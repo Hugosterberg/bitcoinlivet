@@ -491,7 +491,7 @@ const enFunctions: BitcoinFunction[] = [
       "You can verify the supply yourself by running your own node.",
     ],
     related: [
-      { href: "/halvering", label: "Read about the halving" },
+      { href: "/halving", label: "Read about the halving" },
       { href: "/data", label: "See the supply live" },
     ],
   },
@@ -553,8 +553,8 @@ const enFunctions: BitcoinFunction[] = [
       "Gives censorship resistance, but also personal responsibility for your keys.",
     ],
     related: [
-      { href: "/ordlista#nod", label: "Glossary: Node" },
-      { href: "/ordlista#censurmotstand", label: "Glossary: Censorship resistance" },
+      { href: "/glossary#node", label: "Glossary: Node" },
+      { href: "/glossary#censorship-resistance", label: "Glossary: Censorship resistance" },
     ],
   },
   {
@@ -615,7 +615,7 @@ const enFunctions: BitcoinFunction[] = [
       "Your keys are your responsibility — protect the recovery phrase.",
     ],
     related: [
-      { href: "/ordlista#proof-of-work", label: "Glossary: Proof of work" },
+      { href: "/glossary#proof-of-work", label: "Glossary: Proof of work" },
     ],
   },
   {
@@ -676,9 +676,9 @@ const enFunctions: BitcoinFunction[] = [
       "Borderless payments lower thresholds for the whole world.",
     ],
     related: [
-      { href: "/ordlista#lightning", label: "Glossary: Lightning Network" },
-      { href: "/ordlista#mempool", label: "Glossary: Mempool" },
-      { href: "/nyheter", label: "See today's fees" },
+      { href: "/glossary#lightning", label: "Glossary: Lightning Network" },
+      { href: "/glossary#mempool", label: "Glossary: Mempool" },
+      { href: "/news", label: "See today's fees" },
     ],
   },
   {
@@ -739,7 +739,7 @@ const enFunctions: BitcoinFunction[] = [
       "Volatile in the short run, hence a long-term perspective.",
     ],
     related: [
-      { href: "/artiklar/kopkraft-forklarat", label: "Read: Purchasing power explained" },
+      { href: "/articles/purchasing-power-explained", label: "Read: Purchasing power explained" },
       { href: "/data", label: "See inflation and purchasing power" },
     ],
   },
@@ -801,8 +801,8 @@ const enFunctions: BitcoinFunction[] = [
       "Addresses are pseudonymous, transparent at the system level but not named.",
     ],
     related: [
-      { href: "/ordlista#full-nod", label: "Glossary: Full node" },
-      { href: "/ordlista#blockkedja", label: "Glossary: Blockchain" },
+      { href: "/glossary#full-node", label: "Glossary: Full node" },
+      { href: "/glossary#blockchain", label: "Glossary: Blockchain" },
     ],
   },
 ];

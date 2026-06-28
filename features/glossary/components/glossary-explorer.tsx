@@ -1,13 +1,14 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
+import type { Locale } from "@/i18n/routing";
 import { Card } from "@/components/ui/card";
 import {
-  glossaryLevels,
+  getGlossaryLevels,
   levelMeta,
   type GlossaryLevel,
   type GlossaryTerm,
@@ -24,8 +25,8 @@ function matches(term: GlossaryTerm, query: string): boolean {
   );
 }
 
-function LevelBadge({ level }: { level: GlossaryLevel }) {
-  const meta = levelMeta(level);
+function LevelBadge({ level, locale }: { level: GlossaryLevel; locale: Locale }) {
+  const meta = levelMeta(locale, level);
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
       <span className={cn("size-1.5 rounded-full", meta.dotClass)} aria-hidden />
@@ -36,6 +37,8 @@ function LevelBadge({ level }: { level: GlossaryLevel }) {
 
 export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
   const t = useTranslations("glossaryExplorer");
+  const locale = useLocale() as Locale;
+  const glossaryLevels = getGlossaryLevels(locale);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<LevelFilter>(null);
   const deferredQuery = useDeferredValue(query);
@@ -143,7 +146,7 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
         <p className="mt-3 text-sm text-muted-foreground">
           {level === null
             ? t("allTermsHint")
-            : levelMeta(level).description + "."}
+            : levelMeta(locale, level).description + "."}
         </p>
       </div>
 
@@ -182,7 +185,7 @@ export function GlossaryExplorer({ terms }: { terms: GlossaryTerm[] }) {
                       <dt className="font-heading text-base font-semibold tracking-tight text-foreground">
                         {t.term}
                       </dt>
-                      <LevelBadge level={t.level} />
+                      <LevelBadge level={t.level} locale={locale} />
                     </div>
                     <dd className="mt-2 text-sm/6 text-muted-foreground">
                       {t.definition}

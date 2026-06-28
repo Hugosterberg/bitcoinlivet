@@ -1,7 +1,15 @@
 import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 
-import { glossary } from "@/features/glossary/data/glossary";
+import { getGlossary } from "@/features/glossary/data/glossary";
+import { routing } from "@/i18n/routing";
+
+/**
+ * Auto-linking currently uses the Swedish glossary and its inflection rules.
+ * The /ordlista path it links to is redirected to /glossary on the en domain;
+ * locale-aware linking lands with the bilingual MDX content work.
+ */
+const glossary = getGlossary(routing.defaultLocale);
 
 /**
  * Auto-links glossary terms found in long-form body text (blog articles and
