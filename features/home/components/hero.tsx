@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { ArrowRight, Lightning } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
@@ -9,22 +10,23 @@ import { formatCurrency, formatNumber, formatShare, wrappable } from "@/lib/form
 
 export async function Hero() {
   const market = await getBitcoinMarket();
+  const t = await getTranslations("home");
 
   const stats = [
     {
-      label: "Maxutbud",
+      label: t("heroMaxSupply"),
       value: formatNumber(market.maxSupply),
-      sub: "bitcoin, för alltid",
+      sub: t("heroMaxSupplySub"),
     },
     {
-      label: "Utgivet hittills",
+      label: t("heroIssued"),
       value: formatShare(market.issuedPercent),
       sub: `${formatNumber(Math.round(market.circulatingSupply))} BTC`,
     },
     {
-      label: market.live ? "Bitcoinpris" : "Exempelpris",
+      label: market.live ? t("heroPrice") : t("heroExamplePrice"),
       value: formatCurrency(market.priceSek),
-      sub: market.live ? "per bitcoin · live" : "per bitcoin",
+      sub: market.live ? t("heroPerBitcoinLive") : t("heroPerBitcoin"),
     },
   ];
 
@@ -39,24 +41,22 @@ export async function Hero() {
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <Badge variant="bitcoin" className="px-3 py-1">
             <Lightning size={14} weight="fill" aria-hidden />
-            Svensk Bitcoinutbildning
+            {t("heroBadge")}
           </Badge>
 
           <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Förstå Bitcoin.{" "}
-            <span className="text-bitcoin">Tänk långsiktigt.</span>
+            {t("heroTitleLead")}{" "}
+            <span className="text-bitcoin">{t("heroTitleAccent")}</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-pretty text-lg/8 text-muted-foreground">
-            bitcoinlivet är en lugn, datadriven guide till Bitcoin, sparande,
-            inflation och köpkraft. Inga snabba pengar och ingen hype, bara
-            tydliga förklaringar för dig som vill förstå sundare pengar.
+            {t("heroLead")}
           </p>
 
           <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
             <Button asChild size="xl" className="rounded-full">
               <Link href="/data">
-                Utforska Bitcoindata
+                {t("heroExploreData")}
                 <ArrowRight weight="bold" aria-hidden />
               </Link>
             </Button>
@@ -66,7 +66,7 @@ export async function Hero() {
               variant="outline"
               className="rounded-full"
             >
-              <Link href="/artiklar">Läs guiderna</Link>
+              <Link href="/artiklar">{t("heroReadGuides")}</Link>
             </Button>
           </div>
         </div>

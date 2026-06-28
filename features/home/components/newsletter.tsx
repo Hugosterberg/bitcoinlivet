@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { EnvelopeSimple, CheckCircle, Warning } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,13 @@ export function Newsletter() {
     subscribeToNewsletter,
     initialSubscribeState,
   );
+  const t = useTranslations("newsletter");
 
   const subscribed = state.status === "ok";
+  // Resolve the action's status into a localized message (the server action
+  // returns a status; copy lives here so it follows the active locale).
+  const statusMessage =
+    state.status === "idle" ? "" : t(state.status);
 
   useEffect(() => {
     if (state.status === "ok") {
@@ -39,13 +45,9 @@ export function Newsletter() {
             <span className="grid size-12 place-items-center rounded-2xl bg-bitcoin-muted text-bitcoin">
               <EnvelopeSimple size={24} weight="bold" aria-hidden />
             </span>
-            <h2 className="mt-6 text-balance font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Häng med när sidan växer
-            </h2>
+            <h2 className="mt-6 text-balance font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{t("title")}</h2>
             <p className="mt-4 max-w-xl text-pretty text-base/7 text-muted-foreground">
-              Skriv upp dig på listan, så hör jag av mig när jag lägger till nya
-              funktioner eller annat viktigt och hjälpsamt här. Det blir sällan,
-              inget spam och ingen hype, och du kan avregistrera dig när du vill.
+              {t("lead")}
             </p>
 
             {subscribed ? (
@@ -54,7 +56,7 @@ export function Newsletter() {
                 className="mt-8 inline-flex items-center gap-2 rounded-full border border-bitcoin/30 bg-bitcoin-muted px-4 py-2.5 text-sm font-medium text-bitcoin"
               >
                 <CheckCircle size={18} weight="fill" aria-hidden />
-                {state.message}
+                {statusMessage}
               </p>
             ) : (
               <form
@@ -64,13 +66,13 @@ export function Newsletter() {
                 {/* Honeypot — hidden from people, catches bots. */}
                 <div aria-hidden className="pointer-events-none absolute left-[-9999px] opacity-0">
                   <label>
-                    Lämna tomt
+                    {t("leaveEmpty")}
                     <input type="text" name="company" tabIndex={-1} autoComplete="off" />
                   </label>
                 </div>
 
                 <label htmlFor="newsletter-email" className="sr-only">
-                  E-postadress
+                  {t("emailLabel")}
                 </label>
                 <div className="group relative w-full">
                   <EnvelopeSimple
@@ -83,7 +85,7 @@ export function Newsletter() {
                     name="email"
                     type="email"
                     required
-                    placeholder="din@epost.se"
+                    placeholder={t("emailPlaceholder")}
                     aria-invalid={errored || undefined}
                     className="h-12 w-full rounded-full border border-input bg-background pl-11 pr-5 text-sm text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground/70 hover:border-bitcoin/40 focus-visible:border-bitcoin/70 focus-visible:ring-2 focus-visible:ring-bitcoin/25"
                   />
@@ -94,7 +96,7 @@ export function Newsletter() {
                   className="rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-bitcoin/30 active:translate-y-0"
                   disabled={pending}
                 >
-                  {pending ? "Skriver upp …" : "Skriv upp mig"}
+                  {pending ? t("submitting") : t("submit")}
                 </Button>
               </form>
             )}
@@ -105,11 +107,11 @@ export function Newsletter() {
                 className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-400"
               >
                 <Warning size={16} weight="fill" aria-hidden />
-                {state.message}
+                {statusMessage}
               </p>
             ) : (
               <p className="mt-4 text-xs text-muted-foreground">
-                Din e-postadress sparas endast för utskick om nytt som händer på bitcoinlivet som du kan tänkas vilja veta om.
+                {t("privacyNote")}
               </p>
             )}
           </div>

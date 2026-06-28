@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import {
   GraduationCap,
   Trophy,
@@ -10,13 +11,15 @@ import { Section } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { moduleCount, totalLessons, totalXp } from "@/features/education/data/courses";
 
-const HIGHLIGHTS = [
-  { icon: Trophy, label: "Samla XP & nivåer" },
-  { icon: Flame, label: "Bygg din streak" },
-  { icon: Sparkle, label: "Lås upp märken" },
-];
+export async function LearnCta() {
+  const t = await getTranslations("home");
 
-export function LearnCta() {
+  const HIGHLIGHTS = [
+    { icon: Trophy, label: t("learnCollectXp") },
+    { icon: Flame, label: t("learnBuildStreak") },
+    { icon: Sparkle, label: t("learnUnlockBadges") },
+  ];
+
   return (
     <Section>
       <div className="relative overflow-hidden rounded-3xl border border-bitcoin/25 bg-graphite px-6 py-12 sm:px-12 sm:py-16">
@@ -28,15 +31,13 @@ export function LearnCta() {
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-bitcoin-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-bitcoin">
               <GraduationCap size={16} weight="fill" aria-hidden />
-              Bitcoinskolan
+              {t("learnBadge")}
             </span>
             <h2 className="mt-5 text-balance font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Lär dig Bitcoin, steg för steg, helt gratis
+              {t("learnTitle")}
             </h2>
             <p className="mt-4 max-w-xl text-pretty text-base/7 text-muted-foreground">
-              En interaktiv kurs på svenska som tar dig från nybörjare till
-              trygg. Korta lektioner, quiz och en lärväg som gör det enkelt att
-              fortsätta, i din egen takt.
+              {t("learnLead")}
             </p>
 
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-3">
@@ -53,19 +54,19 @@ export function LearnCta() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button asChild size="xl" className="rounded-full">
-                <Link href="/utbildning">Börja lära dig</Link>
+                <Link href="/utbildning">{t("learnStart")}</Link>
               </Button>
               <Button asChild size="xl" variant="outline" className="rounded-full">
-                <Link href="/ordlista">Slå upp ett begrepp</Link>
+                <Link href="/ordlista">{t("learnLookUpTerm")}</Link>
               </Button>
             </div>
           </div>
 
           <dl className="grid grid-cols-3 gap-2 sm:gap-4">
             {[
-              { value: moduleCount, label: "Moduler" },
-              { value: totalLessons, label: "Lektioner" },
-              { value: totalXp, label: "XP att samla" },
+              { value: moduleCount, label: t("learnModules") },
+              { value: totalLessons, label: t("learnLessons") },
+              { value: totalXp, label: t("learnXp") },
             ].map((stat) => (
               <div
                 key={stat.label}

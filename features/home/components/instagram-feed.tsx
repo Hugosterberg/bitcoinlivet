@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import {
   InstagramLogo,
   ArrowUpRight,
@@ -18,12 +19,12 @@ import {
   type InstagramLivePost,
 } from "@/features/home/data/instagram";
 
-function FollowButton() {
+function FollowButton({ label }: { label: string }) {
   return (
     <Button asChild size="lg" variant="outline" className="h-10 rounded-full px-5 text-sm">
       <a href={instagram.profileUrl} target="_blank" rel="noopener noreferrer">
         <InstagramLogo weight="fill" aria-hidden />
-        Följ {instagram.handle}
+        {label}
       </a>
     </Button>
   );
@@ -112,6 +113,7 @@ function LivePostCard({ post }: { post: InstagramLivePost }) {
 
 export async function InstagramFeed() {
   const { profile, posts: livePosts } = await getInstagramFeed(3);
+  const t = await getTranslations("home");
   const hasLive = livePosts.length > 0;
   const hasManual = instagram.posts.length > 0;
 
@@ -119,18 +121,18 @@ export async function InstagramFeed() {
     <Section className="border-t border-border">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <SectionHeading
-          eyebrow="Instagram"
-          title={`Följ med på ${instagram.handle}`}
-          description="Korta, begripliga Bitcoin-tankar i ditt flöde. Här är ett urval, följ för mer."
+          eyebrow={t("instagramEyebrow")}
+          title={t("instagramTitle", { handle: instagram.handle })}
+          description={t("instagramDescription")}
         />
         <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-          <FollowButton />
+          <FollowButton label={t("instagramFollow", { handle: instagram.handle })} />
           {profile?.followersCount ? (
             <p className="text-xs text-muted-foreground">
               <span className="font-semibold text-foreground tabular-nums">
                 {formatNumber(profile.followersCount)}
               </span>{" "}
-              följare på Instagram
+              {t("instagramFollowers")}
             </p>
           ) : null}
         </div>
@@ -173,7 +175,7 @@ export async function InstagramFeed() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin transition-colors hover:text-bitcoin/80"
         >
-          Se hela kontot på Instagram
+          {t("instagramSeeMore")}
           <ArrowUpRight size={16} weight="bold" aria-hidden />
         </Link>
       </div>

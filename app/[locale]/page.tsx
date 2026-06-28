@@ -1,3 +1,6 @@
+import { setRequestLocale } from "next-intl/server";
+
+import type { Locale } from "@/i18n/routing";
 import { Hero } from "@/features/home/components/hero";
 import { TrustIntro } from "@/features/home/components/trust-intro";
 import { FeaturedMetrics } from "@/features/home/components/featured-metrics";
@@ -7,7 +10,14 @@ import { BlogPreview } from "@/features/home/components/blog-preview";
 import { InstagramFeed } from "@/features/home/components/instagram-feed";
 import { Newsletter } from "@/features/home/components/newsletter";
 
-export default function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   return (
     <>
       <Hero />

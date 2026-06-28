@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 
 import { Section, SectionHeading } from "@/components/ui/section";
 import { Card } from "@/components/ui/card";
 import { categories, type CategorySlug } from "@/features/blog/data/posts";
 
-export function EducationPreview() {
+export async function EducationPreview() {
+  const t = await getTranslations("home");
   const entries = Object.entries(categories) as [
     CategorySlug,
     (typeof categories)[CategorySlug],
@@ -14,9 +16,9 @@ export function EducationPreview() {
   return (
     <Section>
       <SectionHeading
-        eyebrow="Lär dig stegvis"
-        title="Vad vill du förstå idag?"
-        description="Utforska ämnesområdena. Varje spår är skrivet för att bygga på det förra, börja där du är."
+        eyebrow={t("eduPreviewEyebrow")}
+        title={t("eduPreviewTitle")}
+        description={t("eduPreviewDescription")}
       />
       <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {entries.map(([slug, category]) => (

@@ -4,44 +4,27 @@ import {
   ShieldCheck,
   Hourglass,
 } from "@phosphor-icons/react/dist/ssr";
+import { getTranslations } from "next-intl/server";
 
 import { Section, SectionHeading } from "@/components/ui/section";
 import { Card } from "@/components/ui/card";
 
-const values = [
-  {
-    icon: BookOpen,
-    title: "Utbildande",
-    description:
-      "Här förklarar jag Bitcoin enkelt utan att förenkla för mycket. Du bygger en verklig förståelse, steg för steg.",
-  },
-  {
-    icon: ChartLineUp,
-    title: "Datadriven",
-    description:
-      "Tydliga grafer och siffror istället för känslor och rubriker. Se utvecklingen i ett längre perspektiv.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Anti-hype",
-    description:
-      "Inga prisprognoser, inga heta tips. Jag fokuserar på principer som håller över tid.",
-  },
-  {
-    icon: Hourglass,
-    title: "Långsiktigt",
-    description:
-      "Jag tänker i år och decennier, inte i veckor. Sparande handlar om tålamod och sunda vanor.",
-  },
-];
+export async function TrustIntro() {
+  const t = await getTranslations("home");
 
-export function TrustIntro() {
+  const values = [
+    { icon: BookOpen, title: t("trustEducational"), description: t("trustEducationalText") },
+    { icon: ChartLineUp, title: t("trustDataDriven"), description: t("trustDataDrivenText") },
+    { icon: ShieldCheck, title: t("trustAntiHype"), description: t("trustAntiHypeText") },
+    { icon: Hourglass, title: t("trustLongTerm"), description: t("trustLongTermText") },
+  ];
+
   return (
     <Section>
       <SectionHeading
-        eyebrow="Varför bitcoinlivet"
-        title="En lugn ingång till en högljudd värld"
-        description="Bitcoin omges av brus, spekulation och starka åsikter. Här gör jag tvärtom: saklig och begriplig kunskap som hjälper dig att tänka själv."
+        eyebrow={t("trustEyebrow")}
+        title={t("trustTitle")}
+        description={t("trustDescription")}
       />
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {values.map((value) => (
