@@ -1,16 +1,20 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
+import { getPathname } from "@/i18n/navigation";
 import { Section, SectionHeading } from "@/components/ui/section";
 import { Card } from "@/components/ui/card";
-import { categories, type CategorySlug } from "@/features/blog/data/posts";
+import { getCategories, type CategorySlug } from "@/features/blog/data/posts";
 
 export async function EducationPreview() {
   const t = await getTranslations("home");
+  const locale = (await getLocale()) as Locale;
+  const categories = getCategories(locale);
   const entries = Object.entries(categories) as [
     CategorySlug,
-    (typeof categories)[CategorySlug],
+    { label: string; description: string },
   ][];
 
   return (
@@ -24,7 +28,7 @@ export async function EducationPreview() {
         {entries.map(([slug, category]) => (
           <Link
             key={slug}
-            href={`/artiklar?kategori=${slug}`}
+            href={getPathname({ locale, href: { pathname: "/artiklar", query: { kategori: slug } } })}
             className="group rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Card className="flex h-full items-start justify-between gap-4 p-6 transition-colors group-hover:border-bitcoin/40">

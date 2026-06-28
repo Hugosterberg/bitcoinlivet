@@ -9,15 +9,20 @@ import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates, localizedUrl } from "@/lib/seo";
+import { buildSlugAlternates, localizedUrl } from "@/lib/seo";
+import { getPathname } from "@/i18n/navigation";
 import { PostCard } from "@/features/blog/components/post-card";
 import { formatDate } from "@/lib/format";
-import { getAllPosts, getPost, getPostSlugs } from "@/features/blog/data/posts";
+import { getAllPosts, getPost, getPostSlugs, getPostSlugsById } from "@/features/blog/data/posts";
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getPostSlugs().map((slug) => ({ slug }));
+export function generateStaticParams({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  return getPostSlugs(params.locale as Locale).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -26,20 +31,19 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const post = getPost(slug);
+  const post = getPost(locale, slug);
   if (!post) return {};
 
   const { meta } = post;
-  const href = { pathname: "/artiklar/[slug]" as const, params: { slug } };
   return {
     title: meta.title,
     description: meta.description,
-    alternates: buildAlternates(locale, href),
+    alternates: buildSlugAlternates(locale, "/artiklar/[slug]", getPostSlugsById(meta.id)),
     openGraph: {
       type: "article",
       title: meta.title,
       description: meta.description,
-      url: localizedUrl(locale, href),
+      url: localizedUrl(locale, { pathname: "/artiklar/[slug]", params: { slug: meta.slug } }),
       publishedTime: meta.date,
       authors: meta.author ? [meta.author] : undefined,
       section: meta.categoryLabel,
@@ -62,14 +66,20 @@ export default async function BlogPostPage({
   const t = await getTranslations("articles");
   const tFooter = await getTranslations("footer");
   const site = getSiteConfig(locale);
-  const post = getPost(slug);
+  const post = getPost(locale, slug);
   if (!post) notFound();
 
   const { meta, Content } = post;
-  const related = getAllPosts()
+  const backHref = getPathname({ locale, href: "/artiklar" });
+  const categoryHref = getPathname({
+    locale,
+    href: { pathname: "/artiklar", query: { kategori: meta.category } },
+  });
+  const allPosts = getAllPosts(locale);
+  const related = allPosts
     .filter((p) => p.slug !== meta.slug && p.category === meta.category)
     .slice(0, 3);
-  const fallback = getAllPosts()
+  const fallback = allPosts
     .filter((p) => p.slug !== meta.slug)
     .slice(0, 3);
   const relatedPosts = (related.length > 0 ? related : fallback).slice(0, 3);
@@ -78,7 +88,7 @@ export default async function BlogPostPage({
     <article className="py-14 sm:py-20">
       <Container className="max-w-3xl">
         <Link
-          href="/artiklar"
+          href={backHref}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={16} weight="bold" aria-hidden />
@@ -87,7 +97,7 @@ export default async function BlogPostPage({
 
         <header className="mt-8 border-b border-border pb-8">
           <div className="flex flex-wrap items-center gap-3">
-            <Link href={`/artiklar?kategori=${meta.category}`}>
+            <Link href={categoryHref}>
               <Badge variant="bitcoin">{meta.categoryLabel}</Badge>
             </Link>
             <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">

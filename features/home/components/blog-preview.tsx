@@ -1,14 +1,17 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
+import { getPathname } from "@/i18n/navigation";
 import { Section, SectionHeading } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { PostCard } from "@/features/blog/components/post-card";
 import { getAllPosts } from "@/features/blog/data/posts";
 
 export async function BlogPreview() {
-  const posts = getAllPosts().slice(0, 3);
+  const locale = (await getLocale()) as Locale;
+  const posts = getAllPosts(locale).slice(0, 3);
   const t = await getTranslations("home");
 
   return (
@@ -20,7 +23,7 @@ export async function BlogPreview() {
           description={t("blogDescription")}
         />
         <Button asChild variant="outline" className="h-10 shrink-0 rounded-full px-5 text-sm">
-          <Link href="/artiklar">
+          <Link href={getPathname({ locale, href: "/artiklar" })}>
             {t("blogAll")}
             <ArrowRight weight="bold" aria-hidden />
           </Link>

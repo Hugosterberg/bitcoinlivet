@@ -1,11 +1,12 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
-import { categories, type CategorySlug, type Post } from "@/features/blog/data/posts";
+import type { Locale } from "@/i18n/routing";
+import { getCategories, type CategorySlug, type Post } from "@/features/blog/data/posts";
 import { PostCard } from "@/features/blog/components/post-card";
 
 type FilterSlug = CategorySlug | null;
@@ -30,6 +31,8 @@ export function BlogExplorer({
   initialCategory?: CategorySlug;
 }) {
   const t = useTranslations("blogExplorer");
+  const locale = useLocale() as Locale;
+  const categories = getCategories(locale);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<FilterSlug>(initialCategory ?? null);
   const deferredQuery = useDeferredValue(query);
@@ -37,10 +40,9 @@ export function BlogExplorer({
 
   const FILTERS: { slug: FilterSlug; label: string }[] = [
     { slug: null, label: t("all") },
-    ...(Object.entries(categories) as [
-      CategorySlug,
-      (typeof categories)[CategorySlug],
-    ][]).map(([slug, c]) => ({ slug: slug as FilterSlug, label: c.label })),
+    ...(Object.entries(categories) as [CategorySlug, { label: string; description: string }][]).map(
+      ([slug, c]) => ({ slug: slug as FilterSlug, label: c.label }),
+    ),
   ];
 
   const results = useMemo(() => {

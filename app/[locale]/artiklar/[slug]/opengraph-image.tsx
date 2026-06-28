@@ -1,26 +1,25 @@
 import { ImageResponse } from "next/og";
 
 import { BrandMarkTile } from "@/lib/brand-icon";
-import { siteConfig } from "@/lib/site";
-import { getPost, getPostSlugs } from "@/features/blog/data/posts";
+import { getSiteConfig } from "@/lib/site";
+import type { Locale } from "@/i18n/routing";
+import { getPost } from "@/features/blog/data/posts";
 
-export const alt = "bitcoinlivet, artikel";
+export const alt = "Article";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-export function generateStaticParams() {
-  return getPostSlugs().map((slug) => ({ slug }));
-}
 
 export default async function BlogOpengraphImage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: Locale; slug: string }>;
 }) {
-  const { slug } = await params;
-  const post = getPost(slug);
-  const title = post?.meta.title ?? siteConfig.name;
-  const category = post?.meta.categoryLabel ?? "Artiklar";
+  const { locale, slug } = await params;
+  const site = getSiteConfig(locale);
+  const post = getPost(locale, slug);
+  const title = post?.meta.title ?? site.name;
+  const category = post?.meta.categoryLabel ?? (locale === "sv" ? "Artiklar" : "Articles");
+  const domain = site.url.replace(/^https?:\/\//, "");
 
   return new ImageResponse(
     (
@@ -40,7 +39,7 @@ export default async function BlogOpengraphImage({
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <BrandMarkTile size={56} />
-          <div style={{ fontSize: 30, fontWeight: 600 }}>{siteConfig.name}</div>
+          <div style={{ fontSize: 30, fontWeight: 600 }}>{site.name}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -72,7 +71,7 @@ export default async function BlogOpengraphImage({
           </div>
         </div>
 
-        <div style={{ fontSize: 26, color: "#a1a1aa" }}>bitcoinlivet.se</div>
+        <div style={{ fontSize: 26, color: "#a1a1aa" }}>{domain}</div>
       </div>
     ),
     size,

@@ -1,7 +1,6 @@
-import { siteConfig } from "@/lib/site";
+import { getSiteConfig } from "@/lib/site";
+import { getHostLocale } from "@/lib/host-locale";
 import { getAllPosts } from "@/features/blog/data/posts";
-
-export const dynamic = "force-static";
 
 /** Escape the five XML predefined entities. */
 function escapeXml(value: string): string {
@@ -13,12 +12,16 @@ function escapeXml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
-export function GET() {
-  const base = siteConfig.url;
-  const posts = getAllPosts();
+export async function GET() {
+  const locale = await getHostLocale();
+  const site = getSiteConfig(locale);
+  const base = site.url;
+  const posts = getAllPosts(locale);
   const updated = posts[0]?.date
     ? new Date(posts[0].date).toUTCString()
     : new Date().toUTCString();
+  const feedTitle = locale === "sv" ? "Artiklar" : "Articles";
+  const lang = locale === "sv" ? "sv-SE" : "en-US";
 
   const items = posts
     .map((post) => {
@@ -37,10 +40,10 @@ export function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeXml(siteConfig.name)}, Artiklar</title>
+    <title>${escapeXml(site.name)}, ${feedTitle}</title>
     <link>${base}/artiklar</link>
-    <description>${escapeXml(siteConfig.description)}</description>
-    <language>sv-SE</language>
+    <description>${escapeXml(site.description)}</description>
+    <language>${lang}</language>
     <lastBuildDate>${updated}</lastBuildDate>
     <atom:link href="${base}/feed.xml" rel="self" type="application/rss+xml" />
 ${items}

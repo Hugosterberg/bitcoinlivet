@@ -8,10 +8,9 @@ import { getSiteConfig } from "@/lib/site";
 import { buildAlternates } from "@/lib/seo";
 import { BlogExplorer } from "@/features/blog/components/blog-explorer";
 import {
-  categories,
   getAllPosts,
   getFeaturedPost,
-  type CategorySlug,
+  isCategory,
 } from "@/features/blog/data/posts";
 
 export async function generateMetadata({
@@ -35,10 +34,6 @@ export async function generateMetadata({
   };
 }
 
-function isCategory(value: string | undefined): value is CategorySlug {
-  return !!value && value in categories;
-}
-
 export default async function BlogPage({
   params,
   searchParams,
@@ -53,8 +48,8 @@ export default async function BlogPage({
   const { kategori } = await searchParams;
   const active = isCategory(kategori) ? kategori : undefined;
 
-  const allPosts = getAllPosts();
-  const featured = getFeaturedPost();
+  const allPosts = getAllPosts(locale);
+  const featured = getFeaturedPost(locale);
 
   return (
     <div className="py-14 sm:py-20">

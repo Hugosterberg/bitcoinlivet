@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getAllPosts } from "@/features/blog/data/posts";
+import { getAllPosts, getPostSlugsById } from "@/features/blog/data/posts";
 import { getCourseModules } from "@/features/education/data/courses";
 import { getFunctions, getFunctionSlugsById } from "@/features/functions/data/functions";
 import { routing, type Locale } from "@/i18n/routing";
@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // hreflang alternates for content whose slug is localized (differs per locale).
   const slugLanguages = (
-    pathname: "/funktioner/[slug]",
+    pathname: "/funktioner/[slug]" | "/artiklar/[slug]",
     slugs: Record<Locale, string>,
   ): Record<string, string> => {
     const languages: Record<string, string> = {};
@@ -77,8 +77,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  // Courses and posts use localized slugs; emit the current-locale URL only
-  // until their cross-locale slug mapping is wired (no wrong hreflang links).
+  // Courses use localized slugs; emit the current-locale URL only until their
+  // cross-locale slug mapping is wired (no wrong hreflang links).
   const courseRoutes: MetadataRoute.Sitemap = courseModules.flatMap((module) => [
     localEntry(
       { pathname: "/utbildning/[modul]", params: { modul: module.slug } },
@@ -95,16 +95,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
   ]);
 
-  const postRoutes: MetadataRoute.Sitemap = getAllPosts().map((post) =>
-    localEntry(
-      { pathname: "/artiklar/[slug]", params: { slug: post.slug } },
-      {
-        lastModified: new Date(post.date),
-        changeFrequency: "monthly",
-        priority: 0.6,
-      },
-    ),
-  );
+  const postRoutes: MetadataRoute.Sitemap = getAllPosts(locale).map((post) => ({
+    url: localizedUrl(locale, { pathname: "/artiklar/[slug]", params: { slug: post.slug } }),
+    alternates: {
+      languages: slugLanguages("/artiklar/[slug]", getPostSlugsById(post.id)),
+    },
+    lastModified: new Date(post.date),
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
 
   return [...staticRoutes, ...functionRoutes, ...courseRoutes, ...postRoutes];
 }
