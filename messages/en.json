@@ -12,6 +12,21 @@
     "glossary": "Glossary",
     "glossaryDesc": "Bitcoin terms explained"
   },
+  "header": {
+    "mainMenu": "Main menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "account": "Account",
+    "signIn": "Sign in",
+    "features": "Features"
+  },
+  "language": {
+    "label": "Language",
+    "sv": "Svenska",
+    "en": "English",
+    "switchToEn": "View in English",
+    "switchToSv": "Visa på svenska"
+  },
   "footer": {
     "explore": "Explore",
     "learn": "Learn",
@@ -24,6 +39,9 @@
     "glossary": "Glossary",
     "halving": "The halving",
     "beginnerGuides": "Beginner guides",
-    "saving": "Saving"
+    "saving": "Saving",
+    "rights": "All content is for educational purposes.",
+    "privacy": "Privacy policy",
+    "notAdvice": "This is not financial advice."
   }
 }

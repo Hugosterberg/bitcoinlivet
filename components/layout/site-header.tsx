@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState, type ComponentProps } from "react";
+import { useTranslations } from "next-intl";
 import {
   List,
   X,
@@ -17,12 +16,14 @@ import {
 } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
+import { Link, usePathname } from "@/i18n/navigation";
 import { mainNav, type NavIconKey } from "@/lib/site";
 import { functionMenu } from "@/features/functions/data/functions";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { FeaturesMenu } from "@/components/layout/features-menu";
 import { DataCta } from "@/components/layout/data-cta";
+import { LanguageToggle } from "@/components/layout/language-toggle";
 import { useAuthUser } from "@/features/auth/components/use-auth-user";
 
 const NAV_ICONS: Record<NavIconKey, Icon> = {
@@ -33,6 +34,9 @@ const NAV_ICONS: Record<NavIconKey, Icon> = {
   glossary: Books,
 };
 
+/** The locale-aware Link's href type; nav hrefs are canonical static paths. */
+type Href = ComponentProps<typeof Link>["href"];
+
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -42,15 +46,17 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { signedIn } = useAuthUser();
+  const t = useTranslations("nav");
+  const th = useTranslations("header");
 
   // Label/icon reflect auth state; both route to /konto (sign in/up or account).
   const accountActive = isActive(pathname, "/konto");
-  const accountLabel = signedIn ? "Konto" : "Logga in";
+  const accountLabel = signedIn ? th("account") : th("signIn");
   const AccountIcon = signedIn ? UserCircle : SignIn;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/65">
-      <Container as="nav" aria-label="Huvudmeny" className="flex h-16 items-center justify-between gap-4">
+      <Container as="nav" aria-label={th("mainMenu")} className="flex h-16 items-center justify-between gap-4">
         <Logo />
 
         <ul className="hidden items-center gap-1 lg:flex">
@@ -61,7 +67,7 @@ export function SiteHeader() {
             const node = item.highlight ? (
               <li key={item.href}>
                 <Link
-                  href={item.href}
+                  href={item.href as Href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "ml-1 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors",
@@ -71,13 +77,13 @@ export function SiteHeader() {
                   )}
                 >
                   {NavI ? <NavI size={16} weight="fill" aria-hidden /> : null}
-                  {item.title}
+                  {t(item.key)}
                 </Link>
               </li>
             ) : (
               <li key={item.href}>
                 <Link
-                  href={item.href}
+                  href={item.href as Href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -87,7 +93,7 @@ export function SiteHeader() {
                   )}
                 >
                   {NavI ? <NavI size={15} weight={active ? "fill" : "regular"} aria-hidden /> : null}
-                  {item.title}
+                  {t(item.key)}
                 </Link>
               </li>
             );
@@ -105,7 +111,7 @@ export function SiteHeader() {
           {signedIn ? (
             <Link
               href="/konto"
-              aria-label="Konto"
+              aria-label={th("account")}
               aria-current={accountActive ? "page" : undefined}
               className={cn(
                 "grid size-9 place-items-center rounded-full transition-colors hover:bg-muted",
@@ -123,9 +129,10 @@ export function SiteHeader() {
                 accountActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              Logga in
+              {th("signIn")}
             </Link>
           )}
+          <LanguageToggle />
         </div>
 
         <button
@@ -133,7 +140,7 @@ export function SiteHeader() {
           className="grid size-10 place-items-center rounded-md text-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
-          aria-label={open ? "Stäng meny" : "Öppna meny"}
+          aria-label={open ? th("closeMenu") : th("openMenu")}
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X size={22} weight="bold" /> : <List size={22} weight="bold" />}
@@ -150,7 +157,7 @@ export function SiteHeader() {
               const node = item.highlight ? (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={item.href as Href}
                   aria-current={active ? "page" : undefined}
                   onClick={() => setOpen(false)}
                   className={cn(
@@ -161,12 +168,12 @@ export function SiteHeader() {
                   )}
                 >
                   {NavI ? <NavI size={18} weight="fill" aria-hidden /> : null}
-                  {item.title}
+                  {t(item.key)}
                 </Link>
               ) : (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={item.href as Href}
                   aria-current={active ? "page" : undefined}
                   onClick={() => setOpen(false)}
                   className={cn(
@@ -177,7 +184,7 @@ export function SiteHeader() {
                   )}
                 >
                   {NavI ? <NavI size={18} weight={active ? "fill" : "regular"} aria-hidden /> : null}
-                  {item.title}
+                  {t(item.key)}
                 </Link>
               );
 
@@ -188,12 +195,12 @@ export function SiteHeader() {
                 node,
                 <div key="funktioner" className="mt-1">
                   <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Funktioner
+                    {th("features")}
                   </p>
                   {functionMenu.map((feature) => (
                     <Link
                       key={feature.title}
-                      href={feature.href}
+                      href={feature.href as Href}
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
@@ -223,6 +230,9 @@ export function SiteHeader() {
               {accountLabel}
             </Link>
             <DataCta className="mt-2 h-11 w-full" onClick={() => setOpen(false)} />
+            <div className="mt-2 flex justify-center">
+              <LanguageToggle />
+            </div>
           </Container>
         </div>
       ) : null}

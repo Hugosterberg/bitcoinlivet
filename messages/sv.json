@@ -12,6 +12,21 @@
     "glossary": "Ordlista",
     "glossaryDesc": "Bitcoinbegrepp förklarade"
   },
+  "header": {
+    "mainMenu": "Huvudmeny",
+    "openMenu": "Öppna meny",
+    "closeMenu": "Stäng meny",
+    "account": "Konto",
+    "signIn": "Logga in",
+    "features": "Funktioner"
+  },
+  "language": {
+    "label": "Språk",
+    "sv": "Svenska",
+    "en": "English",
+    "switchToEn": "Visa på engelska",
+    "switchToSv": "Visa på svenska"
+  },
   "footer": {
     "explore": "Utforska",
     "learn": "Lär dig",
@@ -24,6 +39,9 @@
     "glossary": "Ordlista",
     "halving": "Halveringen",
     "beginnerGuides": "Nybörjarguider",
-    "saving": "Sparande"
+    "saving": "Sparande",
+    "rights": "Allt innehåll är i utbildande syfte.",
+    "privacy": "Integritetspolicy",
+    "notAdvice": "Detta är inte finansiell rådgivning."
   }
 }

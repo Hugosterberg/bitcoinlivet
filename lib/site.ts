@@ -79,9 +79,12 @@ export type NavIconKey =
   | "glossary";
 
 export type NavItem = {
-  title: string;
+  /** Message key under the `nav` namespace. */
+  key: string;
+  /** Canonical (sv) href; the i18n Link maps it to the active locale path. */
   href: string;
-  description?: string;
+  /** Optional description message key under the `nav` namespace. */
+  descKey?: string;
   /** Small icon shown next to the title in the navigation. */
   icon?: NavIconKey;
   /** Render with extra emphasis in the navigation. */
@@ -89,39 +92,35 @@ export type NavItem = {
 };
 
 export const mainNav: NavItem[] = [
-  {
-    title: "Utbildning",
-    href: "/utbildning",
-    description: "Interaktiv Bitcoinskola",
-    icon: "education",
-    highlight: true,
-  },
+  { key: "education", href: "/utbildning", descKey: "educationDesc", icon: "education", highlight: true },
   // (The "Funktioner" mega-menu is injected here in the header.)
-  { title: "Artiklar", href: "/artiklar", description: "Guider och artiklar", icon: "articles" },
-  { title: "Nyheter", href: "/nyheter", description: "Veckans Bitcoinnyheter", icon: "news" },
-  { title: "Om", href: "/om", description: "Om bitcoinlivet", icon: "about" },
-  { title: "Ordlista", href: "/ordlista", description: "Bitcoinbegrepp förklarade", icon: "glossary" },
+  { key: "articles", href: "/artiklar", descKey: "articlesDesc", icon: "articles" },
+  { key: "news", href: "/nyheter", descKey: "newsDesc", icon: "news" },
+  { key: "about", href: "/om", descKey: "aboutDesc", icon: "about" },
+  { key: "glossary", href: "/ordlista", descKey: "glossaryDesc", icon: "glossary" },
 ];
 
-export const footerNav: { title: string; items: NavItem[] }[] = [
+export type FooterItem = { key: string; href: string };
+
+export const footerNav: { titleKey: string; items: FooterItem[] }[] = [
   {
-    title: "Utforska",
+    titleKey: "explore",
     items: [
-      { title: "Hem", href: "/" },
-      { title: "Nyheter", href: "/nyheter" },
-      { title: "Artiklar", href: "/artiklar" },
-      { title: "Bitcoindata", href: "/data" },
-      { title: "Om bitcoinlivet", href: "/om" },
+      { key: "home", href: "/" },
+      { key: "news", href: "/nyheter" },
+      { key: "articles", href: "/artiklar" },
+      { key: "data", href: "/data" },
+      { key: "about", href: "/om" },
     ],
   },
   {
-    title: "Lär dig",
+    titleKey: "learn",
     items: [
-      { title: "Bitcoinskolan", href: "/utbildning" },
-      { title: "Ordlista", href: "/ordlista" },
-      { title: "Halveringen", href: "/halvering" },
-      { title: "Nybörjarguider", href: "/artiklar?kategori=nyborjarguider" },
-      { title: "Sparande", href: "/artiklar?kategori=sparande" },
+      { key: "education", href: "/utbildning" },
+      { key: "glossary", href: "/ordlista" },
+      { key: "halving", href: "/halvering" },
+      { key: "beginnerGuides", href: "/artiklar?kategori=nyborjarguider" },
+      { key: "saving", href: "/artiklar?kategori=sparande" },
     ],
   },
 ];
