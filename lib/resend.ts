@@ -28,6 +28,13 @@ export const RESEND_AUDIENCE_ID_EN = process.env.RESEND_AUDIENCE_ID_EN;
 /** Verified sender, e.g. "bitcoinlivet <noreply@bitcoinlivet.se>". */
 export const RESEND_FROM =
   process.env.RESEND_FROM ?? "bitcoinlivet <onboarding@resend.dev>";
+/** Optional English sender, e.g. "bitcoinerlife <noreply@bitcoinerlife.xyz>". */
+export const RESEND_FROM_EN = process.env.RESEND_FROM_EN;
+
+/** Picks the sender for a locale, falling back to the default sender. */
+export function fromForLocale(locale?: EmailLocale): string {
+  return locale === "en" && RESEND_FROM_EN ? RESEND_FROM_EN : RESEND_FROM;
+}
 
 /** True when sending + audience sync are wired up. */
 export const isResendConfigured = Boolean(RESEND_API_KEY && RESEND_AUDIENCE_ID);
@@ -94,7 +101,7 @@ export async function sendNewsletterBroadcast({
 
   const created = await resend.broadcasts.create({
     audienceId,
-    from: RESEND_FROM,
+    from: fromForLocale(locale),
     subject,
     html,
     name: name ?? subject,

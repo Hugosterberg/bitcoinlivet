@@ -41,8 +41,12 @@ RESEND_API_KEY=re_xxxxxxxx
 RESEND_AUDIENCE_ID=xxxxxxxx-xxxx-...        # svenska (bitcoinlivet.se)
 RESEND_AUDIENCE_ID_EN=xxxxxxxx-xxxx-...     # valfritt: engelska (bitcoinerlife.xyz)
 RESEND_FROM=bitcoinlivet <noreply@bitcoinlivet.se>
+RESEND_FROM_EN=bitcoinerlife <noreply@bitcoinerlife.xyz>  # valfritt: engelsk avsändare
 NEWSLETTER_ADMIN_TOKEN=<en lång slumpmässig hemlig sträng>
 ```
+
+Avsändarnamnet följer språket: `RESEND_FROM` för svenska och `RESEND_FROM_EN`
+för engelska utskick (faller tillbaka till `RESEND_FROM` om den inte är satt).
 
 Inga av dessa får ha prefixet `NEXT_PUBLIC_` – de ska aldrig nå webbläsaren.
 Lägg samma värden på Vercel under **Settings → Environment Variables**.

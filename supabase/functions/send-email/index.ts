@@ -10,7 +10,8 @@
 //
 // Deploy (needs your Supabase project + a verified Resend domain):
 //   1. supabase secrets set RESEND_API_KEY=... SEND_EMAIL_HOOK_SECRET=... \
-//        RESEND_FROM='bitcoinlivet <noreply@bitcoinlivet.se>'
+//        RESEND_FROM='bitcoinlivet <noreply@bitcoinlivet.se>' \
+//        RESEND_FROM_EN='bitcoinerlife <noreply@bitcoinerlife.xyz>'  # optional
 //   2. supabase functions deploy send-email --no-verify-jwt
 //   3. Dashboard → Authentication → Hooks → Send Email → enable, point at this
 //      function, and copy the generated secret into SEND_EMAIL_HOOK_SECRET.
@@ -24,7 +25,8 @@ const hookSecret = (Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? "").replace(
   "v1,whsec_",
   "",
 );
-const from = Deno.env.get("RESEND_FROM") ?? "bitcoinlivet <noreply@bitcoinlivet.se>";
+const fromSv = Deno.env.get("RESEND_FROM") ?? "bitcoinlivet <noreply@bitcoinlivet.se>";
+const fromEn = Deno.env.get("RESEND_FROM_EN") ?? fromSv;
 const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
 
 type Locale = "sv" | "en";
@@ -119,7 +121,7 @@ Deno.serve(async (req) => {
   const html = renderHtml(c, verifyUrl(email_data), brand);
 
   const { error } = await resend.emails.send({
-    from,
+    from: locale === "en" ? fromEn : fromSv,
     to: [user.email],
     subject: c.subject,
     html,
