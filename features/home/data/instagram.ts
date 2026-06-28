@@ -163,23 +163,19 @@ export async function getInstagramFeed(limit = 3): Promise<{
   }
 }
 
-/** Coarse, Swedish relative time ("idag", "3 dagar sedan", "2 månader sedan"). */
-export function relativeTimeSv(iso?: string): string | undefined {
+/**
+ * Coarse, locale-aware relative time ("today" / "idag", "3 days ago" / "3 dagar
+ * sedan"). Uses the platform Intl formatter, bucketed by days/weeks/months/years.
+ */
+export function relativeTime(iso: string | undefined, locale: string): string | undefined {
   if (!iso) return undefined;
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return undefined;
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   const days = Math.floor((Date.now() - then) / 86_400_000);
-  if (days <= 0) return "idag";
-  if (days === 1) return "igår";
-  if (days < 7) return `${days} dagar sedan`;
-  if (days < 30) {
-    const w = Math.floor(days / 7);
-    return w === 1 ? "1 vecka sedan" : `${w} veckor sedan`;
-  }
-  if (days < 365) {
-    const m = Math.floor(days / 30);
-    return m === 1 ? "1 månad sedan" : `${m} månader sedan`;
-  }
-  const y = Math.floor(days / 365);
-  return y === 1 ? "1 år sedan" : `${y} år sedan`;
+  if (days <= 0) return rtf.format(0, "day");
+  if (days < 7) return rtf.format(-days, "day");
+  if (days < 30) return rtf.format(-Math.floor(days / 7), "week");
+  if (days < 365) return rtf.format(-Math.floor(days / 30), "month");
+  return rtf.format(-Math.floor(days / 365), "year");
 }

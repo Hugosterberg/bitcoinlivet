@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   InstagramLogo,
   ArrowUpRight,
@@ -15,7 +15,7 @@ import {
   instagram,
   buildInstagramEmbedUrl,
   getInstagramFeed,
-  relativeTimeSv,
+  relativeTime,
   type InstagramLivePost,
 } from "@/features/home/data/instagram";
 
@@ -31,7 +31,7 @@ function FollowButton({ label }: { label: string }) {
 }
 
 /** Branded placeholder shown until real post shortcodes are configured. */
-function PlaceholderGrid() {
+function PlaceholderGrid({ label }: { label: string }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 3 }).map((_, i) => (
@@ -47,7 +47,7 @@ function PlaceholderGrid() {
             <InstagramLogo size={24} weight="fill" aria-hidden />
           </span>
           <p className="relative px-6 text-sm text-muted-foreground">
-            Inlägg från {instagram.handle} visas här
+            {label}
           </p>
         </div>
       ))}
@@ -56,11 +56,19 @@ function PlaceholderGrid() {
 }
 
 /** Live post card: the actual image, linking out to the post, with a hover. */
-function LivePostCard({ post }: { post: InstagramLivePost }) {
+function LivePostCard({
+  post,
+  locale,
+  fallbackLabel,
+}: {
+  post: InstagramLivePost;
+  locale: string;
+  fallbackLabel: string;
+}) {
   const label = post.caption
     ? post.caption.replace(/\s+/g, " ").slice(0, 120)
-    : `Inlägg från ${instagram.handle}`;
-  const time = relativeTimeSv(post.timestamp);
+    : fallbackLabel;
+  const time = relativeTime(post.timestamp, locale);
   const hasStats = post.likeCount != null || post.commentsCount != null || time;
 
   return (
@@ -114,6 +122,7 @@ function LivePostCard({ post }: { post: InstagramLivePost }) {
 export async function InstagramFeed() {
   const { profile, posts: livePosts } = await getInstagramFeed(3);
   const t = await getTranslations("home");
+  const locale = await getLocale();
   const hasLive = livePosts.length > 0;
   const hasManual = instagram.posts.length > 0;
 
@@ -142,7 +151,12 @@ export async function InstagramFeed() {
         {hasLive ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {livePosts.map((post) => (
-              <LivePostCard key={post.id} post={post} />
+              <LivePostCard
+                key={post.id}
+                post={post}
+                locale={locale}
+                fallbackLabel={t("instagramPostFrom", { handle: instagram.handle })}
+              />
             ))}
           </div>
         ) : hasManual ? (
@@ -154,7 +168,7 @@ export async function InstagramFeed() {
               >
                 <iframe
                   src={buildInstagramEmbedUrl(post)}
-                  title={post.label ?? `Instagram-inlägg ${post.shortcode}`}
+                  title={post.label ?? t("instagramPostNumber", { shortcode: post.shortcode })}
                   loading="lazy"
                   scrolling="no"
                   allow="encrypted-media"
@@ -164,7 +178,7 @@ export async function InstagramFeed() {
             ))}
           </div>
         ) : (
-          <PlaceholderGrid />
+          <PlaceholderGrid label={t("instagramPostsHere", { handle: instagram.handle })} />
         )}
       </div>
 
