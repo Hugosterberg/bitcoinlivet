@@ -1,10 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
+import { getLocale } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { addNewsletterContact } from "@/lib/resend";
+import { routing, type Locale } from "@/i18n/routing";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   isValidEmail,
@@ -65,15 +67,18 @@ export async function subscribeToNewsletter(
   }
 
   try {
+    const requested = await getLocale();
+    const locale: Locale = requested === "en" ? "en" : routing.defaultLocale;
     const supabase = await createClient();
     const { error } = await supabase.rpc("subscribe_to_newsletter", {
       p_email: email,
+      p_language: locale,
     });
     if (error) throw error;
 
     // Submitting the newsletter form is itself an opt-in → add to the
     // Resend send list. Best-effort; never blocks the thank-you.
-    await addNewsletterContact(email);
+    await addNewsletterContact(email, locale);
 
     return {
       status: "ok",

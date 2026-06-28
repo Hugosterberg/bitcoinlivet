@@ -24,16 +24,19 @@ export type Database = {
         Row: {
           id: string;
           email: string;
+          language: string;
           created_at: string;
         };
         Insert: {
           id?: string;
           email: string;
+          language?: string;
           created_at?: string;
         };
         Update: {
           id?: string;
           email?: string;
+          language?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -105,7 +108,7 @@ export type Database = {
     Views: Record<never, never>;
     Functions: {
       subscribe_to_newsletter: {
-        Args: { p_email: string };
+        Args: { p_email: string; p_language?: string };
         Returns: undefined;
       };
     };

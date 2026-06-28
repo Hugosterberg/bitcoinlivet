@@ -9,10 +9,12 @@ import { isResendConfigured, sendNewsletterBroadcast } from "@/lib/resend";
  *
  * POST /api/newsletter/broadcast
  *   Header:  Authorization: Bearer <NEWSLETTER_ADMIN_TOKEN>
- *   Body:    { "subject": "...", "html": "<p>...</p>", "name"?: "internal label" }
+ *   Body:    { "subject": "...", "html": "<p>...</p>", "name"?: "label",
+ *             "language"?: "sv" | "en" }
  *
  * Recipients are never specified by the caller — the audience only contains
  * people who opted in, so a send can only reach consenting addresses.
+ * `language` targets the per-locale audience (falls back to the default).
  */
 
 export const runtime = "nodejs";
@@ -44,11 +46,13 @@ export async function POST(req: Request) {
     subject?: unknown;
     html?: unknown;
     name?: unknown;
+    language?: unknown;
   } | null;
 
   const subject = typeof body?.subject === "string" ? body.subject.trim() : "";
   const html = typeof body?.html === "string" ? body.html : "";
   const name = typeof body?.name === "string" ? body.name : undefined;
+  const locale = body?.language === "en" ? "en" : body?.language === "sv" ? "sv" : undefined;
 
   if (!subject || !html) {
     return NextResponse.json(
@@ -58,7 +62,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const broadcastId = await sendNewsletterBroadcast({ subject, html, name });
+    const broadcastId = await sendNewsletterBroadcast({ subject, html, name, locale });
     return NextResponse.json({ ok: true, broadcastId });
   } catch (error) {
     return NextResponse.json(

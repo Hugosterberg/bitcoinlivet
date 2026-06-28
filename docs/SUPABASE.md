@@ -9,7 +9,7 @@ du fyllt i miljövariablerna nedan slås allt på automatiskt.
 
 | Område | Lagring | Anmärkning |
 | --- | --- | --- |
-| **Nyhetsbrev** | `newsletter_subscribers` | Ingen double opt-in, ingen e-post skickas. Dubbletter ignoreras. Skrivs via RPC `subscribe_to_newsletter` (security definer) – anon kan aldrig läsa listan. |
+| **Nyhetsbrev** | `newsletter_subscribers` | Ingen double opt-in, ingen e-post skickas. Dubbletter ignoreras. Skrivs via RPC `subscribe_to_newsletter(p_email, p_language)` (security definer) – anon kan aldrig läsa listan. `language` sparar locale (sv/en) för språkrätta utskick. |
 | **Kursinnehåll** | I kod (`features/education/data/courses.ts`) | Lagras **inte** i databasen. |
 | **Slutförda lektioner** | `lesson_completions` (1 rad/lektion) | Spegling av `ProgressData.lessons`. Ger statistik och "senaste aktivitet". |
 | **XP, streak, märken** | `user_progress` (1 rad/användare) | Aggregat som speglar dagens klientlogik 1:1. |
@@ -54,8 +54,11 @@ npx supabase link --project-ref <project-ref>
 npx supabase db push
 ```
 
-**Alternativ B – Dashboard:** öppna **SQL Editor** och kör innehållet i
-`0001_newsletter.sql` följt av `0002_user_progress.sql`.
+**Alternativ B – Dashboard:** öppna **SQL Editor** och kör innehållet i alla
+filer i `supabase/migrations/` i nummerordning (`0001` … `0005`). `0005`
+lägger till en `language`-kolumn på `newsletter_subscribers` så varje
+anmälan sparas med språket den gjordes på (bitcoinlivet.se = sv,
+bitcoinerlife.xyz = en).
 
 ## 4. Konfigurera Auth
 
@@ -85,6 +88,24 @@ Sätt även **Site URL** till din produktionsdomän. Flödet: mejllänk →
 `/auth/callback` (växlar koden mot en session) → `/aterstall` (välj nytt
 lösenord). För många utskick, konfigurera egen SMTP under **Authentication →
 Emails** (Supabases standardutskick är hårt rate-limitade).
+
+#### Språkrätta auth-mejl (tvåspråkigt, valfritt)
+
+Klienten skickar med `redirectTo` mot rätt domän, så återställningslänken pekar
+redan på rätt sida. För att även **mejltexten** ska vara på rätt språk finns en
+Send Email-hook i `supabase/functions/send-email/` som renderar mejlet (sv/en,
+härlett från domänen i `redirect_to`) och skickar via Resend:
+
+```bash
+supabase secrets set RESEND_API_KEY=... SEND_EMAIL_HOOK_SECRET=... \
+  RESEND_FROM='bitcoinlivet <noreply@bitcoinlivet.se>'
+supabase functions deploy send-email --no-verify-jwt
+```
+
+Aktivera sedan **Authentication → Hooks → Send Email**, peka på funktionen och
+klistra in den genererade hemligheten i `SEND_EMAIL_HOOK_SECRET`. Utan hooken
+används Supabases inbyggda (enspråkiga) mallar. Eftersom e-postbekräftelse är
+avstängd är det i praktiken bara återställningsmejlet som berörs.
 
 ### Samtycke för nyhetsutskick (GDPR)
 

@@ -1,8 +1,11 @@
 "use server";
 
+import { getLocale } from "next-intl/server";
+
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { addNewsletterContact } from "@/lib/resend";
+import { routing, type Locale } from "@/i18n/routing";
 
 /**
  * Server-only side-effect for signup with marketing consent: add the email to
@@ -12,9 +15,11 @@ import { addNewsletterContact } from "@/lib/resend";
  */
 export async function recordSignupConsent(email: string): Promise<void> {
   if (!isSupabaseConfigured) return;
+  const requested = await getLocale();
+  const locale: Locale = requested === "en" ? "en" : routing.defaultLocale;
   const supabase = await createClient();
-  await supabase.rpc("subscribe_to_newsletter", { p_email: email });
-  await addNewsletterContact(email);
+  await supabase.rpc("subscribe_to_newsletter", { p_email: email, p_language: locale });
+  await addNewsletterContact(email, locale);
 }
 
 export type UpdatePasswordResult = { ok: boolean; error?: string };

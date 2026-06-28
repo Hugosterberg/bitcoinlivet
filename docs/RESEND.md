@@ -27,13 +27,19 @@ automatiskt till en **avregistreringslänk** (lagkrav).
    (Domains → Add). Krävs för att skicka från `@bitcoinlivet.se`.
 2. **API Keys → Create** → kopiera till `RESEND_API_KEY`.
 3. **Audiences → Create audience** → kopiera id:t till `RESEND_AUDIENCE_ID`.
-   Det här är listan med alla som tackat ja.
+   Det här är listan med alla som tackat ja (svenska som standard).
+4. **Tvåspråkigt (valfritt):** skapa en andra audience för engelska och lägg
+   id:t i `RESEND_AUDIENCE_ID_EN`. Då hamnar de som registrerar sig på
+   bitcoinerlife.xyz i den, och svenska anmälningar i `RESEND_AUDIENCE_ID`, så
+   utskick kan göras på rätt språk. Utan den variabeln hamnar alla i den enda
+   audiencen (som tidigare).
 
 ## 2. Miljövariabler (`.env.local`, server-only)
 
 ```bash
 RESEND_API_KEY=re_xxxxxxxx
-RESEND_AUDIENCE_ID=xxxxxxxx-xxxx-...
+RESEND_AUDIENCE_ID=xxxxxxxx-xxxx-...        # svenska (bitcoinlivet.se)
+RESEND_AUDIENCE_ID_EN=xxxxxxxx-xxxx-...     # valfritt: engelska (bitcoinerlife.xyz)
 RESEND_FROM=bitcoinlivet <noreply@bitcoinlivet.se>
 NEWSLETTER_ADMIN_TOKEN=<en lång slumpmässig hemlig sträng>
 ```
@@ -54,11 +60,13 @@ audience → skriv och skicka. Bra för manuella, redaktionella utskick.
 curl -X POST https://bitcoinlivet.se/api/newsletter/broadcast \
   -H "Authorization: Bearer $NEWSLETTER_ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"subject":"Nytt på bitcoinlivet","html":"<p>Hej! ...</p>"}'
+  -d '{"subject":"Nytt på bitcoinlivet","html":"<p>Hej! ...</p>","language":"sv"}'
 ```
 
 - Skyddas av `NEWSLETTER_ADMIN_TOKEN` (utan token är endpointen helt stängd).
 - `subject` och `html` krävs. `name` (valfritt) är en intern etikett i Resend.
+- `language` (valfritt, `"sv"`/`"en"`) väljer audience när
+  `RESEND_AUDIENCE_ID_EN` är satt; annars används den enda audiencen.
 - Mottagare kan **inte** anges av anroparen – alltid hela audiencen.
 
 ## Noteringar

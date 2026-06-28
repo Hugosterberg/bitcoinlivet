@@ -15,14 +15,28 @@ import { Resend } from "resend";
  * All values are server-only secrets (never NEXT_PUBLIC).
  */
 
+type EmailLocale = "sv" | "en";
+
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 export const RESEND_AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID;
+/**
+ * Optional per-locale audience for the English domain. When set, en subscribers
+ * are added here and sv subscribers to RESEND_AUDIENCE_ID, so broadcasts can be
+ * sent in the right language. Falls back to the single audience when unset.
+ */
+export const RESEND_AUDIENCE_ID_EN = process.env.RESEND_AUDIENCE_ID_EN;
 /** Verified sender, e.g. "bitcoinlivet <noreply@bitcoinlivet.se>". */
 export const RESEND_FROM =
   process.env.RESEND_FROM ?? "bitcoinlivet <onboarding@resend.dev>";
 
 /** True when sending + audience sync are wired up. */
 export const isResendConfigured = Boolean(RESEND_API_KEY && RESEND_AUDIENCE_ID);
+
+/** Resolves the audience for a locale, falling back to the default audience. */
+export function audienceForLocale(locale?: EmailLocale): string | undefined {
+  if (locale === "en" && RESEND_AUDIENCE_ID_EN) return RESEND_AUDIENCE_ID_EN;
+  return RESEND_AUDIENCE_ID;
+}
 
 function getResend(): Resend {
   if (!RESEND_API_KEY) {
@@ -32,17 +46,21 @@ function getResend(): Resend {
 }
 
 /**
- * Adds a consented email to the news Audience. Best-effort and never throws —
- * Supabase remains the source of truth for consent, so a transient Resend
- * failure must not break signup / subscribe.
+ * Adds a consented email to the news Audience (per-locale when configured).
+ * Best-effort and never throws — Supabase remains the source of truth for
+ * consent, so a transient Resend failure must not break signup / subscribe.
  */
-export async function addNewsletterContact(email: string): Promise<void> {
-  if (!isResendConfigured) return;
+export async function addNewsletterContact(
+  email: string,
+  locale?: EmailLocale,
+): Promise<void> {
+  const audienceId = audienceForLocale(locale);
+  if (!RESEND_API_KEY || !audienceId) return;
   try {
     const resend = getResend();
     await resend.contacts.create({
       email,
-      audienceId: RESEND_AUDIENCE_ID!,
+      audienceId,
       unsubscribed: false,
     });
   } catch {
@@ -58,20 +76,24 @@ export async function sendNewsletterBroadcast({
   subject,
   html,
   name,
+  locale,
 }: {
   subject: string;
   html: string;
   /** Internal label shown in the Resend dashboard. */
   name?: string;
+  /** Target the per-locale audience (falls back to the default audience). */
+  locale?: EmailLocale;
 }): Promise<string> {
-  if (!isResendConfigured) {
+  const audienceId = audienceForLocale(locale);
+  if (!RESEND_API_KEY || !audienceId) {
     throw new Error("Resend är inte konfigurerat (RESEND_API_KEY / RESEND_AUDIENCE_ID).");
   }
 
   const resend = getResend();
 
   const created = await resend.broadcasts.create({
-    audienceId: RESEND_AUDIENCE_ID!,
+    audienceId,
     from: RESEND_FROM,
     subject,
     html,
