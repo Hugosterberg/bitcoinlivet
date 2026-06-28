@@ -23,7 +23,8 @@
   "common": {
     "dataCta": "Se Bitcoindata",
     "cookieSettings": "Cookie-inställningar",
-    "featuresLearnMore": "Lär dig mer om Bitcoin"
+    "featuresLearnMore": "Lär dig mer om Bitcoin",
+    "loadingContent": "Laddar innehåll …"
   },
   "language": {
     "label": "Språk",
@@ -236,7 +237,13 @@
     "errPwMismatch": "Lösenorden matchar inte.",
     "errGeneric": "Något gick fel.",
     "saving": "Sparar …",
-    "saveNewPassword": "Spara nytt lösenord"
+    "saveNewPassword": "Spara nytt lösenord",
+    "resetPageMetaTitle": "Återställ lösenord",
+    "resetPageMetaDesc": "Välj ett nytt lösenord för ditt bitcoinlivet-konto.",
+    "resetPageTitle": "Välj ett nytt lösenord",
+    "resetPageLead": "Skriv in ditt nya lösenord nedan, så loggar vi in dig direkt.",
+    "resetLinkInvalid": "Länken är ogiltig eller har gått ut. Be om en ny återställningslänk från ",
+    "resetSignInPage": "inloggningssidan"
   },
   "account": {
     "metaTitle": "Konto",
@@ -659,5 +666,16 @@
     "allTermsHint": "Alla begrepp. Filtrera på nivå om du vill börja enkelt eller gräva djupare.",
     "noMatches": "Inga begrepp matchar",
     "tryAnother": "Prova ett annat sökord eller välj en annan nivå."
+  },
+  "notFound": {
+    "title": "Sidan kunde inte hittas",
+    "lead": "Länken kan vara fel eller så har sidan flyttats. Här är några vägar vidare.",
+    "home": "Till startsidan",
+    "readArticles": "Läs artiklarna"
+  },
+  "errorPage": {
+    "title": "Något gick fel",
+    "lead": "Ett oväntat fel inträffade. Försök igen, om problemet kvarstår, ladda om sidan om en liten stund.",
+    "retry": "Försök igen"
   }
 }

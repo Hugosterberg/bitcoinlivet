@@ -23,7 +23,8 @@
   "common": {
     "dataCta": "See Bitcoin data",
     "cookieSettings": "Cookie settings",
-    "featuresLearnMore": "Learn more about Bitcoin"
+    "featuresLearnMore": "Learn more about Bitcoin",
+    "loadingContent": "Loading content …"
   },
   "language": {
     "label": "Language",
@@ -236,7 +237,13 @@
     "errPwMismatch": "The passwords don't match.",
     "errGeneric": "Something went wrong.",
     "saving": "Saving …",
-    "saveNewPassword": "Save new password"
+    "saveNewPassword": "Save new password",
+    "resetPageMetaTitle": "Reset password",
+    "resetPageMetaDesc": "Choose a new password for your bitcoinerlife account.",
+    "resetPageTitle": "Choose a new password",
+    "resetPageLead": "Enter your new password below and we'll sign you in right away.",
+    "resetLinkInvalid": "The link is invalid or has expired. Request a new reset link from ",
+    "resetSignInPage": "the sign-in page"
   },
   "account": {
     "metaTitle": "Account",
@@ -659,5 +666,16 @@
     "allTermsHint": "All terms. Filter by level if you want to start simple or dig deeper.",
     "noMatches": "No terms match",
     "tryAnother": "Try another search term or pick a different level."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "lead": "The link may be wrong or the page may have moved. Here are a few ways forward.",
+    "home": "To the home page",
+    "readArticles": "Read the articles"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "lead": "An unexpected error occurred. Try again — if the problem persists, reload the page in a little while.",
+    "retry": "Try again"
   }
 }

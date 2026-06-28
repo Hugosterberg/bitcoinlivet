@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Warning } from "@phosphor-icons/react";
 
 import { Container } from "@/components/layout/container";
@@ -13,6 +14,8 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("errorPage");
+
   useEffect(() => {
     // TODO(observability): forward to an error reporting service.
     console.error(error);
@@ -25,14 +28,13 @@ export default function Error({
           <Warning size={28} weight="bold" aria-hidden />
         </span>
         <h1 className="mt-6 font-heading text-2xl font-semibold tracking-tight text-foreground">
-          Något gick fel
+          {t("title")}
         </h1>
         <p className="mt-3 text-pretty text-muted-foreground">
-          Ett oväntat fel inträffade. Försök igen, om problemet kvarstår, ladda
-          om sidan om en liten stund.
+          {t("lead")}
         </p>
         <Button onClick={reset} size="xl" className="mt-8 rounded-full">
-          Försök igen
+          {t("retry")}
         </Button>
       </Container>
     </div>

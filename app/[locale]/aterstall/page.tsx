@@ -1,20 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LockKey, Warning } from "@phosphor-icons/react/dist/ssr";
 
+import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { getCurrentUser } from "@/features/auth/data/session";
 import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
 
-export const metadata: Metadata = {
-  title: "Återställ lösenord",
-  description: "Välj ett nytt lösenord för ditt bitcoinlivet-konto.",
-  alternates: { canonical: "/aterstall" },
-  robots: { index: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auth" });
+  return {
+    title: t("resetPageMetaTitle"),
+    description: t("resetPageMetaDesc"),
+    alternates: { canonical: "/aterstall" },
+    robots: { index: false },
+  };
+}
 
-export default async function ResetPage() {
+export default async function ResetPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("auth");
   // The auth callback established a recovery session before redirecting here.
   const user = await getCurrentUser();
 
@@ -26,10 +43,10 @@ export default async function ResetPage() {
             <LockKey size={24} weight="fill" aria-hidden />
           </span>
           <h1 className="mt-6 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Välj ett nytt lösenord
+            {t("resetPageTitle")}
           </h1>
           <p className="mt-4 text-pretty text-base/7 text-muted-foreground">
-            Skriv in ditt nya lösenord nedan, så loggar vi in dig direkt.
+            {t("resetPageLead")}
           </p>
         </header>
 
@@ -44,10 +61,9 @@ export default async function ResetPage() {
                 aria-hidden
                 className="mx-auto mb-3 text-amber-400"
               />
-              Länken är ogiltig eller har gått ut. Be om en ny
-              återställningslänk från{" "}
+              {t("resetLinkInvalid")}
               <Link href="/konto" className="font-medium text-bitcoin hover:underline">
-                inloggningssidan
+                {t("resetSignInPage")}
               </Link>
               .
             </Card>
