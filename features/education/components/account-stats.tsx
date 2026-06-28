@@ -8,6 +8,8 @@ import {
   CheckCircle,
 } from "@phosphor-icons/react/dist/ssr";
 
+import { getTranslations } from "next-intl/server";
+
 import { cn } from "@/lib/utils";
 import { IconStat } from "@/components/ui/icon-stat";
 import { formatNumber } from "@/lib/format";
@@ -16,12 +18,13 @@ import { getCourseModules, totalLessons } from "@/features/education/data/course
 import type { ProgressData } from "@/features/education/data/progress";
 import type { Locale } from "@/i18n/routing";
 
-/** Formats a YYYY-MM-DD day key as a long Swedish date. */
-function formatDay(day: string | null): string {
-  if (!day) return "Ingen aktivitet än";
+/** Formats a YYYY-MM-DD day key as a long, locale-aware date. */
+function formatDay(day: string | null, locale: Locale, fallback: string): string {
+  if (!day) return fallback;
   const date = new Date(`${day}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(date);
+  const intlLocale = locale === "sv" ? "sv-SE" : "en-US";
+  return new Intl.DateTimeFormat(intlLocale, { dateStyle: "long" }).format(date);
 }
 
 function Ring({ percent }: { percent: number }) {
@@ -50,7 +53,14 @@ function Ring({ percent }: { percent: number }) {
  * progression (`ProgressData` from Supabase). Reuses the same XP/level/streak
  * helpers as the client dashboard so the numbers always agree.
  */
-export function AccountStats({ data, locale }: { data: ProgressData; locale: Locale }) {
+export async function AccountStats({
+  data,
+  locale,
+}: {
+  data: ProgressData;
+  locale: Locale;
+}) {
+  const t = await getTranslations("education");
   const lp = getLevelProgress(data.xp);
   const completedCount = Object.keys(data.lessons).length;
   const percentComplete = totalLessons
@@ -74,9 +84,9 @@ export function AccountStats({ data, locale }: { data: ProgressData; locale: Loc
   const started = completedCount > 0;
 
   return (
-    <section aria-label="Din statistik" className="mt-6">
+    <section aria-label={t("yourStats")} className="mt-6">
       <h2 className="font-heading text-lg font-semibold tracking-tight text-foreground">
-        Din statistik
+        {t("yourStats")}
       </h2>
 
       <div className="mt-4 grid gap-4">
@@ -91,17 +101,24 @@ export function AccountStats({ data, locale }: { data: ProgressData; locale: Loc
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-bitcoin">
-                Nivå {lp.current.level}
+                {t("level")} {lp.current.level}
               </p>
               <p className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-                {lp.current.name}
+                {t(`levels.${lp.current.level}`)}
               </p>
               <p className="mt-1 text-pretty text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
                 {formatNumber(data.xp)} XP
                 {lp.next ? (
-                  <> · {formatNumber(lp.xpToNext)} XP till {lp.next.name}</>
+                  <>
+                    {" "}
+                    ·{" "}
+                    {t("xpToNext", {
+                      xp: formatNumber(lp.xpToNext),
+                      name: t(`levels.${lp.next.level}`),
+                    })}
+                  </>
                 ) : (
-                  <> · högsta nivån uppnådd</>
+                  <> · {t("maxLevel")}</>
                 )}
               </p>
             </div>
@@ -109,7 +126,7 @@ export function AccountStats({ data, locale }: { data: ProgressData; locale: Loc
 
           <div className="mt-5">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Mot nästa nivå</span>
+              <span>{t("towardsNextLevel")}</span>
               <span className="tabular-nums">{lp.percentToNext}%</span>
             </div>
             <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-muted">
@@ -126,34 +143,32 @@ export function AccountStats({ data, locale }: { data: ProgressData; locale: Loc
           <IconStat
             icon={<GraduationCap size={18} weight="bold" aria-hidden />}
             value={`${completedCount}/${totalLessons}`}
-            label="Lektioner"
+            label={t("lessonsLabel")}
           />
           <IconStat
             icon={<Flame size={18} weight="fill" aria-hidden />}
             value={`${data.streak}`}
-            label={data.streak === 1 ? "dag i rad" : "dagar i rad"}
+            label={data.streak === 1 ? t("dayStreakOne") : t("dayStreakMany")}
           />
           <IconStat
             icon={<Medal size={18} weight="fill" aria-hidden />}
             value={`${data.badges.length}`}
-            label="märken"
+            label={t("badgesLabel")}
           />
           <IconStat
             icon={<Lightning size={18} weight="fill" aria-hidden />}
             value={formatNumber(data.xp)}
-            label="XP totalt"
+            label={t("xpTotal")}
           />
         </div>
 
         {/* Per-course progress */}
         <div className="rounded-2xl border border-border bg-card p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-heading text-base font-semibold tracking-tight text-foreground">
-              Genomförda kurser
-            </h3>
+            <h3 className="font-heading text-base font-semibold tracking-tight text-foreground">{t("completedCourses")}</h3>
             <span className="flex items-center gap-1.5 text-pretty text-xs text-muted-foreground">
               <Trophy size={14} weight="fill" aria-hidden className="shrink-0 text-bitcoin" />
-              {percentComplete}% av hela kursen
+              {t("percentOfCourse", { percent: percentComplete })}
             </span>
           </div>
 
@@ -188,13 +203,12 @@ export function AccountStats({ data, locale }: { data: ProgressData; locale: Loc
 
           <p className="mt-5 flex items-center gap-1.5 border-t border-border pt-4 text-xs text-muted-foreground">
             <Clock size={14} weight="bold" aria-hidden className="text-bitcoin" />
-            Senaste aktivitet: <span className="text-foreground">{formatDay(data.lastActive)}</span>
+            {t("lastActivity")} <span className="text-foreground">{formatDay(data.lastActive, locale, t("noActivity"))}</span>
           </p>
 
           {!started ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              Du har inte börjat än. Gör din första lektion så fylls statistiken i
-              här.
+              {t("notStarted")}
             </p>
           ) : null}
         </div>

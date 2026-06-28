@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowLeft, Lightning } from "@phosphor-icons/react/dist/ssr";
 
 import { Container } from "@/components/layout/container";
@@ -49,6 +49,7 @@ export default async function ModulePage({
 }) {
   const { locale, modul } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("education");
   const mod = getModule(locale, modul);
   if (!mod) notFound();
 
@@ -63,9 +64,7 @@ export default async function ModulePage({
             href="/utbildning"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ArrowLeft size={15} weight="bold" aria-hidden />
-            Alla moduler
-          </Link>
+            <ArrowLeft size={15} weight="bold" aria-hidden />{t("allModules")}</Link>
 
           <header className="mt-5 flex items-start gap-4">
             <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-bitcoin-muted text-bitcoin">
@@ -82,7 +81,7 @@ export default async function ModulePage({
           </header>
 
           <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground tabular-nums">
-            <span>{mod.lessons.length} lektioner</span>
+            <span>{t("lessonsCount", { count: mod.lessons.length })}</span>
             <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1 text-bitcoin">
               <Lightning size={14} weight="fill" aria-hidden />
@@ -90,7 +89,7 @@ export default async function ModulePage({
             </span>
           </p>
 
-          <section className="mt-8" aria-label="Lektioner">
+          <section className="mt-8" aria-label={t("lessonsLabel")}>
             <LessonList
               moduleId={mod.id}
               basePath={basePath}

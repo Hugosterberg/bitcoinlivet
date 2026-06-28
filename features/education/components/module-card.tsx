@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowRight, CheckCircle, Lightning } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ export type ModuleCardData = {
 
 export function ModuleCard({ module }: { module: ModuleCardData }) {
   const { isLessonComplete, hydrated } = useProgress();
+  const t = useTranslations("education");
 
   const total = module.lessonIds.length;
   const done = hydrated
@@ -66,7 +68,7 @@ export function ModuleCard({ module }: { module: ModuleCardData }) {
           {complete ? (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-bitcoin-muted px-2 py-0.5 text-xs font-medium text-bitcoin">
               <CheckCircle size={13} weight="fill" aria-hidden />
-              Klar
+              {t("done")}
             </span>
           ) : null}
         </div>
@@ -90,7 +92,7 @@ export function ModuleCard({ module }: { module: ModuleCardData }) {
             {module.xp} XP
           </span>
           <span className="inline-flex items-center gap-1 text-sm font-medium text-bitcoin">
-            {done > 0 && !complete ? "Fortsätt" : complete ? "Repetera" : "Börja"}
+            {done > 0 && !complete ? t("continue") : complete ? t("review") : t("start")}
             <ArrowRight
               size={15}
               weight="bold"

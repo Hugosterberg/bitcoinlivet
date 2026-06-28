@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ export function Quiz({
   onResult: (result: QuizResult) => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const t = useTranslations("education");
 
   const correct = questions.filter((q) => answers[q.id] === q.answer).length;
   const answered = Object.keys(answers).length;
@@ -38,7 +40,7 @@ export function Quiz({
         return (
           <div key={q.id} className="rounded-2xl border border-border bg-card p-5 sm:p-6">
             <p className="text-xs font-medium uppercase tracking-wide text-bitcoin">
-              Fråga {qi + 1} av {questions.length}
+              {t("questionN", { n: qi + 1, total: questions.length })}
             </p>
             <h4 className="mt-1.5 font-heading text-base font-semibold tracking-tight text-foreground">
               {q.question}
@@ -101,7 +103,7 @@ export function Quiz({
                     : "bg-muted text-muted-foreground",
                 )}
               >
-                {selected === q.answer ? "Rätt! " : "Inte riktigt. "}
+                {selected === q.answer ? t("correctPrefix") : t("incorrectPrefix")}
                 {q.explanation}
               </p>
             ) : null}

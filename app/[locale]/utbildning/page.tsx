@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { ProgressDashboard } from "@/features/education/components/progress-dashboard";
 import { SignInPrompt } from "@/features/auth/components/sign-in-prompt";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ModuleCard, type ModuleCardData } from "@/features/education/components/module-card";
 import {
@@ -54,24 +54,6 @@ function buildModuleCards(locale: Locale): ModuleCardData[] {
   }));
 }
 
-const howItWorks = [
-  {
-    icon: <Lightning size={20} weight="fill" aria-hidden />,
-    title: "Samla XP",
-    text: "Varje slutförd lektion och rätt svar ger poäng som bygger din nivå.",
-  },
-  {
-    icon: <Flame size={20} weight="fill" aria-hidden />,
-    title: "Håll din streak",
-    text: "Lär dig lite varje dag så växer din streak, små steg blir stor kunskap.",
-  },
-  {
-    icon: <Medal size={20} weight="fill" aria-hidden />,
-    title: "Tjäna märken",
-    text: "Klara alla lektioner i en modul och lås upp ett märke för bemästrandet.",
-  },
-];
-
 export default async function UtbildningPage({
   params,
 }: {
@@ -79,7 +61,26 @@ export default async function UtbildningPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("education");
   const moduleCards = buildModuleCards(locale);
+
+  const howItWorks = [
+    {
+      icon: <Lightning size={20} weight="fill" aria-hidden />,
+      title: t("collectXp"),
+      text: t("collectXpText"),
+    },
+    {
+      icon: <Flame size={20} weight="fill" aria-hidden />,
+      title: t("keepStreak"),
+      text: t("keepStreakText"),
+    },
+    {
+      icon: <Medal size={20} weight="fill" aria-hidden />,
+      title: t("earnBadges"),
+      text: t("earnBadgesText"),
+    },
+  ];
 
   return (
     <div className="py-14 sm:py-20">
@@ -89,18 +90,15 @@ export default async function UtbildningPage({
           <div className="flex items-center gap-3">
             <Badge variant="bitcoin" className="px-3 py-1">
               <GraduationCap size={14} weight="fill" aria-hidden />
-              Bitcoinskolan
+              {t("schoolBadge")}
             </Badge>
-            <Badge variant="outline">Gratis</Badge>
+            <Badge variant="outline">{t("free")}</Badge>
           </div>
           <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Lär dig Bitcoin, steg för steg
+            {t("heroTitle")}
           </h1>
           <p className="mt-5 text-pretty text-lg/8 text-muted-foreground">
-            En lugn, interaktiv kurs på svenska. Läs korta lektioner, svara på
-            kunskapsfrågor och samla XP medan du bygger en riktig förståelse för
-            pengar, knapphet och köpkraft. Din progress sparas automatiskt i din
-            webbläsare.
+            {t("heroLead")}
           </p>
         </header>
 
@@ -132,11 +130,14 @@ export default async function UtbildningPage({
         <section className="mt-14" aria-label="Kursmoduler">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <h2 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-              Din lärväg
+              {t("yourPath")}
             </h2>
             <p className="text-pretty text-sm text-muted-foreground tabular-nums">
-              {moduleCount} moduler · {totalLessons} lektioner ·{" "}
-              {formatNumber(totalXp)} XP
+              {t("pathStats", {
+                modules: moduleCount,
+                lessons: totalLessons,
+                xp: formatNumber(totalXp),
+              })}
             </p>
           </div>
           <div className="mt-6 flex flex-col gap-4">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Flame, Medal, GraduationCap, Trophy } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ function Ring({ percent }: { percent: number }) {
 
 export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
   const { data, completedCount, hydrated, reset } = useProgress();
+  const t = useTranslations("education");
 
   const lp = getLevelProgress(data.xp);
   const percentComplete = totalLessons
@@ -55,20 +57,24 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-bitcoin">
-              Nivå {lp.current.level}
+              {t("level")} {lp.current.level}
             </p>
             <p className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-              {lp.current.name}
+              {t(`levels.${lp.current.level}`)}
             </p>
             <p className="mt-1 text-pretty text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
               {formatNumber(data.xp)} XP
               {lp.next ? (
                 <>
                   {" "}
-                  · {formatNumber(lp.xpToNext)} XP till {lp.next.name}
+                  ·{" "}
+                  {t("xpToNext", {
+                    xp: formatNumber(lp.xpToNext),
+                    name: t(`levels.${lp.next.level}`),
+                  })}
                 </>
               ) : (
-                <> · högsta nivån uppnådd</>
+                <> · {t("maxLevel")}</>
               )}
             </p>
           </div>
@@ -78,17 +84,17 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
           <IconStat
             icon={<GraduationCap size={18} weight="bold" aria-hidden />}
             value={`${completedCount}/${totalLessons}`}
-            label="Lektioner"
+            label={t("lessonsLabel")}
           />
           <IconStat
             icon={<Flame size={18} weight="fill" aria-hidden />}
             value={`${data.streak}`}
-            label={data.streak === 1 ? "dag i rad" : "dagar i rad"}
+            label={data.streak === 1 ? t("dayStreakOne") : t("dayStreakMany")}
           />
           <IconStat
             icon={<Medal size={18} weight="fill" aria-hidden />}
             value={`${data.badges.length}`}
-            label="märken"
+            label={t("badgesLabel")}
           />
         </div>
       </div>
@@ -96,7 +102,7 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
       {/* XP progress to next level */}
       <div className="mt-6">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Mot nästa nivå</span>
+          <span>{t("towardsNextLevel")}</span>
           <span className="tabular-nums">{lp.percentToNext}%</span>
         </div>
         <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-muted">
@@ -110,23 +116,19 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <p className="flex items-center gap-1.5 text-pretty text-xs text-muted-foreground">
           <Trophy size={14} weight="fill" aria-hidden className="shrink-0 text-bitcoin" />
-          {percentComplete}% av hela kursen klar
+          {t("percentDone", { percent: percentComplete })}
         </p>
         {hydrated && completedCount > 0 ? (
           <button
             type="button"
             onClick={() => {
-              if (
-                window.confirm(
-                  "Vill du nollställa dina poäng och din kursprogress? Detta går inte att ångra.",
-                )
-              ) {
+              if (window.confirm(t("resetConfirm"))) {
                 reset();
               }
             }}
             className="text-xs font-medium text-muted-foreground underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
           >
-            Nollställ progress
+            {t("resetProgress")}
           </button>
         ) : null}
       </div>

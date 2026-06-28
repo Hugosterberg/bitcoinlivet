@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { CheckCircle, Circle, Clock } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export function LessonList({
   lessons: LessonListItem[];
 }) {
   const { isLessonComplete, hydrated } = useProgress();
+  const t = useTranslations("education");
 
   return (
     <ol className="flex flex-col gap-3">
@@ -55,11 +57,11 @@ export function LessonList({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                    Lektion {i + 1}
+                    {t("lessonN", { n: i + 1 })}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock size={12} weight="bold" aria-hidden />
-                    {lesson.minutes} min
+                    {lesson.minutes} {t("minShort")}
                   </span>
                 </div>
                 <h3 className="mt-0.5 font-heading text-base font-semibold tracking-tight text-foreground">
