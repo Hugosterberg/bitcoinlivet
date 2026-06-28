@@ -1,17 +1,25 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/lib/site";
+import { getHostLocale } from "@/lib/host-locale";
+import { getSiteConfig } from "@/lib/site";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const locale = await getHostLocale();
+  const site = getSiteConfig(locale);
+  const name =
+    locale === "sv"
+      ? `${site.name}: Bitcoin, sparande och köpkraft`
+      : `${site.name}: Bitcoin, saving and purchasing power`;
+
   return {
-    name: `${siteConfig.name}: Bitcoin, sparande och köpkraft`,
-    short_name: siteConfig.name,
-    description: siteConfig.description,
+    name,
+    short_name: site.name,
+    description: site.description,
     start_url: "/",
     display: "standalone",
     background_color: "#0a0a0a",
     theme_color: "#f7931a",
-    lang: "sv-SE",
+    lang: locale === "sv" ? "sv-SE" : "en-US",
     categories: ["education", "finance"],
     icons: [
       { src: "/icon", sizes: "512x512", type: "image/png", purpose: "any" },

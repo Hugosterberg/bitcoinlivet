@@ -23,6 +23,7 @@ import {
 } from "@/features/education/data/courses";
 import type { Locale } from "@/i18n/routing";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata({
@@ -36,7 +37,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/utbildning" },
+    alternates: buildAlternates(locale, "/utbildning"),
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),

@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LockKey, Warning } from "@phosphor-icons/react/dist/ssr";
 
 import type { Locale } from "@/i18n/routing";
+import { localizedUrl } from "@/lib/seo";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { getCurrentUser } from "@/features/auth/data/session";
@@ -19,7 +20,7 @@ export async function generateMetadata({
   return {
     title: t("resetPageMetaTitle"),
     description: t("resetPageMetaDesc"),
-    alternates: { canonical: "/aterstall" },
+    alternates: { canonical: localizedUrl(locale, "/aterstall") },
     robots: { index: false },
   };
 }

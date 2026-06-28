@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import { HalvingCountdown } from "@/features/bitcoin-data/components/halving-countdown";
 import { StatTile } from "@/features/bitcoin-data/components/stat-tile";
 import { getBitcoinMarket } from "@/features/bitcoin-data/data/live-data";
@@ -34,7 +35,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/halvering" },
+    alternates: buildAlternates(locale, "/halvering"),
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),

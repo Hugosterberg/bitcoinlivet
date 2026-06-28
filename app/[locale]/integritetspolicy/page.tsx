@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import { CookieSettingsButton } from "@/components/layout/cookie-settings-button";
 
 export async function generateMetadata({
@@ -17,7 +18,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/integritetspolicy" },
+    alternates: buildAlternates(locale, "/integritetspolicy"),
   };
 }
 

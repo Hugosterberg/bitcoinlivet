@@ -9,6 +9,7 @@ import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import { PostCard } from "@/features/blog/components/post-card";
 import { formatDate } from "@/lib/format";
 import { getAllPosts, getPost, getPostSlugs } from "@/features/blog/data/posts";
@@ -24,20 +25,21 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: Locale; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const post = getPost(slug);
   if (!post) return {};
 
   const { meta } = post;
+  const href = { pathname: "/artiklar/[slug]" as const, params: { slug } };
   return {
     title: meta.title,
     description: meta.description,
-    alternates: { canonical: meta.href },
+    alternates: buildAlternates(locale, href),
     openGraph: {
       type: "article",
       title: meta.title,
       description: meta.description,
-      url: meta.href,
+      url: localizedUrl(locale, href),
       publishedTime: meta.date,
       authors: meta.author ? [meta.author] : undefined,
       section: meta.categoryLabel,

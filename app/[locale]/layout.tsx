@@ -8,6 +8,7 @@ import "../globals.css";
 
 import { cn } from "@/lib/utils";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import { routing, type Locale } from "@/i18n/routing";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -74,7 +75,7 @@ export async function generateMetadata({
     creator: site.name,
     publisher: site.name,
     alternates: {
-      canonical: "/",
+      ...buildAlternates(locale, "/"),
       types: {
         "application/rss+xml": [
           { url: "/feed.xml", title: `${site.name}: ${locale === "sv" ? "Artiklar" : "Articles"}` },

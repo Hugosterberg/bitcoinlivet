@@ -1,0 +1,35 @@
+import type { Metadata } from "next";
+
+import { getPathname } from "@/i18n/navigation";
+import { routing, type Locale } from "@/i18n/routing";
+import { getSiteConfig } from "@/lib/site";
+
+/** A locale-aware href, as accepted by next-intl's `getPathname`. */
+type Href = Parameters<typeof getPathname>[0]["href"];
+
+/** Absolute URL for `href` on `locale`'s domain, with its localized path. */
+export function localizedUrl(locale: Locale, href: Href): string {
+  return getSiteConfig(locale).url + getPathname({ locale, href });
+}
+
+/**
+ * Builds `alternates` for a page: a self-referencing canonical on the current
+ * domain (with the locale-correct path) plus cross-domain `hreflang` links to
+ * every locale and an `x-default`. Use in every `generateMetadata` so the en
+ * domain points at `/news` rather than the sv `/nyheter`.
+ */
+export function buildAlternates(
+  locale: Locale,
+  href: Href,
+): NonNullable<Metadata["alternates"]> {
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) {
+    languages[l] = localizedUrl(l, href);
+  }
+  languages["x-default"] = localizedUrl(routing.defaultLocale, href);
+
+  return {
+    canonical: localizedUrl(locale, href),
+    languages,
+  };
+}

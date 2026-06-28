@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { UserCircle, GraduationCap, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
 import type { Locale } from "@/i18n/routing";
+import { localizedUrl } from "@/lib/seo";
 import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/konto" },
+    alternates: { canonical: localizedUrl(locale, "/konto") },
     robots: { index: false },
   };
 }

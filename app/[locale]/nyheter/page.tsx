@@ -17,6 +17,7 @@ import { Container } from "@/components/layout/container";
 import { Badge } from "@/components/ui/badge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import {
   getBitcoinMarket,
   getRecommendedFees,
@@ -47,7 +48,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/nyheter" },
+    alternates: buildAlternates(locale, "/nyheter"),
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),

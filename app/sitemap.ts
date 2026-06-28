@@ -1,54 +1,85 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/lib/site";
 import { getAllPosts } from "@/features/blog/data/posts";
 import { getCourseModules } from "@/features/education/data/courses";
 import { bitcoinFunctions } from "@/features/functions/data/functions";
 import { routing } from "@/i18n/routing";
+import { getHostLocale } from "@/lib/host-locale";
+import { localizedUrl } from "@/lib/seo";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = siteConfig.url;
-  // Sitemap is sv-only for now; per-domain (host-derived) sitemaps land in Phase 2.
-  const courseModules = getCourseModules(routing.defaultLocale);
+type Href = Parameters<typeof localizedUrl>[1];
+
+/**
+ * Per-domain sitemap. The active locale is derived from the request Host, so
+ * bitcoinlivet.se serves the sv URLs and bitcoinerlife.xyz the en URLs, each
+ * with its own localized path segments. Every entry carries `hreflang`
+ * alternates linking the locales across domains.
+ */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const locale = await getHostLocale();
+  const courseModules = getCourseModules(locale);
+
+  const languagesFor = (href: Href): Record<string, string> => {
+    const languages: Record<string, string> = {};
+    for (const l of routing.locales) languages[l] = localizedUrl(l, href);
+    return languages;
+  };
+
+  const entry = (
+    href: Href,
+    opts: Omit<MetadataRoute.Sitemap[number], "url" | "alternates">,
+  ): MetadataRoute.Sitemap[number] => ({
+    url: localizedUrl(locale, href),
+    alternates: { languages: languagesFor(href) },
+    ...opts,
+  });
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/utbildning`, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${base}/artiklar`, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${base}/data`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${base}/nyheter`, changeFrequency: "hourly", priority: 0.7 },
-    { url: `${base}/ordlista`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/halvering`, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${base}/funktioner`, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/om`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/integritetspolicy`, changeFrequency: "yearly", priority: 0.2 },
+    entry("/", { changeFrequency: "weekly", priority: 1 }),
+    entry("/utbildning", { changeFrequency: "weekly", priority: 0.9 }),
+    entry("/artiklar", { changeFrequency: "weekly", priority: 0.8 }),
+    entry("/data", { changeFrequency: "daily", priority: 0.8 }),
+    entry("/nyheter", { changeFrequency: "hourly", priority: 0.7 }),
+    entry("/ordlista", { changeFrequency: "monthly", priority: 0.6 }),
+    entry("/halvering", { changeFrequency: "weekly", priority: 0.7 }),
+    entry("/funktioner", { changeFrequency: "monthly", priority: 0.7 }),
+    entry("/om", { changeFrequency: "monthly", priority: 0.5 }),
+    entry("/integritetspolicy", { changeFrequency: "yearly", priority: 0.2 }),
   ];
 
-  const functionRoutes: MetadataRoute.Sitemap = bitcoinFunctions.map((fn) => ({
-    url: `${base}/funktioner/${fn.slug}`,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
+  const functionRoutes: MetadataRoute.Sitemap = bitcoinFunctions.map((fn) =>
+    entry(
+      { pathname: "/funktioner/[slug]", params: { slug: fn.slug } },
+      { changeFrequency: "monthly", priority: 0.6 },
+    ),
+  );
 
   const courseRoutes: MetadataRoute.Sitemap = courseModules.flatMap((module) => [
-    {
-      url: `${base}/utbildning/${module.slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-    ...module.lessons.map((lesson) => ({
-      url: `${base}/utbildning/${module.slug}/${lesson.slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    })),
+    entry(
+      { pathname: "/utbildning/[modul]", params: { modul: module.slug } },
+      { changeFrequency: "monthly", priority: 0.6 },
+    ),
+    ...module.lessons.map((lesson) =>
+      entry(
+        {
+          pathname: "/utbildning/[modul]/[lektion]",
+          params: { modul: module.slug, lektion: lesson.slug },
+        },
+        { changeFrequency: "monthly", priority: 0.5 },
+      ),
+    ),
   ]);
 
-  const postRoutes: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
-    url: `${base}${post.href}`,
-    lastModified: new Date(post.date),
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
+  const postRoutes: MetadataRoute.Sitemap = getAllPosts().map((post) =>
+    entry(
+      { pathname: "/artiklar/[slug]", params: { slug: post.slug } },
+      {
+        lastModified: new Date(post.date),
+        changeFrequency: "monthly",
+        priority: 0.6,
+      },
+    ),
+  );
 
   return [...staticRoutes, ...functionRoutes, ...courseRoutes, ...postRoutes];
 }

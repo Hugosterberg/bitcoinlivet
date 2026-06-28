@@ -15,6 +15,7 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates, localizedUrl } from "@/lib/seo";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 import {
   bitcoinFunctions,
@@ -37,14 +38,15 @@ export async function generateMetadata({
   const fn = getFunction(slug);
   if (!fn) return {};
   const site = getSiteConfig(locale);
+  const href = { pathname: "/funktioner/[slug]" as const, params: { slug: fn.slug } };
   return {
     title: fn.title,
     description: fn.metaDescription,
-    alternates: { canonical: `/funktioner/${fn.slug}` },
+    alternates: buildAlternates(locale, href),
     openGraph: {
       title: `${fn.title} · ${site.name}`,
       description: fn.metaDescription,
-      url: `/funktioner/${fn.slug}`,
+      url: localizedUrl(locale, href),
       type: "article",
     },
   };

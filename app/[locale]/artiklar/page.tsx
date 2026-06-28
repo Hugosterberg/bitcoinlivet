@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/routing";
 import { Container } from "@/components/layout/container";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import { BlogExplorer } from "@/features/blog/components/blog-explorer";
 import {
   categories,
@@ -24,7 +25,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/artiklar" },
+    alternates: buildAlternates(locale, "/artiklar"),
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),

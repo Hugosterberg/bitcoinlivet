@@ -8,6 +8,7 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 import { functionMenu } from "@/features/functions/data/functions";
 
@@ -22,7 +23,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/funktioner" },
+    alternates: buildAlternates(locale, "/funktioner"),
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),

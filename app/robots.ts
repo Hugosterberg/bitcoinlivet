@@ -1,16 +1,27 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/lib/site";
+import { getPathname } from "@/i18n/navigation";
+import { getHostLocale } from "@/lib/host-locale";
+import { getSiteConfig } from "@/lib/site";
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const locale = await getHostLocale();
+  const site = getSiteConfig(locale);
+
   return {
     rules: {
       userAgent: "*",
       allow: "/",
       // Private/personal and non-content routes — no SEO value, keep them out.
-      disallow: ["/api/", "/konto", "/aterstall", "/auth/"],
+      // Paths are localized per domain (e.g. /konto vs /account).
+      disallow: [
+        "/api/",
+        getPathname({ locale, href: "/konto" }),
+        getPathname({ locale, href: "/aterstall" }),
+        "/auth/",
+      ],
     },
-    sitemap: `${siteConfig.url}/sitemap.xml`,
-    host: siteConfig.url,
+    sitemap: `${site.url}/sitemap.xml`,
+    host: site.url,
   };
 }

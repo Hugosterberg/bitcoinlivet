@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { GlossaryExplorer } from "@/features/glossary/components/glossary-explorer";
 import { sortedGlossary } from "@/features/glossary/data/glossary";
 import { getSiteConfig } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -20,7 +21,7 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDesc"),
-    alternates: { canonical: "/ordlista" },
+    alternates: buildAlternates(locale, "/ordlista"),
     openGraph: {
       title: `${t("ogTitle")} · ${site.name}`,
       description: t("ogDesc"),
