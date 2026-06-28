@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 import { getAllPosts } from "@/features/blog/data/posts";
 import { getCourseModules } from "@/features/education/data/courses";
-import { bitcoinFunctions } from "@/features/functions/data/functions";
-import { routing } from "@/i18n/routing";
+import { getFunctions, getFunctionSlugsById } from "@/features/functions/data/functions";
+import { routing, type Locale } from "@/i18n/routing";
 import { getHostLocale } from "@/lib/host-locale";
 import { localizedUrl } from "@/lib/seo";
 
@@ -34,6 +34,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...opts,
   });
 
+  // hreflang alternates for content whose slug is localized (differs per locale).
+  const slugLanguages = (
+    pathname: "/funktioner/[slug]",
+    slugs: Record<Locale, string>,
+  ): Record<string, string> => {
+    const languages: Record<string, string> = {};
+    for (const l of routing.locales) {
+      languages[l] = localizedUrl(l, { pathname, params: { slug: slugs[l] } });
+    }
+    return languages;
+  };
+
+  // Current-locale URL only — used where cross-locale slugs aren't mapped yet.
+  const localEntry = (
+    href: Href,
+    opts: Omit<MetadataRoute.Sitemap[number], "url" | "alternates">,
+  ): MetadataRoute.Sitemap[number] => ({
+    url: localizedUrl(locale, href),
+    ...opts,
+  });
+
   const staticRoutes: MetadataRoute.Sitemap = [
     entry("/", { changeFrequency: "weekly", priority: 1 }),
     entry("/utbildning", { changeFrequency: "weekly", priority: 0.9 }),
@@ -47,20 +68,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/integritetspolicy", { changeFrequency: "yearly", priority: 0.2 }),
   ];
 
-  const functionRoutes: MetadataRoute.Sitemap = bitcoinFunctions.map((fn) =>
-    entry(
-      { pathname: "/funktioner/[slug]", params: { slug: fn.slug } },
-      { changeFrequency: "monthly", priority: 0.6 },
-    ),
-  );
+  const functionRoutes: MetadataRoute.Sitemap = getFunctions(locale).map((fn) => ({
+    url: localizedUrl(locale, { pathname: "/funktioner/[slug]", params: { slug: fn.slug } }),
+    alternates: {
+      languages: slugLanguages("/funktioner/[slug]", getFunctionSlugsById(fn.id)),
+    },
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
 
+  // Courses and posts use localized slugs; emit the current-locale URL only
+  // until their cross-locale slug mapping is wired (no wrong hreflang links).
   const courseRoutes: MetadataRoute.Sitemap = courseModules.flatMap((module) => [
-    entry(
+    localEntry(
       { pathname: "/utbildning/[modul]", params: { modul: module.slug } },
       { changeFrequency: "monthly", priority: 0.6 },
     ),
     ...module.lessons.map((lesson) =>
-      entry(
+      localEntry(
         {
           pathname: "/utbildning/[modul]/[lektion]",
           params: { modul: module.slug, lektion: lesson.slug },
@@ -71,7 +96,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   const postRoutes: MetadataRoute.Sitemap = getAllPosts().map((post) =>
-    entry(
+    localEntry(
       { pathname: "/artiklar/[slug]", params: { slug: post.slug } },
       {
         lastModified: new Date(post.date),

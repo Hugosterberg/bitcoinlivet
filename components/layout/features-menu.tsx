@@ -3,11 +3,13 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { SquaresFour, CaretDown, ArrowRight } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
-import { functionMenu } from "@/features/functions/data/functions";
+import { getPathname } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { getFunctionMenu } from "@/features/functions/data/functions";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 
 /**
@@ -18,6 +20,8 @@ import { FunctionIcon } from "@/features/functions/components/function-icon";
  */
 export function FeaturesMenu() {
   const pathname = usePathname();
+  const locale = useLocale() as Locale;
+  const functionMenu = getFunctionMenu(locale);
   const t = useTranslations("header");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -120,7 +124,7 @@ export function FeaturesMenu() {
 
             <div className="mt-4 border-t border-border/60 pt-4">
               <Link
-                href="/utbildning"
+                href={getPathname({ locale, href: "/utbildning" })}
                 onClick={() => setOpen(false)}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-bitcoin transition-colors hover:text-bitcoin/80"
               >

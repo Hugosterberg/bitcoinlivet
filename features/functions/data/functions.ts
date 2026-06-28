@@ -1,12 +1,20 @@
 /**
- * Deep content for the "Funktioner" pages — one rich page per Bitcoin
- * property, each motivating *why* the property matters in relation to how
- * money and payments work today. Calm, factual and anti-hype; never financial
- * advice.
+ * Deep content for the "Funktioner" / "Features" pages — one rich page per
+ * Bitcoin property, each motivating *why* the property matters in relation to
+ * how money and payments work today. Calm, factual and anti-hype; never
+ * financial advice.
+ *
+ * Bilingual: each function has a stable, locale-agnostic `id` and a localized
+ * `slug` (URLs differ per domain, e.g. /funktioner/begransat-utbud vs
+ * /features/limited-supply). hreflang/sitemap resolve the cross-locale slug via
+ * the shared `id`.
  *
  * Halveringen has its own bespoke page at /halvering and is therefore not in
- * `bitcoinFunctions`; it is added to the navigation menu separately below.
+ * the functions list; it is added to the navigation menu separately below.
  */
+
+import { getPathname } from "@/i18n/navigation";
+import { routing, type Locale } from "@/i18n/routing";
 
 /** Icon key, mapped to a Phosphor icon in
  *  features/functions/components/function-icon.tsx. */
@@ -27,6 +35,9 @@ export type FunctionSection = { heading: string; body: string[] };
 export type RelatedLink = { href: string; label: string };
 
 export type BitcoinFunction = {
+  /** Stable, locale-agnostic identifier shared across locales. */
+  id: string;
+  /** Localized URL slug. */
   slug: string;
   icon: FunctionIconKey;
   title: string;
@@ -46,8 +57,9 @@ export type BitcoinFunction = {
   related: RelatedLink[];
 };
 
-export const bitcoinFunctions: BitcoinFunction[] = [
+const svFunctions: BitcoinFunction[] = [
   {
+    id: "limited-supply",
     slug: "begransat-utbud",
     icon: "supply",
     title: "Begränsat utbud",
@@ -104,12 +116,12 @@ export const bitcoinFunctions: BitcoinFunction[] = [
       "Du kan själv verifiera utbudet med en egen nod.",
     ],
     related: [
-      { href: "/utbildning/knapphet/21-miljoner", label: "Lektion: De 21 miljonerna" },
       { href: "/halvering", label: "Läs om halveringen" },
       { href: "/data", label: "Se utbudet live" },
     ],
   },
   {
+    id: "decentralisation",
     slug: "decentralisering",
     icon: "decentralisation",
     title: "Decentralisering",
@@ -166,12 +178,12 @@ export const bitcoinFunctions: BitcoinFunction[] = [
       "Ger censurmotstånd, men också eget ansvar för dina nycklar.",
     ],
     related: [
-      { href: "/utbildning/bitcoin/decentralisering", label: "Lektion: Varför ingen styr Bitcoin" },
       { href: "/ordlista#nod", label: "Ordlista: Nod" },
       { href: "/ordlista#censurmotstand", label: "Ordlista: Censurmotstånd" },
     ],
   },
   {
+    id: "security",
     slug: "sakerhet",
     icon: "security",
     title: "Säkerhet",
@@ -228,12 +240,11 @@ export const bitcoinFunctions: BitcoinFunction[] = [
       "Dina nycklar är ditt ansvar, skydda återställningsfrasen.",
     ],
     related: [
-      { href: "/utbildning/knapphet/brytning", label: "Lektion: Brytning och energi" },
-      { href: "/utbildning/kom-igang/sakerhet", label: "Lektion: Säkerhet och vanliga misstag" },
       { href: "/ordlista#proof-of-work", label: "Ordlista: Proof of work" },
     ],
   },
   {
+    id: "fast-transactions",
     slug: "snabba-transaktioner",
     icon: "payments",
     title: "Snabba transaktioner",
@@ -296,6 +307,7 @@ export const bitcoinFunctions: BitcoinFunction[] = [
     ],
   },
   {
+    id: "purchasing-power",
     slug: "kopkraft-pa-lang-sikt",
     icon: "purchasingPower",
     title: "Köpkraft på lång sikt",
@@ -352,12 +364,12 @@ export const bitcoinFunctions: BitcoinFunction[] = [
       "Volatilt på kort sikt, därför ett långsiktigt perspektiv.",
     ],
     related: [
-      { href: "/utbildning/kopkraft/kopkraft-over-tid", label: "Lektion: Köpkraft över tid" },
       { href: "/artiklar/kopkraft-forklarat", label: "Läs: Köpkraft förklarat" },
       { href: "/data", label: "Se inflation och köpkraft" },
     ],
   },
   {
+    id: "transparency",
     slug: "transparens",
     icon: "transparency",
     title: "Transparens",
@@ -414,19 +426,418 @@ export const bitcoinFunctions: BitcoinFunction[] = [
       "Adresser är pseudonyma, transparent på systemnivå men inte namngivet.",
     ],
     related: [
-      { href: "/utbildning/bitcoin/blockkedjan", label: "Lektion: Blockkedjan enkelt förklarad" },
       { href: "/ordlista#full-nod", label: "Ordlista: Full nod" },
       { href: "/ordlista#blockkedja", label: "Ordlista: Blockkedja" },
     ],
   },
 ];
 
-export function getFunction(slug: string): BitcoinFunction | undefined {
-  return bitcoinFunctions.find((f) => f.slug === slug);
+const enFunctions: BitcoinFunction[] = [
+  {
+    id: "limited-supply",
+    slug: "limited-supply",
+    icon: "supply",
+    title: "Limited supply",
+    menuDescription:
+      "There will never be more than 21 million bitcoin. The cap is built in and can't be changed.",
+    tagline: "21 million, forever. Why a fixed cap changes everything.",
+    metaDescription:
+      "Bitcoin has a mathematical cap of 21 million. How the scarce, predictable supply works, and why it differs from money that can be printed without limit.",
+    intro: [
+      "Bitcoin has a cap built into its rules: there will never be more than 21 million bitcoin. No one can vote more into existence, print more in a crisis or quietly slip in exceptions. The scarcity isn't a promise — it's a rule anyone can check for themselves.",
+      "It sounds like a technical detail, but it may be the single most important difference from the money we use today.",
+    ],
+    compare: [
+      {
+        today:
+          "Central banks can create new money essentially without limit. The money supply grows year after year, often faster in a crisis.",
+        bitcoin:
+          "The supply is fixed in code. It can't be increased, and the rate new bitcoin are created falls step by step toward zero.",
+      },
+      {
+        today:
+          "How much money exists, and who gets the new money, is decided by choices you rarely see or can influence.",
+        bitcoin:
+          "Anyone can download the blockchain and count for themselves exactly how many bitcoin exist.",
+      },
+    ],
+    sections: [
+      {
+        heading: "Money that can be printed erodes savings",
+        body: [
+          "When the amount of money grows faster than the amount of goods and services, prices tend to rise. It isn't that things become 'more expensive' in themselves — it's often that each unit of money becomes worth less. Anyone saving in cash quietly loses purchasing power, year after year.",
+          "The problem isn't that money is sometimes created, but that there's no limit. As long as the amount can be increased, there's always a temptation to solve short-term problems by diluting what everyone already owns.",
+        ],
+      },
+      {
+        heading: "A cap no one can move",
+        body: [
+          "Bitcoin's 21 million are released on a schedule known from the start. New bitcoin are created as a reward to those who secure the network, and that reward halves roughly every four years. Today around 20 million are already issued; the very last ones aren't created until around the year 2140.",
+          "What matters is that the rules apply equally to everyone and can't be changed by a single actor. Changing the cap would require an overwhelming majority of the network to voluntarily agree to make their own bitcoin less scarce — something no one would rationally want.",
+        ],
+      },
+      {
+        heading: "Why scarcity is good for the world",
+        body: [
+          "Money with a known, limited supply rewards patience. When you know what you save can't be diluted, it becomes easier to think long term, plan and build. Historically, societies with stable, hard money have found it easier to save and invest across generations.",
+          "A predictable supply is also fairer: no group gets a quiet advantage from standing closest to the money tap. Everyone works with the same rules.",
+        ],
+      },
+    ],
+    takeaways: [
+      "A hard cap of 21 million bitcoin, built into the protocol.",
+      "About 20 million are already issued; the rest release on a declining schedule to ~2140.",
+      "No single actor can create more or change the cap.",
+      "You can verify the supply yourself by running your own node.",
+    ],
+    related: [
+      { href: "/halvering", label: "Read about the halving" },
+      { href: "/data", label: "See the supply live" },
+    ],
+  },
+  {
+    id: "decentralisation",
+    slug: "decentralisation",
+    icon: "decentralisation",
+    title: "Decentralisation",
+    menuDescription:
+      "No central actor controls Bitcoin. The network is run by thousands of independent nodes.",
+    tagline: "No CEO, no head office, no off switch.",
+    metaDescription:
+      "Bitcoin isn't controlled by any single actor. How decentralisation works, why no one can take control, and what it means for you and the world.",
+    intro: [
+      "Bitcoin has no CEO, no head office and no button to switch it off. Instead, responsibility is spread across thousands of independent participants around the world, each following the same rules.",
+      "That makes the network slow-moving and hard to change, which might sound like a drawback. In practice it's the whole strength.",
+    ],
+    compare: [
+      {
+        today:
+          "Banks and payment systems are run by individual actors who can freeze accounts, refuse payments or change the terms.",
+        bitcoin:
+          "Thousands of independent nodes follow the same rules. No single one can change them, censor you or shut down the network.",
+      },
+      {
+        today:
+          "Trust rests on institutions: you have to trust that they behave and don't make mistakes.",
+        bitcoin:
+          "Trust rests on open code and mathematics that anyone can inspect and run themselves.",
+      },
+    ],
+    sections: [
+      {
+        heading: "What decentralisation means in practice",
+        body: [
+          "Three groups keep the network running, without any one of them deciding alone. Nodes download and check that every rule is followed. Miners propose new blocks and spend energy to secure them. Users choose which version of the software they run.",
+          "No one has to trust anyone else. If a miner or node tries to break the rules, it's simply rejected by everyone else.",
+        ],
+      },
+      {
+        heading: "Why no one can take control",
+        body: [
+          "Changes to Bitcoin's rules require broad agreement among thousands of independent participants with different interests. That makes it extremely hard for any single party — a company, a state or a wealthy actor — to change the rules of the game in their own favour.",
+          "The same property makes the network resilient. There's no central server to knock out and no single point that can be made to fail.",
+        ],
+      },
+      {
+        heading: "What it gives you and the world",
+        body: [
+          "Decentralisation gives censorship resistance: a valid transaction can't be stopped and your money can't be frozen by an intermediary. For many in the world, where access to banking isn't a given or where the local currency collapses, that isn't an abstract principle but a practical freedom.",
+          "It also means responsibility. When no one can shut you out, no one can rescue you either if you lose your keys. The freedom and the responsibility go together.",
+        ],
+      },
+    ],
+    takeaways: [
+      "No central actor owns or controls Bitcoin.",
+      "Nodes, miners and users balance one another.",
+      "Rule changes require broad agreement, which protects against manipulation.",
+      "Gives censorship resistance, but also personal responsibility for your keys.",
+    ],
+    related: [
+      { href: "/ordlista#nod", label: "Glossary: Node" },
+      { href: "/ordlista#censurmotstand", label: "Glossary: Censorship resistance" },
+    ],
+  },
+  {
+    id: "security",
+    slug: "security",
+    icon: "security",
+    title: "Security",
+    menuDescription:
+      "Cryptography and proof of work make it extremely expensive to forge the history.",
+    tagline: "Energy turned into security, and why the history is so hard to change.",
+    metaDescription:
+      "How is Bitcoin protected? How proof of work and cryptography make the network's history extremely expensive to forge, and what you're responsible for yourself.",
+    intro: [
+      "Bitcoin isn't protected by passwords or by trust in an institution, but by mathematics and real work. That makes the network's history practically impossible to forge.",
+      "Security exists on two levels: the network's, handled by the protocol, and your own, which is your responsibility.",
+    ],
+    compare: [
+      {
+        today:
+          "Digital accounts are protected by passwords and by trust in institutions that can be hacked, leak or be misused.",
+        bitcoin:
+          "The history is protected by proof of work: an attacker has to outmatch the network's entire combined computing power.",
+      },
+      {
+        today:
+          "A central database can be changed by whoever has the right permissions, sometimes after the fact.",
+        bitcoin:
+          "Each block builds mathematically on the last. Changing anything old requires redoing everything after it.",
+      },
+    ],
+    sections: [
+      {
+        heading: "Proof of work, briefly explained",
+        body: [
+          "To add a new block, miners have to solve a computational task that requires real electricity and hardware. Finding the solution is hard, but checking it is easy for everyone else. Whoever succeeds is rewarded with new bitcoin and fees.",
+          "That the work costs something is the whole point. It ties the digital history to real energy, and makes cheating expensive to attempt.",
+        ],
+      },
+      {
+        heading: "Why cheating gets more expensive over time",
+        body: [
+          "The combined computing power that secures the network is called the hash rate, and it has grown enormously over the years. To rewrite the history, an attacker would need more power than the rest of the world's miners combined, while paying for huge amounts of electricity.",
+          "The more the network grows, the more unreasonable such an attack becomes. Energy is thus continuously converted into security.",
+        ],
+      },
+      {
+        heading: "Your own security",
+        body: [
+          "The network can be as secure as you like, but your bitcoin are only as safe as your keys. Whoever has the secret recovery phrase controls the money. So it should be written down offline, never shared and never entered at the prompting of someone who reaches out to you.",
+          "Precisely so that money can have a single true owner, the responsibility lies with you. That's the price of no intermediary being able to freeze, take or make disappear what you own.",
+        ],
+      },
+    ],
+    takeaways: [
+      "Proof of work ties security to real energy.",
+      "Changing old history requires more power than the whole network.",
+      "Security grows with the network's hash rate.",
+      "Your keys are your responsibility — protect the recovery phrase.",
+    ],
+    related: [
+      { href: "/ordlista#proof-of-work", label: "Glossary: Proof of work" },
+    ],
+  },
+  {
+    id: "fast-transactions",
+    slug: "fast-transactions",
+    icon: "payments",
+    title: "Fast transactions",
+    menuDescription:
+      "With layers like Lightning, value can be sent around the world in seconds, around the clock.",
+    tagline: "Send value anywhere, around the clock, without asking permission.",
+    metaDescription:
+      "How fast is Bitcoin? How the base layer and the Lightning network work, and why borderless payments around the clock matter.",
+    intro: [
+      "Bitcoin is open around the clock, all year. There are no closing hours, no weekends and no borders that stop a payment. How fast it goes depends on which layer you use.",
+      "It's worth being honest: the base layer is built for security, not speed. The really fast payments happen on top of it.",
+    ],
+    compare: [
+      {
+        today:
+          "Bank transfers pause on weekends, are stopped at borders and can take days internationally, often with high fees.",
+        bitcoin:
+          "The network is open 24/7. With Lightning, payments happen in seconds for fractions of a cent.",
+      },
+      {
+        today:
+          "Sending money abroad often requires several intermediaries, each of which charges and takes time.",
+        bitcoin:
+          "Value is sent directly between parties, anywhere in the world, without asking anyone for permission.",
+      },
+    ],
+    sections: [
+      {
+        heading: "The base layer: decisive, not lightning-fast",
+        body: [
+          "On Bitcoin's base layer, transactions are gathered into blocks roughly every ten minutes. That's deliberately slow: the time and the work are what make the history secure and hard to change. The base layer works best as a settlement layer for larger or final transfers.",
+          "When many want in at once, fees rise, because the space in each block is limited. It's a natural queue, not a fault.",
+        ],
+      },
+      {
+        heading: "Lightning: everyday payments",
+        body: [
+          "On top of the base layer sits the Lightning Network, a layer built for small, fast payments. There, transfers happen almost instantly and for minimal fees, while ultimately settling against the secure blockchain.",
+          "That's how Bitcoin can be both a robust settlement layer and a practical way to pay for a coffee, without compromising on security.",
+        ],
+      },
+      {
+        heading: "Why being borderless matters",
+        body: [
+          "For someone sending money to family in another country, today's fees and waiting times can eat up a large part of the amount. An open network around the clock lowers both the cost and the threshold.",
+          "And for the many millions of people without access to a bank, a phone is enough to receive and send value. Access isn't conditional on where you live or who you are.",
+        ],
+      },
+    ],
+    takeaways: [
+      "The network is open around the clock, with no weekends or borders.",
+      "The base layer prioritises security, with blocks roughly every ten minutes.",
+      "Lightning gives near-instant payments for minimal fees.",
+      "Borderless payments lower thresholds for the whole world.",
+    ],
+    related: [
+      { href: "/ordlista#lightning", label: "Glossary: Lightning Network" },
+      { href: "/ordlista#mempool", label: "Glossary: Mempool" },
+      { href: "/nyheter", label: "See today's fees" },
+    ],
+  },
+  {
+    id: "purchasing-power",
+    slug: "purchasing-power",
+    icon: "purchasingPower",
+    title: "Purchasing power over the long run",
+    menuDescription:
+      "A scarce, predictable supply is meant to preserve purchasing power as ordinary money erodes.",
+    tagline: "Measure saving by what the money buys, not by the number of kronor.",
+    metaDescription:
+      "Why is saving measured in purchasing power? How inflation erodes ordinary money over time, and the idea behind Bitcoin's scarce supply as a store of value.",
+    intro: [
+      "The number of kronor in your account says nothing until we know what they buy. What shapes your everyday life is purchasing power — how much in goods and services the money can actually buy.",
+      "And purchasing power is something that changes, usually slowly and almost imperceptibly.",
+    ],
+    compare: [
+      {
+        today:
+          "At 2 percent inflation, money's purchasing power halves in about 35 years. Cash loses value quietly.",
+        bitcoin:
+          "A fixed supply can't be diluted. The idea is that purchasing power is preserved rather than eroded over time.",
+      },
+      {
+        today:
+          "You have to take on risk just to keep the value of your savings in step with inflation.",
+        bitcoin:
+          "The idea is money that doesn't need to 'work' to avoid losing value, because it can't be diluted.",
+      },
+    ],
+    sections: [
+      {
+        heading: "What inflation does to your savings",
+        body: [
+          "Inflation means the general price level rises, so the same sum buys a little less. Over a single year it's rarely felt, but over a decade or two the effect is large. A hundred-krona note saved long ago buys a fraction today of what it once did.",
+          "A common cause is the amount of money growing faster than the amount of goods and services. When more kronor chase the same supply, prices rise.",
+        ],
+      },
+      {
+        heading: "Scarce money and purchasing power",
+        body: [
+          "Money with a limited, predictable supply can't be diluted in the same way. The idea is simple: if no one can create more, no one can erode the value of what you already own. That's why Bitcoin's fixed cap is so central to the whole idea of sounder money.",
+          "It doesn't mean the price is stable — quite the opposite. It means the long-term dilution that affects ordinary money is taken out of the equation.",
+        ],
+      },
+      {
+        heading: "Volatility in the short run, scarcity in the long run",
+        body: [
+          "Bitcoin swings sharply in price in the short run. That's one reason to think in years and decades rather than weeks, and never to save more than you can afford to set aside. Scarcity is an argument about the long run, not a promise about what the price does tomorrow.",
+          "This is not financial advice. The goal is to understand the difference between money that can be diluted and money that can't, so you can think clearly about your own saving.",
+        ],
+      },
+    ],
+    takeaways: [
+      "Purchasing power, not the number of kronor, is what counts.",
+      "Inflation erodes ordinary money slowly but relentlessly.",
+      "A fixed supply can't be diluted, which is the idea behind preserving value.",
+      "Volatile in the short run, hence a long-term perspective.",
+    ],
+    related: [
+      { href: "/artiklar/kopkraft-forklarat", label: "Read: Purchasing power explained" },
+      { href: "/data", label: "See inflation and purchasing power" },
+    ],
+  },
+  {
+    id: "transparency",
+    slug: "transparency",
+    icon: "transparency",
+    title: "Transparency",
+    menuDescription:
+      "Every transaction sits openly in the blockchain and can be verified by anyone.",
+    tagline: "An open ledger that anyone can inspect.",
+    metaDescription:
+      "Bitcoin's blockchain is open and can be inspected by everyone. How transparency works, the 'don't trust, verify' principle, and how it's balanced against privacy.",
+    intro: [
+      "Bitcoin keeps a shared, open ledger. Every transaction ever made, and every bitcoin that exists, can be inspected by anyone, at any time, without asking permission.",
+      "It's the exact opposite of how the financial system usually works today.",
+    ],
+    compare: [
+      {
+        today:
+          "The financial system is largely a black box. You have to trust that institutions keep the books correctly.",
+        bitcoin:
+          "The entire blockchain is open. Anyone can verify the rules, the supply and every transaction themselves.",
+      },
+      {
+        today:
+          "Insight into how money is created and moves is reserved for a few.",
+        bitcoin:
+          "The insight is total and free. You only need to run the software to see everything with your own eyes.",
+      },
+    ],
+    sections: [
+      {
+        heading: "The open blockchain",
+        body: [
+          "The blockchain is a chronological ledger of all transactions, copied to thousands of computers worldwide. Because everyone has the same copy, no central bookkeeper is needed, and because everything is open, no one can quietly rewrite history.",
+          "That makes it possible to check things that previously required blind trust: how many bitcoin exist, that none were created beyond the rules, and that a payment really took place.",
+        ],
+      },
+      {
+        heading: "Don't trust, verify",
+        body: [
+          "A common motto in Bitcoin is 'don't trust, verify' — verify instead of relying on trust. By running your own node you can check every rule against the whole chain yourself, without relying on anyone else's word.",
+          "It moves power from institutions to the individual. You don't have to believe a claim — you can check it.",
+        ],
+      },
+      {
+        heading: "Transparency and privacy",
+        body: [
+          "The openness applies to transactions and addresses, not names. Addresses are pseudonymous — they don't directly reveal who you are, but because everything is public, patterns can still be analysed. Bitcoin is thus transparent at the system level, but requires thought if you value privacy.",
+          "The balance is deliberate: an open system everyone can inspect, while identity isn't built into the chain.",
+        ],
+      },
+    ],
+    takeaways: [
+      "The entire blockchain is open and can be inspected by anyone.",
+      "You can verify the supply and rules yourself, without trusting anyone.",
+      "Your own node gives you full insight — 'don't trust, verify'.",
+      "Addresses are pseudonymous, transparent at the system level but not named.",
+    ],
+    related: [
+      { href: "/ordlista#full-nod", label: "Glossary: Full node" },
+      { href: "/ordlista#blockkedja", label: "Glossary: Blockchain" },
+    ],
+  },
+];
+
+const functionsByLocale: Record<Locale, BitcoinFunction[]> = {
+  sv: svFunctions,
+  en: enFunctions,
+};
+
+export function getFunctions(locale: Locale): BitcoinFunction[] {
+  return functionsByLocale[locale];
 }
 
-export function getFunctionSlugs(): string[] {
-  return bitcoinFunctions.map((f) => f.slug);
+export function getFunction(
+  locale: Locale,
+  slug: string,
+): BitcoinFunction | undefined {
+  return getFunctions(locale).find((f) => f.slug === slug);
+}
+
+export function getFunctionSlugs(locale: Locale): string[] {
+  return getFunctions(locale).map((f) => f.slug);
+}
+
+/**
+ * Maps a function's stable id to its slug in every locale — used to build
+ * hreflang/sitemap alternates across domains where the slugs differ.
+ */
+export function getFunctionSlugsById(id: string): Record<Locale, string> {
+  const slugs = {} as Record<Locale, string>;
+  for (const locale of routing.locales) {
+    const fn = getFunctions(locale).find((f) => f.id === id);
+    if (fn) slugs[locale] = fn.slug;
+  }
+  return slugs;
 }
 
 /* ------------------------------------------------------------------ *
@@ -437,30 +848,46 @@ export function getFunctionSlugs(): string[] {
 export type FunctionMenuItem = {
   title: string;
   description: string;
+  /** Concrete, already-localized href for the active locale. */
   href: string;
   icon: FunctionIconKey;
 };
 
-function toMenuItem(f: BitcoinFunction): FunctionMenuItem {
+/**
+ * Menu hrefs are resolved to the active locale's concrete path (localized
+ * static segment + localized slug) so links work on both domains; the visible
+ * title/description come from the active locale's content.
+ */
+function toMenuItem(localized: BitcoinFunction, locale: Locale): FunctionMenuItem {
   return {
-    title: f.title,
-    description: f.menuDescription,
-    href: `/funktioner/${f.slug}`,
-    icon: f.icon,
+    title: localized.title,
+    description: localized.menuDescription,
+    href: getPathname({
+      locale,
+      href: { pathname: "/funktioner/[slug]", params: { slug: localized.slug } },
+    }),
+    icon: localized.icon,
   };
 }
 
-const halvingMenuItem: FunctionMenuItem = {
-  title: "Halveringen",
-  description:
-    "Ungefär vart fjärde år halveras takten som nya bitcoin skapas i, allt knappare över tid.",
-  href: "/halvering",
-  icon: "halving",
-};
+function halvingMenuItem(locale: Locale): FunctionMenuItem {
+  return {
+    title: locale === "sv" ? "Halveringen" : "The halving",
+    description:
+      locale === "sv"
+        ? "Ungefär vart fjärde år halveras takten som nya bitcoin skapas i, allt knappare över tid."
+        : "Roughly every four years the rate at which new bitcoin are created is halved — ever scarcer over time.",
+    href: getPathname({ locale, href: "/halvering" }),
+    icon: "halving",
+  };
+}
 
 /** Order: supply, halving, decentralisation, security, payments, purchasing, transparency. */
-export const functionMenu: FunctionMenuItem[] = [
-  toMenuItem(bitcoinFunctions[0]),
-  halvingMenuItem,
-  ...bitcoinFunctions.slice(1).map(toMenuItem),
-];
+export function getFunctionMenu(locale: Locale): FunctionMenuItem[] {
+  const fns = getFunctions(locale);
+  return [
+    toMenuItem(fns[0], locale),
+    halvingMenuItem(locale),
+    ...fns.slice(1).map((fn) => toMenuItem(fn, locale)),
+  ];
+}

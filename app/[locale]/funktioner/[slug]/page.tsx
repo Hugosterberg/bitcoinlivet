@@ -15,18 +15,24 @@ import { Container } from "@/components/layout/container";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
-import { buildAlternates, localizedUrl } from "@/lib/seo";
+import { buildSlugAlternates, localizedUrl } from "@/lib/seo";
+import { getPathname } from "@/i18n/navigation";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
 import {
-  bitcoinFunctions,
+  getFunctions,
   getFunction,
   getFunctionSlugs,
+  getFunctionSlugsById,
 } from "@/features/functions/data/functions";
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getFunctionSlugs().map((slug) => ({ slug }));
+export function generateStaticParams({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  return getFunctionSlugs(params.locale as Locale).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -35,14 +41,14 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const fn = getFunction(slug);
+  const fn = getFunction(locale, slug);
   if (!fn) return {};
   const site = getSiteConfig(locale);
   const href = { pathname: "/funktioner/[slug]" as const, params: { slug: fn.slug } };
   return {
     title: fn.title,
     description: fn.metaDescription,
-    alternates: buildAlternates(locale, href),
+    alternates: buildSlugAlternates(locale, "/funktioner/[slug]", getFunctionSlugsById(fn.id)),
     openGraph: {
       title: `${fn.title} · ${site.name}`,
       description: fn.metaDescription,
@@ -60,19 +66,22 @@ export default async function FunctionPage({
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("functions");
-  const fn = getFunction(slug);
+  const fn = getFunction(locale, slug);
   if (!fn) notFound();
 
-  const index = bitcoinFunctions.findIndex((f) => f.slug === fn.slug);
-  const prev = index > 0 ? bitcoinFunctions[index - 1] : null;
-  const next =
-    index < bitcoinFunctions.length - 1 ? bitcoinFunctions[index + 1] : null;
+  const all = getFunctions(locale);
+  const index = all.findIndex((f) => f.slug === fn.slug);
+  const prev = index > 0 ? all[index - 1] : null;
+  const next = index < all.length - 1 ? all[index + 1] : null;
+  const backHref = getPathname({ locale, href: "/funktioner" });
+  const fnHref = (s: string) =>
+    getPathname({ locale, href: { pathname: "/funktioner/[slug]", params: { slug: s } } });
 
   return (
     <div className="py-14 sm:py-20">
       <Container>
         <Link
-          href="/funktioner"
+          href={backHref}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={15} weight="bold" aria-hidden />
@@ -201,7 +210,7 @@ export default async function FunctionPage({
         <nav className="mt-12 flex items-center justify-between gap-4 border-t border-border pt-6">
           {prev ? (
             <Link
-              href={`/funktioner/${prev.slug}`}
+              href={fnHref(prev.slug)}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft size={15} weight="bold" aria-hidden />
@@ -212,7 +221,7 @@ export default async function FunctionPage({
           )}
           {next ? (
             <Link
-              href={`/funktioner/${next.slug}`}
+              href={fnHref(next.slug)}
               className="inline-flex items-center gap-1.5 text-right text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               {next.title}

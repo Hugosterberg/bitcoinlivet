@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ComponentProps } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   List,
   X,
@@ -18,7 +18,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Link, usePathname } from "@/i18n/navigation";
 import { mainNav, type NavIconKey } from "@/lib/site";
-import { functionMenu } from "@/features/functions/data/functions";
+import type { Locale } from "@/i18n/routing";
+import { getFunctionMenu } from "@/features/functions/data/functions";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
 import { FeaturesMenu } from "@/components/layout/features-menu";
@@ -44,6 +45,8 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const locale = useLocale() as Locale;
+  const functionMenu = getFunctionMenu(locale);
   const [open, setOpen] = useState(false);
   const { signedIn } = useAuthUser();
   const t = useTranslations("nav");

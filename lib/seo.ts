@@ -33,3 +33,23 @@ export function buildAlternates(
     languages,
   };
 }
+
+/**
+ * Like {@link buildAlternates} but for dynamic content whose slug is localized
+ * (differs per locale). Pass the route's pathname template and the slug for
+ * every locale, resolved from the content's stable id.
+ */
+export function buildSlugAlternates(
+  locale: Locale,
+  pathname: "/funktioner/[slug]" | "/artiklar/[slug]",
+  slugs: Record<Locale, string>,
+): NonNullable<Metadata["alternates"]> {
+  const url = (l: Locale) =>
+    localizedUrl(l, { pathname, params: { slug: slugs[l] } });
+
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) languages[l] = url(l);
+  languages["x-default"] = url(routing.defaultLocale);
+
+  return { canonical: url(locale), languages };
+}

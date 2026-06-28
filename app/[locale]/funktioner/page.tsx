@@ -10,7 +10,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { getSiteConfig } from "@/lib/site";
 import { buildAlternates } from "@/lib/seo";
 import { FunctionIcon } from "@/features/functions/components/function-icon";
-import { functionMenu } from "@/features/functions/data/functions";
+import { getFunctionMenu } from "@/features/functions/data/functions";
 
 export async function generateMetadata({
   params,
@@ -41,6 +41,7 @@ export default async function FunctionsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("functions");
+  const functionMenu = getFunctionMenu(locale);
 
   return (
     <div className="py-14 sm:py-20">
