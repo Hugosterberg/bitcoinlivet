@@ -6,22 +6,33 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { usePathname, getPathname } from "@/i18n/navigation";
-import { type Locale } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 import { getSiteConfig } from "@/lib/site";
 
 /**
- * Switches between the Swedish and English sites. Each language lives on its own
- * domain, so this links to the OTHER domain's origin + the equivalent localized
- * path.
+ * Switches between the Swedish and English sites.
  *
- * The `href` is an SSR-safe fallback (static routes map cleanly via
- * `getPathname`; dynamic ones point at the other domain's home). On click, we
- * upgrade to the page's own `<link rel="alternate" hreflang>` target, which is
- * the exact equivalent — including dynamic content with per-locale slugs
- * (articles, functions, course lessons). Reading it from the DOM keeps the
- * toggle correct everywhere without pulling the content registries into the
- * client bundle.
+ * In production each language lives on its own domain, so this links to the
+ * OTHER domain's origin + the equivalent localized path (read at click time
+ * from the page's own `<link rel="alternate" hreflang>`, which covers dynamic
+ * content with per-locale slugs without bundling the content registries).
+ *
+ * On any non-production host (localhost, Vercel preview, www without a
+ * redirect) there is no domain to switch to, so it instead flips the locale
+ * in place via next-intl's `NEXT_LOCALE` cookie and navigates to the other
+ * locale's path on the same host. This makes the language switch testable
+ * before both production domains serve this code.
  */
+
+/** Hosts that map to a locale via domain routing (no protocol). */
+const PROD_HOSTS = routing.locales.map((l) => {
+  try {
+    return new URL(getSiteConfig(l).url).host;
+  } catch {
+    return "";
+  }
+});
+
 export function LanguageToggle({ className }: { className?: string }) {
   const locale = useLocale() as Locale;
   const pathname = usePathname();
@@ -38,13 +49,27 @@ export function LanguageToggle({ className }: { className?: string }) {
   const label = other === "en" ? t("switchToEn") : t("switchToSv");
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    // Exact equivalent (incl. localized dynamic slugs) from the page's hreflang.
     const link = document.querySelector<HTMLLinkElement>(
       `link[rel="alternate"][hreflang="${other}"]`,
     );
-    if (link?.href && link.href !== e.currentTarget.href) {
-      e.preventDefault();
-      window.location.href = link.href;
+    const target = link?.href || e.currentTarget.href;
+    const targetUrl = new URL(target, window.location.origin);
+
+    if (PROD_HOSTS.includes(window.location.host)) {
+      // Production: navigate cross-domain to the other site.
+      if (target !== e.currentTarget.href) {
+        e.preventDefault();
+        window.location.href = target;
+      }
+      return;
     }
+
+    // Non-production: stay on this host, flip the locale via cookie.
+    e.preventDefault();
+    document.cookie = `NEXT_LOCALE=${other}; path=/; max-age=31536000; samesite=lax`;
+    window.location.href =
+      targetUrl.pathname + targetUrl.search + targetUrl.hash;
   }
 
   return (

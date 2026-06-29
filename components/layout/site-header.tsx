@@ -109,8 +109,6 @@ export function SiteHeader() {
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <DataCta className="gap-1.5 px-3.5 py-2 text-xs xl:gap-2 xl:px-5 xl:py-2.5 xl:text-sm" />
-          <span aria-hidden className="h-5 w-px bg-border/70" />
           {signedIn ? (
             <Link
               href="/konto"
@@ -135,7 +133,10 @@ export function SiteHeader() {
               {th("signIn")}
             </Link>
           )}
+          <span aria-hidden className="h-5 w-px bg-border/70" />
+          {/* Compact globe+locale toggle sits just left of the data CTA. */}
           <LanguageToggle />
+          <DataCta className="gap-1.5 px-3 py-1.5 text-xs xl:px-4" />
         </div>
 
         <button
