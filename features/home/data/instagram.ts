@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/routing";
 import { siteConfig } from "@/lib/site";
 
 /**
@@ -42,8 +43,14 @@ export function buildInstagramEmbedUrl(post: InstagramPost): string {
  * Instagram's Basic Display API was shut down (Dec 2024), so a connected
  * service is required to fetch "latest posts". Behold (free) handles the
  * Instagram Graph API + token refresh and exposes a clean JSON endpoint.
- * Set INSTAGRAM_FEED_URL to that endpoint; without it we fall back to the
- * manual embeds / placeholder above. See docs/INSTAGRAM.md.
+ *
+ * Each locale points at its own account's feed:
+ *   sv → INSTAGRAM_FEED_URL      (@bitcoinlivet)
+ *   en → INSTAGRAM_FEED_URL_EN   (@bitcoinerlife)
+ * Without a URL for the active locale we fall back to the manual embeds /
+ * placeholder above. The English site deliberately does NOT fall back to the
+ * Swedish feed, so it never shows the wrong account's posts. See
+ * docs/INSTAGRAM.md.
  * ------------------------------------------------------------------ */
 
 export type InstagramLivePost = {
@@ -137,16 +144,26 @@ function mapProfile(data: unknown): InstagramProfile | null {
   };
 }
 
+/** The Behold feed endpoint for a locale, or undefined when unconfigured. */
+function feedUrlForLocale(locale: Locale): string | undefined {
+  return locale === "en"
+    ? process.env.INSTAGRAM_FEED_URL_EN
+    : process.env.INSTAGRAM_FEED_URL;
+}
+
 /**
- * Fetches the latest Instagram posts + profile (cached for an hour). Returns
- * empty values when no feed is configured or on any error, so the UI degrades
- * nicely.
+ * Fetches the latest Instagram posts + profile for the given locale's account
+ * (cached for an hour). Returns empty values when no feed is configured or on
+ * any error, so the UI degrades nicely.
  */
-export async function getInstagramFeed(limit = 3): Promise<{
+export async function getInstagramFeed(
+  limit = 3,
+  locale: Locale = "sv",
+): Promise<{
   profile: InstagramProfile | null;
   posts: InstagramLivePost[];
 }> {
-  const url = process.env.INSTAGRAM_FEED_URL;
+  const url = feedUrlForLocale(locale);
   if (!url) return { profile: null, posts: [] };
 
   try {

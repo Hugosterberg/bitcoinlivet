@@ -27,6 +27,7 @@ import {
 import { getBitcoinNews } from "@/features/bitcoin-data/data/news";
 import { getHalvingInfo } from "@/features/bitcoin-data/data/metrics";
 import {
+  currencyForLocale,
   formatCurrency,
   formatNumber,
   formatPercent,
@@ -107,9 +108,9 @@ export default async function BitcoinTodayPage({
   const t = await getTranslations("news");
 
   const [market, fees, fearGreed, height, news] = await Promise.all([
-    getBitcoinMarket(),
+    getBitcoinMarket(currencyForLocale(locale)),
     getRecommendedFees(),
-    getFearGreed(),
+    getFearGreed(locale),
     getBlockHeight(),
     getBitcoinNews(18),
   ]);
@@ -134,7 +135,7 @@ export default async function BitcoinTodayPage({
             {t("lead")}
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            {t("updated", { date: formatDate(today) })}
+            {t("updated", { date: formatDate(today, locale) })}
           </p>
         </header>
 
@@ -144,8 +145,8 @@ export default async function BitcoinTodayPage({
             <SnapshotTile
               icon={<CurrencyBtc size={18} weight="bold" aria-hidden />}
               label={t("tilePrice")}
-              value={formatCurrency(market.priceSek)}
-              sub={t("priceChange", { percent: formatPercent(market.change24h) })}
+              value={formatCurrency(market.price, locale)}
+              sub={t("priceChange", { percent: formatPercent(market.change24h, {}, locale) })}
               tone={market.change24h >= 0 ? "up" : "down"}
             />
             <SnapshotTile
@@ -163,8 +164,8 @@ export default async function BitcoinTodayPage({
             <SnapshotTile
               icon={<Timer size={18} weight="bold" aria-hidden />}
               label={t("tileHalving")}
-              value={halving ? t("halvingBlocks", { blocks: formatNumber(halving.blocksRemaining) }) : "–"}
-              sub={halving ? `≈ ${formatDate(halving.estimatedDate)}` : t("halvingUnavailable")}
+              value={halving ? t("halvingBlocks", { blocks: formatNumber(halving.blocksRemaining, {}, locale) }) : "–"}
+              sub={halving ? `≈ ${formatDate(halving.estimatedDate, locale)}` : t("halvingUnavailable")}
             />
           </div>
           <div className="mt-4 flex justify-end">
@@ -212,7 +213,7 @@ export default async function BitcoinTodayPage({
                         </span>
                         <span aria-hidden>·</span>
                         <time dateTime={item.date.toISOString()} className="tabular-nums">
-                          {formatDateShort(item.date)}
+                          {formatDateShort(item.date, locale)}
                         </time>
                       </p>
                     </div>
@@ -244,7 +245,7 @@ export default async function BitcoinTodayPage({
           ) : null}
         </section>
 
-        <Disclaimer className="mt-12 max-w-2xl">
+        <Disclaimer className="mt-12">
           {t("disclaimer")}
         </Disclaimer>
       </Container>

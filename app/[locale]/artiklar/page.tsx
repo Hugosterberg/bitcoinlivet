@@ -74,7 +74,7 @@ export default async function BlogPage({
           />
         </div>
 
-        <Disclaimer className="mt-14 max-w-2xl">
+        <Disclaimer className="mt-14">
           {t("disclaimer")}
         </Disclaimer>
       </Container>

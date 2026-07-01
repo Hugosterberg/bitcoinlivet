@@ -2,9 +2,9 @@ import {
   SUPPLY,
   btcSnapshot,
   inflationHistory,
+  usInflationHistory,
   priceHistory,
   type InflationPoint,
-  type PricePoint,
 } from "@/features/bitcoin-data/data/metrics";
 import { dcaConfig, instagramSnapshots } from "@/features/bitcoin-data/data/portfolio";
 import {
@@ -32,9 +32,16 @@ const REVALIDATE_HISTORY = 3600;
 /** Long-term yearly price history changes slowly; refresh daily. */
 const REVALIDATE_PRICE_HISTORY = 86_400;
 
+/** Display currency, derived from the active locale (sv → SEK, en → USD). */
+export type Currency = "SEK" | "USD";
+
 export type BitcoinMarket = {
-  priceSek: number;
-  marketCapSek: number;
+  /** Price in the requested currency. */
+  price: number;
+  /** Market cap in the requested currency. */
+  marketCap: number;
+  /** The currency the values are expressed in. */
+  currency: Currency;
   change24h: number;
   /** Live circulating supply (BTC). */
   circulatingSupply: number;
@@ -48,26 +55,33 @@ export type BitcoinMarket = {
   source: string;
 };
 
-const COINGECKO_MARKETS_URL =
-  "https://api.coingecko.com/api/v3/coins/markets?vs_currency=sek&ids=bitcoin&price_change_percentage=24h";
+/** Rough SEK per USD, only for the static-snapshot fallback market cap. */
+const FALLBACK_USD_SEK = 10.5;
 
 /** Fallback derived from the static placeholder snapshot. */
-const marketFallback: BitcoinMarket = {
-  priceSek: btcSnapshot.priceSek,
-  marketCapSek: btcSnapshot.marketCapUsd * 10.5,
-  change24h: btcSnapshot.change24h,
-  circulatingSupply: SUPPLY.circulating,
-  maxSupply: SUPPLY.max,
-  issuedPercent: (SUPPLY.circulating / SUPPLY.max) * 100,
-  live: false,
-  source: "CoinGecko",
-};
+function marketFallback(currency: Currency): BitcoinMarket {
+  const usd = currency === "USD";
+  return {
+    price: usd ? btcSnapshot.priceUsd : btcSnapshot.priceSek,
+    marketCap: usd ? btcSnapshot.marketCapUsd : btcSnapshot.marketCapUsd * FALLBACK_USD_SEK,
+    currency,
+    change24h: btcSnapshot.change24h,
+    circulatingSupply: SUPPLY.circulating,
+    maxSupply: SUPPLY.max,
+    issuedPercent: (SUPPLY.circulating / SUPPLY.max) * 100,
+    live: false,
+    source: "CoinGecko",
+  };
+}
 
-export async function getBitcoinMarket(): Promise<BitcoinMarket> {
+export async function getBitcoinMarket(
+  currency: Currency = "SEK",
+): Promise<BitcoinMarket> {
+  const url =
+    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency.toLowerCase()}` +
+    "&ids=bitcoin&price_change_percentage=24h";
   try {
-    const res = await fetch(COINGECKO_MARKETS_URL, {
-      next: { revalidate: REVALIDATE_SECONDS },
-    });
+    const res = await fetch(url, { next: { revalidate: REVALIDATE_SECONDS } });
     if (!res.ok) throw new Error(`CoinGecko HTTP ${res.status}`);
 
     const json = (await res.json()) as Array<{
@@ -87,8 +101,9 @@ export async function getBitcoinMarket(): Promise<BitcoinMarket> {
     const maxSupply = b.max_supply ?? SUPPLY.max;
 
     return {
-      priceSek: b.current_price,
-      marketCapSek: b.market_cap ?? circulatingSupply * b.current_price,
+      price: b.current_price,
+      marketCap: b.market_cap ?? circulatingSupply * b.current_price,
+      currency,
       change24h: b.price_change_percentage_24h ?? 0,
       circulatingSupply,
       maxSupply,
@@ -97,7 +112,7 @@ export async function getBitcoinMarket(): Promise<BitcoinMarket> {
       source: "CoinGecko",
     };
   } catch {
-    return marketFallback;
+    return marketFallback(currency);
   }
 }
 
@@ -108,6 +123,9 @@ export async function getBitcoinMarket(): Promise<BitcoinMarket> {
 
 export type AssetSlice = {
   name: string;
+  /** Stable key for the localized label; absent for proper nouns (companies,
+   *  Bitcoin), which display `name` directly. */
+  labelKey?: string;
   valueUsd: number;
   percent: number;
   isBitcoin: boolean;
@@ -150,6 +168,7 @@ export async function getAssetAllocation(): Promise<AssetAllocation> {
   const raw = [
     ...assetBreakdown.map((a) => ({
       name: a.name,
+      labelKey: a.labelKey,
       valueUsd: a.valueUsd,
       group: a.group,
       color: a.color,
@@ -186,11 +205,11 @@ export async function getAssetAllocation(): Promise<AssetAllocation> {
 export type InvestmentPoint = {
   /** YYYY-MM-DD of the sampled point (month end or today). */
   date: string;
-  /** Short Swedish label, e.g. "jun 2024". */
+  /** Short month label, e.g. "jun 2024" / "Jun 2024". */
   label: string;
-  /** Cumulative invested SEK. */
+  /** Cumulative invested amount, in the active currency. */
   invested: number;
-  /** Value of accrued BTC at that date's price, in SEK. */
+  /** Value of accrued BTC at that date's price, in the active currency. */
   value: number;
   /** Cumulative BTC accrued. */
   btc: number;
@@ -201,26 +220,33 @@ export type InvestmentHistory = {
   totalInvested: number;
   currentValue: number;
   totalBtc: number;
-  returnSek: number;
+  /** Net return in the active currency. */
+  returnAmount: number;
   returnPct: number;
-  dailySek: number;
+  /** Daily buy amount in the active currency. */
+  daily: number;
+  currency: Currency;
   startDate: string;
   days: number;
   live: boolean;
   source: string;
 };
 
-const dateFmt = new Intl.DateTimeFormat("sv-SE", { month: "short", year: "numeric" });
-const monthLabel = (d: Date) => dateFmt.format(d);
+const monthLabelFmt: Record<Currency, Intl.DateTimeFormat> = {
+  SEK: new Intl.DateTimeFormat("sv-SE", { month: "short", year: "numeric" }),
+  USD: new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }),
+};
+const monthLabel = (d: Date, currency: Currency) => monthLabelFmt[currency].format(d);
 const dateKey = (d: Date) => d.toISOString().slice(0, 10);
 
 /** Builds the monthly DCA series given a price lookup for each day. */
 function buildSeries(
   start: Date,
   end: Date,
-  dailySek: number,
+  daily: number,
   priceFor: (key: string, prev: number) => number,
   seedPrice: number,
+  currency: Currency,
 ): { points: InvestmentPoint[]; totalInvested: number; totalBtc: number; lastPrice: number } {
   const points: InvestmentPoint[] = [];
   let cumBtc = 0;
@@ -234,8 +260,8 @@ function buildSeries(
     const key = dateKey(cur);
     const price = priceFor(key, lastPrice);
     lastPrice = price;
-    cumInvested += dailySek;
-    cumBtc += dailySek / price;
+    cumInvested += daily;
+    cumBtc += daily / price;
 
     const next = new Date(cur.getTime());
     next.setUTCDate(cur.getUTCDate() + 1);
@@ -244,7 +270,7 @@ function buildSeries(
     if (isMonthEnd || key === endKey) {
       points.push({
         date: key,
-        label: monthLabel(cur),
+        label: monthLabel(cur, currency),
         invested: Math.round(cumInvested),
         value: Math.round(cumBtc * price),
         btc: cumBtc,
@@ -314,19 +340,23 @@ async function fetchSekRates(
   return byDay;
 }
 
-export async function getInvestmentHistory(): Promise<InvestmentHistory> {
+export async function getInvestmentHistory(
+  currency: Currency = "SEK",
+): Promise<InvestmentHistory> {
   const { dailySek, startDate } = dcaConfig;
+  const usd = currency === "USD";
   const start = new Date(`${startDate}T00:00:00Z`);
   const today = new Date();
   const days = Math.max(1, Math.ceil((today.getTime() - start.getTime()) / 86_400_000));
 
-  // Manual mode: exact numbers pasted from monthly Instagram status posts.
+  // Manual mode: exact numbers pasted from monthly Instagram status posts
+  // (denominated in SEK; only used when the list below is populated).
   if (instagramSnapshots.length > 0) {
     const points: InvestmentPoint[] = instagramSnapshots.map((s) => {
       const d = new Date(`${s.month}-01T00:00:00Z`);
       return {
         date: dateKey(d),
-        label: monthLabel(d),
+        label: monthLabel(d, currency),
         invested: s.invested,
         value: s.value,
         btc: 0,
@@ -338,9 +368,10 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
       totalInvested: last.invested,
       currentValue: last.value,
       totalBtc: 0,
-      returnSek: last.value - last.invested,
+      returnAmount: last.value - last.invested,
       returnPct: last.invested ? ((last.value - last.invested) / last.invested) * 100 : 0,
-      dailySek,
+      daily: dailySek,
+      currency,
       startDate,
       days,
       live: false,
@@ -349,37 +380,40 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
   }
 
   try {
-    // The free CoinGecko history caps at 365 days, so compose a SEK series
+    // The free CoinGecko history caps at 365 days, so compose the price series
     // from Coinbase BTC/USD (key-less, geo-safe) × Frankfurter USD→SEK rates.
     const [usdByDay, fxByDay] = await Promise.all([
       fetchCoinbaseDailyUsd(start, today, REVALIDATE_HISTORY),
       fetchSekRates(startDate, dateKey(today), REVALIDATE_HISTORY),
     ]);
 
-    // Build a continuous SEK price for every day, carrying forward the last
-    // known USD price and FX rate over weekends/gaps.
+    // Daily price in the active currency, carrying forward the last known USD
+    // price and FX rate over weekends/gaps.
     let lastUsd = usdByDay.get(dateKey(start)) ?? [...usdByDay.values()][0];
     const sortedFx = [...fxByDay.values()];
-    let lastRate = sortedFx.length ? sortedFx[0] : 10.5;
-    const sekByDay = new Map<string, number>();
+    let lastRate = sortedFx.length ? sortedFx[0] : FALLBACK_USD_SEK;
+    const priceByDay = new Map<string, number>();
     {
       const cur = new Date(start.getTime());
       while (cur.getTime() <= today.getTime()) {
         const key = dateKey(cur);
         lastUsd = usdByDay.get(key) ?? lastUsd;
         lastRate = fxByDay.get(key) ?? lastRate;
-        sekByDay.set(key, lastUsd * lastRate);
+        priceByDay.set(key, usd ? lastUsd : lastUsd * lastRate);
         cur.setUTCDate(cur.getUTCDate() + 1);
       }
     }
-    const seed = sekByDay.get(dateKey(start)) ?? lastUsd * lastRate;
+    // The DCA rule is "dailySek per day"; show it in USD at the current rate.
+    const daily = usd ? dailySek / lastRate : dailySek;
+    const seed = priceByDay.get(dateKey(start)) ?? (usd ? lastUsd : lastUsd * lastRate);
 
     const { points, totalInvested, totalBtc, lastPrice } = buildSeries(
       start,
       today,
-      dailySek,
-      (key, prev) => sekByDay.get(key) ?? prev,
+      daily,
+      (key, prev) => priceByDay.get(key) ?? prev,
       seed,
+      currency,
     );
 
     const currentValue = Math.round(totalBtc * lastPrice);
@@ -388,9 +422,10 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
       totalInvested: Math.round(totalInvested),
       currentValue,
       totalBtc,
-      returnSek: currentValue - Math.round(totalInvested),
+      returnAmount: currentValue - Math.round(totalInvested),
       returnPct: totalInvested ? ((currentValue - totalInvested) / totalInvested) * 100 : 0,
-      dailySek,
+      daily,
+      currency,
       startDate,
       days,
       live: true,
@@ -398,13 +433,15 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
     };
   } catch {
     // Fallback: invested is deterministic; value uses a single fallback price.
-    const price = btcSnapshot.priceSek;
+    const price = usd ? btcSnapshot.priceUsd : btcSnapshot.priceSek;
+    const daily = usd ? dailySek / FALLBACK_USD_SEK : dailySek;
     const { points, totalInvested, totalBtc } = buildSeries(
       start,
       today,
-      dailySek,
+      daily,
       () => price,
       price,
+      currency,
     );
     const currentValue = Math.round(totalBtc * price);
     return {
@@ -412,9 +449,10 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
       totalInvested: Math.round(totalInvested),
       currentValue,
       totalBtc,
-      returnSek: currentValue - Math.round(totalInvested),
+      returnAmount: currentValue - Math.round(totalInvested),
       returnPct: 0,
-      dailySek,
+      daily,
+      currency,
       startDate,
       days,
       live: false,
@@ -429,8 +467,11 @@ export async function getInvestmentHistory(): Promise<InvestmentHistory> {
  * history) × Frankfurter USD→SEK, same approach as the DCA series.
  * ------------------------------------------------------------------ */
 
+export type YearPrice = { year: string; price: number };
+
 export type PriceHistory = {
-  points: PricePoint[];
+  points: YearPrice[];
+  currency: Currency;
   live: boolean;
   source: string;
 };
@@ -438,14 +479,23 @@ export type PriceHistory = {
 /** Coinbase BTC/USD daily candles reach back to mid-2015. */
 const COINBASE_HISTORY_START = "2015-01-01";
 
-export async function getBtcPriceHistory(): Promise<PriceHistory> {
+export async function getBtcPriceHistory(
+  currency: Currency = "SEK",
+): Promise<PriceHistory> {
+  const usd = currency === "USD";
+  const fallbackPoints: YearPrice[] = priceHistory.map((p) => ({
+    year: p.year,
+    price: usd ? p.priceUsd : p.priceSek,
+  }));
   try {
     const today = new Date();
     const start = new Date(`${COINBASE_HISTORY_START}T00:00:00Z`);
 
     const [usdByDay, fxByDay] = await Promise.all([
       fetchCoinbaseDailyUsd(start, today, REVALIDATE_PRICE_HISTORY),
-      fetchSekRates(COINBASE_HISTORY_START, dateKey(today), REVALIDATE_PRICE_HISTORY),
+      usd
+        ? Promise.resolve(new Map<string, number>())
+        : fetchSekRates(COINBASE_HISTORY_START, dateKey(today), REVALIDATE_PRICE_HISTORY),
     ]);
 
     // Latest USD close per calendar year (the year-end print).
@@ -459,6 +509,7 @@ export async function getBtcPriceHistory(): Promise<PriceHistory> {
     // FX rates sorted ascending, for a carry-forward lookup at each year-end.
     const fxDays = [...fxByDay.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     const rateOnOrBefore = (day: string): number => {
+      if (fxDays.length === 0) return FALLBACK_USD_SEK;
       let rate = fxDays[0][1];
       for (const [d, r] of fxDays) {
         if (d <= day) rate = r;
@@ -468,21 +519,26 @@ export async function getBtcPriceHistory(): Promise<PriceHistory> {
     };
 
     // Start from the settled historical year-end prices (so the pre-Coinbase
-    // years 2013–2014 stay intact), then overlay live SEK values for every
-    // year Coinbase covers (2015→today).
-    const byYear = new Map<string, number>(priceHistory.map((p) => [p.year, p.priceSek]));
-    for (const [year, usd] of usdByYear) {
-      byYear.set(String(year), Math.round(usd.close * rateOnOrBefore(usd.day)));
+    // years 2013–2014 stay intact), then overlay live values for every year
+    // Coinbase covers (2015→today).
+    const byYear = new Map<string, number>(
+      priceHistory.map((p) => [p.year, usd ? p.priceUsd : p.priceSek]),
+    );
+    for (const [year, close] of usdByYear) {
+      byYear.set(
+        String(year),
+        usd ? Math.round(close.close) : Math.round(close.close * rateOnOrBefore(close.day)),
+      );
     }
 
-    const points: PricePoint[] = [...byYear.entries()]
+    const points: YearPrice[] = [...byYear.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([year, priceSek]) => ({ year, priceSek }));
+      .map(([year, price]) => ({ year, price }));
     if (points.length < 2) throw new Error("För få datapunkter");
 
-    return { points, live: true, source: "Coinbase · Frankfurter" };
+    return { points, currency, live: true, source: usd ? "Coinbase" : "Coinbase · Frankfurter" };
   } catch {
-    return { points: priceHistory, live: false, source: "Exempeldata" };
+    return { points: fallbackPoints, currency, live: false, source: "Exempeldata" };
   }
 }
 
@@ -493,26 +549,38 @@ export async function getBtcPriceHistory(): Promise<PriceHistory> {
 export type FearGreed = {
   /** 0–100. */
   value: number;
-  /** Swedish label, e.g. "Rädsla". */
+  /** Sentiment label localized for the active locale, e.g. "Rädsla" / "Fear". */
   label: string;
   updated: Date;
   live: boolean;
   source: string;
 };
 
-const FNG_LABELS: { max: number; label: string }[] = [
-  { max: 25, label: "Extrem rädsla" },
-  { max: 45, label: "Rädsla" },
-  { max: 55, label: "Neutral" },
-  { max: 75, label: "Girighet" },
-  { max: 100, label: "Extrem girighet" },
-];
+const FNG_LABELS: Record<"sv" | "en", { max: number; label: string }[]> = {
+  sv: [
+    { max: 25, label: "Extrem rädsla" },
+    { max: 45, label: "Rädsla" },
+    { max: 55, label: "Neutral" },
+    { max: 75, label: "Girighet" },
+    { max: 100, label: "Extrem girighet" },
+  ],
+  en: [
+    { max: 25, label: "Extreme fear" },
+    { max: 45, label: "Fear" },
+    { max: 55, label: "Neutral" },
+    { max: 75, label: "Greed" },
+    { max: 100, label: "Extreme greed" },
+  ],
+};
 
-export function fearGreedLabel(value: number): string {
-  return FNG_LABELS.find((b) => value <= b.max)?.label ?? "Neutral";
+export function fearGreedLabel(value: number, locale: "sv" | "en" = "sv"): string {
+  const labels = FNG_LABELS[locale] ?? FNG_LABELS.sv;
+  return labels.find((b) => value <= b.max)?.label ?? "Neutral";
 }
 
-export async function getFearGreed(): Promise<FearGreed | null> {
+export async function getFearGreed(
+  locale: "sv" | "en" = "sv",
+): Promise<FearGreed | null> {
   try {
     const res = await fetch("https://api.alternative.me/fng/?limit=1", {
       next: { revalidate: REVALIDATE_HISTORY },
@@ -528,7 +596,7 @@ export async function getFearGreed(): Promise<FearGreed | null> {
 
     return {
       value,
-      label: fearGreedLabel(value),
+      label: fearGreedLabel(value, locale),
       updated: new Date(Number(d?.timestamp ?? Date.now() / 1000) * 1000),
       live: true,
       source: "alternative.me",
@@ -551,7 +619,34 @@ export type InflationSeries = {
 const SCB_KPI_URL =
   "https://api.scb.se/OV0104/v1/doris/sv/ssd/START/PR/PR0101/PR0101A/KPItotM";
 
-export async function getInflation(): Promise<InflationSeries> {
+/** US annual CPI inflation (World Bank, key-less). Used on the English site. */
+async function getUsInflation(): Promise<InflationSeries> {
+  try {
+    const url =
+      "https://api.worldbank.org/v2/country/USA/indicator/FP.CPI.TOTL.ZG" +
+      "?format=json&per_page=100&date=2010:2026";
+    const res = await fetch(url, { next: { revalidate: 86_400 } });
+    if (!res.ok) throw new Error(`World Bank HTTP ${res.status}`);
+
+    const json = (await res.json()) as [unknown, { date: string; value: number | null }[]?];
+    const rows = json?.[1] ?? [];
+    const points: InflationPoint[] = rows
+      .filter((r) => typeof r.value === "number")
+      .map((r) => ({ year: r.date, inflation: Math.round((r.value as number) * 10) / 10 }))
+      .sort((a, b) => a.year.localeCompare(b.year))
+      .slice(-10);
+
+    if (points.length === 0) throw new Error("Tom serie från World Bank");
+    return { points, live: true, source: "World Bank" };
+  } catch {
+    return { points: usInflationHistory, live: false, source: "Example data" };
+  }
+}
+
+export async function getInflation(
+  locale: "sv" | "en" = "sv",
+): Promise<InflationSeries> {
+  if (locale === "en") return getUsInflation();
   try {
     const res = await fetch(SCB_KPI_URL, {
       method: "POST",

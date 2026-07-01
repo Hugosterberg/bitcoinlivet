@@ -1,10 +1,9 @@
 "use client";
 
 import { useId, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowsDownUp } from "@phosphor-icons/react";
 
-import { btcSnapshot } from "@/features/bitcoin-data/data/metrics";
 import { formatNumber, formatCurrency, SATS_PER_BTC } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 
@@ -17,26 +16,27 @@ function parseAmount(raw: string): number {
 }
 
 export function SatsCalculator({
-  priceSek = btcSnapshot.priceSek,
+  price,
   live = false,
 }: {
-  /** Current BTC price in SEK. Falls back to the placeholder snapshot. */
-  priceSek?: number;
+  /** Current BTC price in the active locale's currency. */
+  price: number;
   /** Whether the price came from a live source. */
   live?: boolean;
-} = {}) {
+}) {
   const t = useTranslations("satsCalc");
-  const PRICE_SEK = priceSek;
+  const locale = useLocale();
+  const PRICE = price;
   const sekId = useId();
   const satsId = useId();
-  // Canonical amount of SEK; sats are derived from the placeholder price.
+  // Canonical amount of money; sats are derived from the current price.
   const [sek, setSek] = useState<number>(500);
   // Track raw strings so typing feels natural.
   const [sekRaw, setSekRaw] = useState<string>("500");
   const [satsRaw, setSatsRaw] = useState<string>("");
 
-  const sats = (sek / PRICE_SEK) * SATS_PER_BTC;
-  const btc = sek / PRICE_SEK;
+  const sats = (sek / PRICE) * SATS_PER_BTC;
+  const btc = sek / PRICE;
 
   function handleSek(raw: string) {
     setSekRaw(raw);
@@ -48,7 +48,7 @@ export function SatsCalculator({
     setSatsRaw(raw);
     setSekRaw("");
     const enteredSats = parseAmount(raw);
-    setSek((enteredSats / SATS_PER_BTC) * PRICE_SEK);
+    setSek((enteredSats / SATS_PER_BTC) * PRICE);
   }
 
   return (
@@ -79,7 +79,7 @@ export function SatsCalculator({
             <input
               id={sekId}
               inputMode="decimal"
-              value={sekRaw !== "" ? sekRaw : sek ? formatNumber(Math.round(sek)) : ""}
+              value={sekRaw !== "" ? sekRaw : sek ? formatNumber(Math.round(sek), {}, locale) : ""}
               onChange={(e) => handleSek(e.target.value)}
               placeholder="0"
               className="h-12 w-full bg-transparent font-mono text-lg tabular-nums text-foreground outline-none placeholder:text-muted-foreground/60"
@@ -99,7 +99,7 @@ export function SatsCalculator({
             <input
               id={satsId}
               inputMode="numeric"
-              value={satsRaw !== "" ? satsRaw : formatNumber(Math.round(sats))}
+              value={satsRaw !== "" ? satsRaw : formatNumber(Math.round(sats), {}, locale)}
               onChange={(e) => handleSats(e.target.value)}
               placeholder="0"
               className="h-12 w-full bg-transparent font-mono text-lg tabular-nums text-foreground outline-none placeholder:text-muted-foreground/60"
@@ -107,7 +107,7 @@ export function SatsCalculator({
             <span className="ml-2 text-sm font-medium text-muted-foreground">{t("sats")}</span>
           </div>
           <p className="text-xs text-muted-foreground tabular-nums">
-            ≈ {formatNumber(btc, { maximumFractionDigits: 8 })} BTC
+            ≈ {formatNumber(btc, { maximumFractionDigits: 8 }, locale)} BTC
           </p>
         </div>
       </div>
@@ -120,15 +120,15 @@ export function SatsCalculator({
             onClick={() => handleSek(String(amount))}
             className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-bitcoin/50 hover:text-bitcoin"
           >
-            {t("quickKr", { amount: formatNumber(amount) })}
+            {t("quickKr", { amount: formatNumber(amount, {}, locale) })}
           </button>
         ))}
       </div>
 
       <p className="mt-auto pt-5 text-xs text-muted-foreground">
         {live
-          ? t("noteLive", { price: formatCurrency(PRICE_SEK) })
-          : t("noteExample", { price: formatCurrency(PRICE_SEK) })}
+          ? t("noteLive", { price: formatCurrency(PRICE, locale) })
+          : t("noteExample", { price: formatCurrency(PRICE, locale) })}
       </p>
     </Card>
   );

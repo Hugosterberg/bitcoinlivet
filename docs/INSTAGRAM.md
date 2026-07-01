@@ -27,10 +27,30 @@ en gratis tjänst som sköter API:t och token-förnyelsen och ger en ren JSON-fe
 Klart — de tre senaste inläggen laddas in och cachas i en timme
 (`revalidate: 3600`). Klick på ett inlägg öppnar det på Instagram.
 
+## Två konton (svenska + engelska)
+
+Varje språkversion hämtar från sitt **eget** Instagram-konto via en egen feed:
+
+| Sida            | Konto           | Env-variabel            |
+| --------------- | --------------- | ----------------------- |
+| Svenska (`sv`)  | `@bitcoinlivet` | `INSTAGRAM_FEED_URL`    |
+| Engelska (`en`) | `@bitcoinerlife`| `INSTAGRAM_FEED_URL_EN` |
+
+Skapa en separat Behold-feed för det engelska kontot och lägg dess endpoint i
+`INSTAGRAM_FEED_URL_EN`:
+```
+INSTAGRAM_FEED_URL_EN=https://feeds.behold.so/YYYYYYYY
+```
+
+Den engelska sidan faller **medvetet inte** tillbaka till den svenska feeden — om
+`INSTAGRAM_FEED_URL_EN` saknas visas platshållaren med `@bitcoinerlife`, så att
+fel kontos inlägg aldrig dyker upp på engelska sidan.
+
 ## Beteende utan feed
 
-- **Ingen `INSTAGRAM_FEED_URL`:** faller tillbaka till manuella inbäddningar om
-  du lagt in shortcodes i `features/home/data/instagram.ts`, annars en snygg
+- **Ingen feed för aktivt språk** (`INSTAGRAM_FEED_URL` för sv,
+  `INSTAGRAM_FEED_URL_EN` för en)**:** faller tillbaka till manuella inbäddningar
+  om du lagt in shortcodes i `features/home/data/instagram.ts`, annars en snygg
   platshållare. Sektionen ser aldrig trasig ut.
 - **Fel/nere:** samma graceful fallback (inga krascher).
 

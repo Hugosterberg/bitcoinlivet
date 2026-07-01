@@ -196,22 +196,22 @@ export const supplyIssuedPercent =
  * ⚠️ HÅRDKODAD EXEMPELDATA – uppdatera med riktig historik (t.ex. CoinGecko
  * `/coins/bitcoin/market_chart?vs_currency=sek`). Se docs/ROADMAP.md (P0).
  */
-export type PricePoint = { year: string; priceSek: number };
+export type PricePoint = { year: string; priceSek: number; priceUsd: number };
 
 export const priceHistory: PricePoint[] = [
-  { year: "2013", priceSek: 8_400 },
-  { year: "2014", priceSek: 3_400 },
-  { year: "2015", priceSek: 4_500 },
-  { year: "2016", priceSek: 10_000 },
-  { year: "2017", priceSek: 146_000 },
-  { year: "2018", priceSek: 39_000 },
-  { year: "2019", priceSek: 76_000 },
-  { year: "2020", priceSek: 305_000 },
-  { year: "2021", priceSek: 486_000 },
-  { year: "2022", priceSek: 173_000 },
-  { year: "2023", priceSek: 444_000 },
-  { year: "2024", priceSek: 980_000 },
-  { year: "2025", priceSek: 1_060_000 },
+  { year: "2013", priceSek: 8_400, priceUsd: 750 },
+  { year: "2014", priceSek: 3_400, priceUsd: 320 },
+  { year: "2015", priceSek: 4_500, priceUsd: 430 },
+  { year: "2016", priceSek: 10_000, priceUsd: 960 },
+  { year: "2017", priceSek: 146_000, priceUsd: 14_000 },
+  { year: "2018", priceSek: 39_000, priceUsd: 3_700 },
+  { year: "2019", priceSek: 76_000, priceUsd: 7_200 },
+  { year: "2020", priceSek: 305_000, priceUsd: 29_000 },
+  { year: "2021", priceSek: 486_000, priceUsd: 46_000 },
+  { year: "2022", priceSek: 173_000, priceUsd: 16_500 },
+  { year: "2023", priceSek: 444_000, priceUsd: 42_000 },
+  { year: "2024", priceSek: 980_000, priceUsd: 93_000 },
+  { year: "2025", priceSek: 1_060_000, priceUsd: 100_000 },
 ];
 
 /**
@@ -232,4 +232,19 @@ export const inflationHistory: InflationPoint[] = [
   { year: "2023", inflation: 8.5 },
   { year: "2024", inflation: 2.9 },
   { year: "2025", inflation: 2.1 },
+];
+
+/** Illustrative annual US CPI inflation (%). Fallback for the English site;
+ *  the live series comes from the World Bank (see getInflation). */
+export const usInflationHistory: InflationPoint[] = [
+  { year: "2016", inflation: 1.3 },
+  { year: "2017", inflation: 2.1 },
+  { year: "2018", inflation: 2.4 },
+  { year: "2019", inflation: 1.8 },
+  { year: "2020", inflation: 1.2 },
+  { year: "2021", inflation: 4.7 },
+  { year: "2022", inflation: 8.0 },
+  { year: "2023", inflation: 4.1 },
+  { year: "2024", inflation: 2.9 },
+  { year: "2025", inflation: 2.9 },
 ];

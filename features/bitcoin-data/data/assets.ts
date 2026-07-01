@@ -20,6 +20,10 @@ export type AssetGroup = "standalone" | "stocks";
 
 export type AssetItem = {
   name: string;
+  /** Stable key for the localized label (see the `assets` message namespace).
+   *  Omitted for proper nouns (companies, Bitcoin) that read the same in every
+   *  language; those fall back to `name`. */
+  labelKey?: string;
   valueUsd: number;
   group: AssetGroup;
   /** Chart + legend color. */
@@ -49,6 +53,7 @@ export const STOCKS_COLOR = "#4338ca";
 /** Stocks beyond the named companies, so the Aktier total stays correct. */
 const otherStocks: AssetItem = {
   name: "Övriga aktier",
+  labelKey: "otherStocks",
   valueUsd: STOCKS_TOTAL - companiesSum,
   group: "stocks",
   color: STOCKS_COLOR,
@@ -60,15 +65,15 @@ const otherStocks: AssetItem = {
  * sit together. Bitcoin is appended live in getAssetAllocation.
  */
 export const assetBreakdown: AssetItem[] = [
-  { name: "Fastigheter", valueUsd: 634.9 * T, group: "standalone", color: "#64748b" },
-  { name: "Olja", valueUsd: 152.54 * T, group: "standalone", color: "#115e59" },
+  { name: "Fastigheter", labelKey: "realEstate", valueUsd: 634.9 * T, group: "standalone", color: "#64748b" },
+  { name: "Olja", labelKey: "oil", valueUsd: 152.54 * T, group: "standalone", color: "#115e59" },
   otherStocks,
   ...companies,
-  { name: "Valutor", valueUsd: 137.03 * T, group: "standalone", color: "#9f1239" },
-  { name: "Guld", valueUsd: 30.69 * T, group: "standalone", color: "#ca8a04" },
-  { name: "Koppar", valueUsd: 18.36 * T, group: "standalone", color: "#92400e" },
-  { name: "Naturgas", valueUsd: 10.79 * T, group: "standalone", color: "#4d7c0f" },
-  { name: "Silver", valueUsd: 4.27 * T, group: "standalone", color: "#94a3b8" },
+  { name: "Valutor", labelKey: "currencies", valueUsd: 137.03 * T, group: "standalone", color: "#9f1239" },
+  { name: "Guld", labelKey: "gold", valueUsd: 30.69 * T, group: "standalone", color: "#ca8a04" },
+  { name: "Koppar", labelKey: "copper", valueUsd: 18.36 * T, group: "standalone", color: "#92400e" },
+  { name: "Naturgas", labelKey: "naturalGas", valueUsd: 10.79 * T, group: "standalone", color: "#4d7c0f" },
+  { name: "Silver", labelKey: "silver", valueUsd: 4.27 * T, group: "standalone", color: "#94a3b8" },
 ];
 
 /** Combined Aktier (stocks) total — companies + Övriga aktier. */

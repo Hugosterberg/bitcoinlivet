@@ -232,7 +232,7 @@ export default async function FunctionPage({
           )}
         </nav>
 
-        <Disclaimer className="mt-10 max-w-2xl">
+        <Disclaimer className="mt-10">
           {t("disclaimer")}
         </Disclaimer>
       </Container>

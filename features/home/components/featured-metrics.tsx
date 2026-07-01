@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowRight, CurrencyBtc, Coins, Stack } from "@phosphor-icons/react/dist/ssr";
 
 import { Section, SectionHeading } from "@/components/ui/section";
@@ -9,6 +9,7 @@ import { MetricCard } from "@/features/bitcoin-data/components/metric-card";
 import { BtcPriceChart } from "@/features/bitcoin-data/components/charts/btc-price-chart";
 import { getBitcoinMarket, getBtcPriceHistory } from "@/features/bitcoin-data/data/live-data";
 import {
+  currencyForLocale,
   formatAmountWords,
   formatCurrency,
   formatNumber,
@@ -16,9 +17,11 @@ import {
 } from "@/lib/format";
 
 export async function FeaturedMetrics() {
+  const locale = await getLocale();
+  const currency = currencyForLocale(locale);
   const [market, history, t] = await Promise.all([
-    getBitcoinMarket(),
-    getBtcPriceHistory(),
+    getBitcoinMarket(currency),
+    getBtcPriceHistory(currency),
     getTranslations("home"),
   ]);
 
@@ -41,18 +44,18 @@ export async function FeaturedMetrics() {
       <div className="mt-12 grid gap-5 lg:grid-cols-3">
         <MetricCard
           label={market.live ? t("metricsPrice") : t("metricsPriceExample")}
-          value={formatCurrency(market.priceSek)}
+          value={formatCurrency(market.price, locale)}
           sub={t("metricsPerBitcoin")}
           change={market.change24h}
           icon={<CurrencyBtc size={20} weight="bold" aria-hidden />}
         />
         <MetricCard
           label={t("metricsMarketCap")}
-          value={formatCurrency(market.marketCapSek)}
+          value={formatCurrency(market.marketCap, locale)}
           valueClassName="text-lg sm:text-xl leading-snug"
           sub={
             <>
-              ≈ {formatAmountWords(market.marketCapSek)}
+              ≈ {formatAmountWords(market.marketCap, locale)}
               <span className="block text-muted-foreground/70">
                 {t("metricsTotalGlobal")}
               </span>
@@ -62,8 +65,8 @@ export async function FeaturedMetrics() {
         />
         <MetricCard
           label={t("metricsIssuedSupply")}
-          value={formatShare(market.issuedPercent)}
-          sub={`${formatNumber(Math.round(market.circulatingSupply))} / ${formatNumber(market.maxSupply)} BTC`}
+          value={formatShare(market.issuedPercent, {}, locale)}
+          sub={`${formatNumber(Math.round(market.circulatingSupply), {}, locale)} / ${formatNumber(market.maxSupply, {}, locale)} BTC`}
           icon={<Stack size={20} weight="bold" aria-hidden />}
         />
       </div>

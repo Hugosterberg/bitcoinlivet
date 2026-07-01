@@ -1,16 +1,10 @@
 "use client";
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { AssetSlice } from "@/features/bitcoin-data/data/live-data";
 import { ChartTooltipCard } from "./chart-theme";
-
-function percent(value: number): string {
-  return `${value.toLocaleString("sv-SE", {
-    maximumFractionDigits: value < 1 ? 2 : 1,
-  })} %`;
-}
 
 export function AssetAllocationChart({
   data,
@@ -20,9 +14,16 @@ export function AssetAllocationChart({
   height?: number;
 }) {
   const t = useTranslations("charts");
+  const tAssets = useTranslations("assets");
+  const locale = useLocale();
+  const numTag = locale === "en" ? "en-US" : "sv-SE";
+  const assetLabel = (slice: AssetSlice): string =>
+    slice.labelKey ? tAssets(slice.labelKey) : slice.name;
+  const percent = (value: number): string =>
+    `${value.toLocaleString(numTag, { maximumFractionDigits: value < 1 ? 2 : 1 })} %`;
   const trillions = (valueUsd: number): string =>
     t("trillionsUsd", {
-      value: (valueUsd / 1_000_000_000_000).toLocaleString("sv-SE", {
+      value: (valueUsd / 1_000_000_000_000).toLocaleString(numTag, {
         maximumFractionDigits: 1,
       }),
     });
@@ -51,7 +52,7 @@ export function AssetAllocationChart({
             const slice = payload[0].payload as AssetSlice;
             return (
               <ChartTooltipCard
-                title={slice.name}
+                title={assetLabel(slice)}
                 rows={[
                   {
                     label: t("share"),

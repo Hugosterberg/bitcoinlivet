@@ -10,10 +10,10 @@ import {
   YAxis,
 } from "recharts";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { InvestmentPoint } from "@/features/bitcoin-data/data/live-data";
-import { formatCompact, formatCurrency, formatNumber } from "@/lib/format";
+import { currencyForLocale, formatCompact, formatCurrency, formatNumber } from "@/lib/format";
 import { axisTick, chartColors, ChartTooltipCard } from "./chart-theme";
 
 export function InvestmentChart({
@@ -24,6 +24,8 @@ export function InvestmentChart({
   height?: number;
 }) {
   const t = useTranslations("charts");
+  const locale = useLocale();
+  const currency = currencyForLocale(locale);
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
@@ -50,7 +52,7 @@ export function InvestmentChart({
           tickLine={false}
           axisLine={false}
           width={64}
-          tickFormatter={(v: number) => formatCompact(v, { style: "currency", currency: "SEK" })}
+          tickFormatter={(v: number) => formatCompact(v, { style: "currency", currency }, locale)}
         />
         <Tooltip
           cursor={{ stroke: chartColors.bitcoin, strokeOpacity: 0.3 }}
@@ -63,17 +65,17 @@ export function InvestmentChart({
                 rows={[
                   {
                     label: t("value"),
-                    value: formatCurrency(point.value),
+                    value: formatCurrency(point.value, locale),
                     color: chartColors.bitcoin,
                   },
                   {
                     label: t("invested"),
-                    value: formatCurrency(point.invested),
+                    value: formatCurrency(point.invested, locale),
                     color: chartColors.gray,
                   },
                   {
                     label: t("holdings"),
-                    value: `${formatNumber(point.btc, { maximumFractionDigits: 5 })} BTC`,
+                    value: `${formatNumber(point.btc, { maximumFractionDigits: 5 }, locale)} BTC`,
                   },
                 ]}
               />

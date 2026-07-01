@@ -10,21 +10,23 @@ import {
   YAxis,
 } from "recharts";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
-import { priceHistory, type PricePoint } from "@/features/bitcoin-data/data/metrics";
-import { formatCompact, formatCurrency } from "@/lib/format";
+import type { YearPrice } from "@/features/bitcoin-data/data/live-data";
+import { currencyForLocale, formatCompact, formatCurrency } from "@/lib/format";
 import { axisTick, chartColors, ChartTooltipCard } from "./chart-theme";
 
 export function BtcPriceChart({
   height = 320,
-  data = priceHistory,
+  data,
 }: {
   height?: number;
-  /** Yearly close points; defaults to the static example series. */
-  data?: PricePoint[];
+  /** Yearly close points, in the active locale's currency. */
+  data: YearPrice[];
 }) {
   const t = useTranslations("charts");
+  const locale = useLocale();
+  const currency = currencyForLocale(locale);
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart
@@ -50,7 +52,7 @@ export function BtcPriceChart({
           tickLine={false}
           axisLine={false}
           width={64}
-          tickFormatter={(v: number) => formatCompact(v, { style: "currency", currency: "SEK" })}
+          tickFormatter={(v: number) => formatCompact(v, { style: "currency", currency }, locale)}
         />
         <Tooltip
           cursor={{ stroke: chartColors.bitcoin, strokeOpacity: 0.3 }}
@@ -61,7 +63,7 @@ export function BtcPriceChart({
                 rows={[
                   {
                     label: t("priceYearEnd"),
-                    value: formatCurrency(Number(payload[0].value), "SEK"),
+                    value: formatCurrency(Number(payload[0].value), locale),
                     color: chartColors.bitcoin,
                   },
                 ]}
@@ -71,7 +73,7 @@ export function BtcPriceChart({
         />
         <Area
           type="monotone"
-          dataKey="priceSek"
+          dataKey="price"
           stroke={chartColors.bitcoin}
           strokeWidth={2}
           fill="url(#btcPriceFill)"

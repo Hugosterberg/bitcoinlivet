@@ -11,6 +11,8 @@ import {
   YAxis,
 } from "recharts";
 
+import { useLocale, useTranslations } from "next-intl";
+
 import { inflationHistory, type InflationPoint } from "@/features/bitcoin-data/data/metrics";
 import { axisTick, chartColors, ChartTooltipCard } from "./chart-theme";
 
@@ -21,6 +23,9 @@ export function InflationChart({
   height?: number;
   data?: InflationPoint[];
 }) {
+  const t = useTranslations("charts");
+  const locale = useLocale();
+  const numTag = locale === "en" ? "en-US" : "sv-SE";
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart
@@ -50,8 +55,8 @@ export function InflationChart({
                 title={label}
                 rows={[
                   {
-                    label: "Inflation",
-                    value: `${Number(payload[0].value).toLocaleString("sv-SE")} %`,
+                    label: t("inflation"),
+                    value: `${Number(payload[0].value).toLocaleString(numTag)} %`,
                     color: chartColors.bitcoin,
                   },
                 ]}

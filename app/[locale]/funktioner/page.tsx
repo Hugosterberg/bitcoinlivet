@@ -85,7 +85,7 @@ export default async function FunctionsPage({
           ))}
         </div>
 
-        <Disclaimer className="mt-12 max-w-2xl">
+        <Disclaimer className="mt-12">
           {t("listDisclaimer")}
         </Disclaimer>
       </Container>

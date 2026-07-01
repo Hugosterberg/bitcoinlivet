@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { PiggyBank } from "@phosphor-icons/react";
 
 import { Card } from "@/components/ui/card";
@@ -16,8 +16,9 @@ import {
  * and how many sats it buys *at today's price*. Deliberately makes no forecast
  * about future value — it is about habit and accumulation, not returns.
  */
-export function SavingsCalculator({ priceSek }: { priceSek: number }) {
+export function SavingsCalculator({ price }: { price: number }) {
   const t = useTranslations("savingsCalc");
+  const locale = useLocale();
   const monthlyId = useId();
   const yearsId = useId();
   const [monthly, setMonthly] = useState(1000);
@@ -26,13 +27,13 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
   const result = useMemo(() => {
     const months = years * 12;
     const invested = monthly * months;
-    const totalSats = priceSek > 0 ? (invested / priceSek) * SATS_PER_BTC : 0;
+    const totalSats = price > 0 ? (invested / price) * SATS_PER_BTC : 0;
     return {
       invested,
       totalSats,
       totalBtc: totalSats / SATS_PER_BTC,
     };
-  }, [monthly, years, priceSek]);
+  }, [monthly, years, price]);
 
   return (
     <Card className="flex flex-col p-6">
@@ -59,7 +60,7 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
             >
               <span>{t("amountPerMonth")}</span>
               <span className="tabular-nums text-bitcoin">
-                {formatCurrency(monthly)}
+                {formatCurrency(monthly, locale)}
               </span>
             </label>
             <input
@@ -108,7 +109,7 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
               {t("totalDeposited")}
             </p>
             <p className="mt-1 font-heading text-2xl font-semibold tracking-tight text-foreground tabular-nums">
-              {formatCurrency(result.invested)}
+              {formatCurrency(result.invested, locale)}
             </p>
           </div>
           <div className="border-t border-border pt-4">
@@ -116,10 +117,10 @@ export function SavingsCalculator({ priceSek }: { priceSek: number }) {
               {t("atTodaysPrice")}
             </p>
             <p className="mt-1 font-heading text-xl font-semibold tracking-tight text-bitcoin tabular-nums">
-              {t("sats", { sats: formatNumber(Math.round(result.totalSats)) })}
+              {t("sats", { sats: formatNumber(Math.round(result.totalSats), {}, locale) })}
             </p>
             <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
-              ≈ {formatNumber(result.totalBtc, { maximumFractionDigits: 4 })} BTC
+              ≈ {formatNumber(result.totalBtc, { maximumFractionDigits: 4 }, locale)} BTC
             </p>
           </div>
         </div>

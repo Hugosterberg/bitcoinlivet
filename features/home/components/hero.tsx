@@ -1,31 +1,32 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowRight, Lightning } from "@phosphor-icons/react/dist/ssr";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/layout/container";
 import { getBitcoinMarket } from "@/features/bitcoin-data/data/live-data";
-import { formatCurrency, formatNumber, formatShare, wrappable } from "@/lib/format";
+import { currencyForLocale, formatCurrency, formatNumber, formatShare, wrappable } from "@/lib/format";
 
 export async function Hero() {
-  const market = await getBitcoinMarket();
+  const locale = await getLocale();
+  const market = await getBitcoinMarket(currencyForLocale(locale));
   const t = await getTranslations("home");
 
   const stats = [
     {
       label: t("heroMaxSupply"),
-      value: formatNumber(market.maxSupply),
+      value: formatNumber(market.maxSupply, {}, locale),
       sub: t("heroMaxSupplySub"),
     },
     {
       label: t("heroIssued"),
-      value: formatShare(market.issuedPercent),
-      sub: `${formatNumber(Math.round(market.circulatingSupply))} BTC`,
+      value: formatShare(market.issuedPercent, {}, locale),
+      sub: `${formatNumber(Math.round(market.circulatingSupply), {}, locale)} BTC`,
     },
     {
       label: market.live ? t("heroPrice") : t("heroExamplePrice"),
-      value: formatCurrency(market.priceSek),
+      value: formatCurrency(market.price, locale),
       sub: market.live ? t("heroPerBitcoinLive") : t("heroPerBitcoin"),
     },
   ];

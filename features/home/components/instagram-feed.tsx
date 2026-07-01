@@ -104,13 +104,13 @@ function LivePostCard({
             {post.likeCount != null ? (
               <span className="inline-flex items-center gap-1">
                 <Heart size={12} weight="fill" aria-hidden />
-                {formatNumber(post.likeCount)}
+                {formatNumber(post.likeCount, {}, locale)}
               </span>
             ) : null}
             {post.commentsCount != null ? (
               <span className="inline-flex items-center gap-1">
                 <ChatCircle size={12} weight="fill" aria-hidden />
-                {formatNumber(post.commentsCount)}
+                {formatNumber(post.commentsCount, {}, locale)}
               </span>
             ) : null}
             {time ? <span className="ml-auto text-white/70">{time}</span> : null}
@@ -122,9 +122,11 @@ function LivePostCard({
 }
 
 export async function InstagramFeed() {
-  const { profile, posts: livePosts } = await getInstagramFeed(3);
-  const t = await getTranslations("home");
   const locale = (await getLocale()) as Locale;
+  const [{ profile, posts: livePosts }, t] = await Promise.all([
+    getInstagramFeed(3, locale),
+    getTranslations("home"),
+  ]);
   const site = getSiteConfig(locale);
   const handle = site.instagramHandle;
   const profileUrl = site.instagram;
@@ -144,7 +146,7 @@ export async function InstagramFeed() {
           {profile?.followersCount ? (
             <p className="text-xs text-muted-foreground">
               <span className="font-semibold text-foreground tabular-nums">
-                {formatNumber(profile.followersCount)}
+                {formatNumber(profile.followersCount, {}, locale)}
               </span>{" "}
               {t("instagramFollowers")}
             </p>

@@ -637,7 +637,18 @@
     "holdings": "Innehav",
     "priceYearEnd": "Pris (årsslut)",
     "share": "Andel",
+    "inflation": "Inflation",
     "trillionsUsd": "{value} biljoner USD"
+  },
+  "assets": {
+    "realEstate": "Fastigheter",
+    "oil": "Olja",
+    "currencies": "Valutor",
+    "gold": "Guld",
+    "copper": "Koppar",
+    "naturalGas": "Naturgas",
+    "silver": "Silver",
+    "otherStocks": "Övriga aktier"
   },
   "blogExplorer": {
     "all": "Alla",

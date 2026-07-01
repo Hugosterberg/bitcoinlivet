@@ -40,6 +40,7 @@ import {
   getRecommendedFees,
 } from "@/features/bitcoin-data/data/live-data";
 import {
+  currencyForLocale,
   formatAmountWords,
   formatCurrency,
   formatDate,
@@ -92,10 +93,12 @@ function ChartCard({
 function SupplyBar({
   label,
   percent,
+  numTag,
   muted,
 }: {
   label: string;
   percent: number;
+  numTag: string;
   muted?: boolean;
 }) {
   const width = Math.min(100, Math.max(0, percent));
@@ -104,7 +107,7 @@ function SupplyBar({
       <div className="mb-1.5 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3 text-sm">
         <span className="text-pretty text-muted-foreground">{label}</span>
         <span className="shrink-0 font-medium text-foreground tabular-nums">
-          {width.toLocaleString("sv-SE", { maximumFractionDigits: 1 })} %
+          {width.toLocaleString(numTag, { maximumFractionDigits: 1 })} %
         </span>
       </div>
       <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
@@ -130,16 +133,21 @@ export default async function DataPage({
   setRequestLocale(locale);
   const t = await getTranslations("data");
   const tCharts = await getTranslations("charts");
+  const tAssets = await getTranslations("assets");
+  const currency = currencyForLocale(locale);
+  const numTag = locale === "en" ? "en-US" : "sv-SE";
+  const assetLabel = (slice: { labelKey?: string; name: string }): string =>
+    slice.labelKey ? tAssets(slice.labelKey) : slice.name;
 
   const [market, fees, investment, fearGreed, inflation, allocation, priceHist] =
     await Promise.all([
-      getBitcoinMarket(),
+      getBitcoinMarket(currency),
       getRecommendedFees(),
-      getInvestmentHistory(),
-      getFearGreed(),
-      getInflation(),
+      getInvestmentHistory(currency),
+      getFearGreed(locale),
+      getInflation(locale),
       getAssetAllocation(),
-      getBtcPriceHistory(),
+      getBtcPriceHistory(currency),
     ]);
 
   const supply = getSupplyTimeline(
@@ -147,7 +155,7 @@ export default async function DataPage({
     market.maxSupply,
   );
   const fmtYears = (v: number, decimals = 1) =>
-    v.toLocaleString("sv-SE", {
+    v.toLocaleString(numTag, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
@@ -174,10 +182,10 @@ export default async function DataPage({
     }
   }
   const fmtPercent = (v: number) =>
-    `${v.toLocaleString("sv-SE", { maximumFractionDigits: v < 1 ? 2 : 1 })} %`;
+    `${v.toLocaleString(numTag, { maximumFractionDigits: v < 1 ? 2 : 1 })} %`;
   const fmtTrillions = (usd: number) =>
     tCharts("trillionsUsd", {
-      value: (usd / 1_000_000_000_000).toLocaleString("sv-SE", {
+      value: (usd / 1_000_000_000_000).toLocaleString(numTag, {
         maximumFractionDigits: 1,
       }),
     });
@@ -206,7 +214,7 @@ export default async function DataPage({
           <p className="mt-3 text-sm text-muted-foreground">
             {market.live
               ? t("sourceLive")
-              : t("sourceStatic", { date: formatDate(btcSnapshot.asOf) })}
+              : t("sourceStatic", { date: formatDate(btcSnapshot.asOf, locale) })}
           </p>
         </header>
 
@@ -215,18 +223,18 @@ export default async function DataPage({
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               label={t("metricPrice")}
-              value={formatCurrency(market.priceSek)}
+              value={formatCurrency(market.price, locale)}
               sub={t("perBitcoin")}
               change={market.change24h}
               icon={<CurrencyBtc size={20} weight="bold" aria-hidden />}
             />
             <MetricCard
               label={t("metricMarketCap")}
-              value={formatCurrency(market.marketCapSek)}
+              value={formatCurrency(market.marketCap, locale)}
               valueClassName="text-lg sm:text-xl leading-snug"
               sub={
                 <>
-                  ≈ {formatAmountWords(market.marketCapSek)}
+                  ≈ {formatAmountWords(market.marketCap, locale)}
                   <span className="block text-muted-foreground/70">
                     {t("globalTotal")}
                   </span>
@@ -236,14 +244,14 @@ export default async function DataPage({
             />
             <MetricCard
               label={t("metricCirculating")}
-              value={`${formatNumber(Math.round(market.circulatingSupply))}`}
+              value={`${formatNumber(Math.round(market.circulatingSupply), {}, locale)}`}
               valueClassName="text-lg sm:text-xl leading-snug"
-              sub={t("ofMaxBtc", { max: formatNumber(market.maxSupply) })}
+              sub={t("ofMaxBtc", { max: formatNumber(market.maxSupply, {}, locale) })}
               icon={<Stack size={20} weight="bold" aria-hidden />}
             />
             <MetricCard
               label={t("metricIssuedShare")}
-              value={formatShare(market.issuedPercent)}
+              value={formatShare(market.issuedPercent, {}, locale)}
               sub={t("ofMaxSupply")}
               icon={<ChartLineUp size={20} weight="bold" aria-hidden />}
             />
@@ -260,7 +268,7 @@ export default async function DataPage({
               <p className="max-w-2xl text-sm text-muted-foreground">
                 {t.rich("supplyIntro", {
                   age: fmtYears(supply.ageYears),
-                  percent: formatShare(supply.issuedPercent),
+                  percent: formatShare(supply.issuedPercent, {}, locale),
                   year: supply.lastCoinYear,
                   yearsLeft: Math.round(supply.yearsLeft),
                   b: (chunks) => (
@@ -278,16 +286,16 @@ export default async function DataPage({
               />
               <StatTile
                 label={t("metricIssuedShare")}
-                value={formatShare(supply.issuedPercent)}
+                value={formatShare(supply.issuedPercent, {}, locale)}
                 sub={t("statIssuedShareSub", {
-                  issued: formatNumber(Math.round(market.circulatingSupply)),
-                  max: formatNumber(market.maxSupply),
+                  issued: formatNumber(Math.round(market.circulatingSupply), {}, locale),
+                  max: formatNumber(market.maxSupply, {}, locale),
                 })}
               />
               <StatTile
                 label={t("statRemaining")}
-                value={t("statRemainingValue", { btc: formatNumber(Math.round(supply.remaining)) })}
-                sub={t("statRemainingSub", { max: formatNumber(market.maxSupply) })}
+                value={t("statRemainingValue", { btc: formatNumber(Math.round(supply.remaining), {}, locale) })}
+                sub={t("statRemainingSub", { max: formatNumber(market.maxSupply, {}, locale) })}
               />
               <StatTile
                 label={t("statAllIssued")}
@@ -301,7 +309,7 @@ export default async function DataPage({
               />
               <StatTile
                 label={t("statNewPerDay")}
-                value={t("statNewPerDayValue", { btc: formatNumber(Math.round(supply.perDay)) })}
+                value={t("statNewPerDayValue", { btc: formatNumber(Math.round(supply.perDay), {}, locale) })}
                 sub={t("statNewPerDaySub")}
               />
             </div>
@@ -310,10 +318,12 @@ export default async function DataPage({
               <SupplyBar
                 label={t("barIssued")}
                 percent={supply.issuedPercent}
+                numTag={numTag}
               />
               <SupplyBar
                 label={t("barTimeElapsed")}
                 percent={supply.timeElapsedPercent}
+                numTag={numTag}
                 muted
               />
               <p className="text-xs text-muted-foreground">
@@ -342,7 +352,7 @@ export default async function DataPage({
                 <StatTile
                   label={t("statPerPerson")}
                   value={t("statPerPersonValue", { btc: fmtYears(supply.perPersonBtc, 4) })}
-                  sub={t("statPerPersonSub", { sats: formatNumber(Math.round(supply.perPersonSats)) })}
+                  sub={t("statPerPersonSub", { sats: formatNumber(Math.round(supply.perPersonSats), {}, locale) })}
                 />
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
@@ -363,7 +373,7 @@ export default async function DataPage({
             </ChartCard>
           </div>
           <div>
-            <SatsCalculator priceSek={market.priceSek} live={market.live} />
+            <SatsCalculator price={market.price} live={market.live} />
           </div>
         </section>
 
@@ -424,7 +434,7 @@ export default async function DataPage({
                                 : "min-w-0 font-medium text-foreground [overflow-wrap:anywhere]"
                             }
                           >
-                            {row.slice.name}
+                            {assetLabel(row.slice)}
                           </span>
                         </dt>
                         <dd className="flex shrink-0 items-baseline gap-2 tabular-nums">
@@ -463,7 +473,7 @@ export default async function DataPage({
                         </p>
                         <ul className="mt-1.5 flex flex-col gap-1.5 pl-[1.625rem]">
                           {stockSlices
-                            .filter((s) => s.name !== "Övriga aktier")
+                            .filter((s) => s.labelKey !== "otherStocks")
                             .map((s) => (
                               <li
                                 key={s.name}
@@ -476,7 +486,7 @@ export default async function DataPage({
                                     style={{ backgroundColor: s.color }}
                                   />
                                   <span className="min-w-0 text-muted-foreground [overflow-wrap:anywhere]">
-                                    {s.name}
+                                    {assetLabel(s)}
                                   </span>
                                 </span>
                                 <span className="flex shrink-0 items-baseline gap-2 tabular-nums">
@@ -526,31 +536,31 @@ export default async function DataPage({
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard
                 label={t("dcaTotalInvested")}
-                value={formatCurrency(investment.totalInvested)}
+                value={formatCurrency(investment.totalInvested, locale)}
                 valueClassName="text-lg sm:text-xl leading-snug"
-                sub={t("dcaDaysBought", { days: formatNumber(investment.days) })}
+                sub={t("dcaDaysBought", { days: formatNumber(investment.days, {}, locale) })}
                 icon={<Wallet size={20} weight="bold" aria-hidden />}
               />
               <MetricCard
                 label={t("dcaValueToday")}
-                value={formatCurrency(investment.currentValue)}
+                value={formatCurrency(investment.currentValue, locale)}
                 valueClassName="text-lg sm:text-xl leading-snug"
                 change={investment.live ? investment.returnPct : undefined}
                 icon={<ChartLineUp size={20} weight="bold" aria-hidden />}
               />
               <MetricCard
                 label={t("dcaReturn")}
-                value={`${investment.returnSek >= 0 ? "+" : ""}${formatCurrency(investment.returnSek)}`}
+                value={`${investment.returnAmount >= 0 ? "+" : ""}${formatCurrency(investment.returnAmount, locale)}`}
                 valueClassName="text-lg sm:text-xl leading-snug"
-                sub={formatPercent(investment.returnPct)}
+                sub={formatPercent(investment.returnPct, {}, locale)}
                 icon={<TrendUp size={20} weight="bold" aria-hidden />}
               />
               {investment.totalBtc > 0 ? (
                 <MetricCard
                   label={t("dcaHoldings")}
-                  value={`${formatNumber(investment.totalBtc, { maximumFractionDigits: 5 })} BTC`}
+                  value={`${formatNumber(investment.totalBtc, { maximumFractionDigits: 5 }, locale)} BTC`}
                   valueClassName="text-lg sm:text-xl leading-snug"
-                  sub={t("dcaSats", { sats: formatNumber(Math.round(investment.totalBtc * 100_000_000)) })}
+                  sub={t("dcaSats", { sats: formatNumber(Math.round(investment.totalBtc * 100_000_000), {}, locale) })}
                   icon={<CurrencyBtc size={20} weight="bold" aria-hidden />}
                 />
               ) : null}
@@ -602,7 +612,7 @@ export default async function DataPage({
 
         {/* Savings calculator */}
         <section aria-label={t("savingsLabel")} className="mt-5">
-          <SavingsCalculator priceSek={market.priceSek} />
+          <SavingsCalculator price={market.price} />
         </section>
 
         {/* Inflation (SCB) */}
@@ -641,7 +651,7 @@ export default async function DataPage({
           </Card>
         </section>
 
-        <Disclaimer className="mt-10 max-w-2xl">
+        <Disclaimer className="mt-10">
           {t("disclaimer")}
         </Disclaimer>
       </Container>

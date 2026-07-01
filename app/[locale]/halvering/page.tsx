@@ -22,7 +22,7 @@ import {
   getSupplyTimeline,
   MINUTES_PER_BLOCK,
 } from "@/features/bitcoin-data/data/metrics";
-import { formatNumber, formatShare } from "@/lib/format";
+import { currencyForLocale, formatNumber, formatShare } from "@/lib/format";
 
 export async function generateMetadata({
   params,
@@ -56,13 +56,14 @@ export default async function HalvingPage({
   setRequestLocale(locale);
   const t = await getTranslations("halving");
 
-  const market = await getBitcoinMarket();
+  const market = await getBitcoinMarket(currencyForLocale(locale));
   const supply = getSupplyTimeline(
     market.circulatingSupply,
     market.maxSupply,
   );
+  const numTag = locale === "en" ? "en-US" : "sv-SE";
   const fmtYears = (v: number, decimals = 1) =>
-    v.toLocaleString("sv-SE", {
+    v.toLocaleString(numTag, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
@@ -90,7 +91,7 @@ export default async function HalvingPage({
               {t("whatIsTitle")}
             </h2>
             <p className="text-base/7 text-muted-foreground">
-              {t("whatIsP1", { blocks: formatNumber(BLOCKS_PER_HALVING) })}
+              {t("whatIsP1", { blocks: formatNumber(BLOCKS_PER_HALVING, {}, locale) })}
             </p>
             <p className="text-base/7 text-muted-foreground">
               {t("whatIsP2")}
@@ -123,12 +124,12 @@ export default async function HalvingPage({
               />
               <StatTile
                 label={t("statBlocksPerHalving")}
-                value={formatNumber(BLOCKS_PER_HALVING)}
+                value={formatNumber(BLOCKS_PER_HALVING, {}, locale)}
                 sub={t("statBlocksPerHalvingSub")}
               />
               <StatTile
                 label={t("statDifficulty")}
-                value={t("statDifficultyValue", { blocks: formatNumber(DIFFICULTY_ADJUSTMENT_BLOCKS) })}
+                value={t("statDifficultyValue", { blocks: formatNumber(DIFFICULTY_ADJUSTMENT_BLOCKS, {}, locale) })}
                 sub={t("statDifficultySub", { days: DIFFICULTY_ADJUSTMENT_DAYS })}
               />
               <StatTile
@@ -172,20 +173,20 @@ export default async function HalvingPage({
               />
               <StatTile
                 label={t("statNewSupplyPerDay")}
-                value={t("statNewSupplyPerDayValue", { btc: formatNumber(Math.round(supply.perDay)) })}
+                value={t("statNewSupplyPerDayValue", { btc: formatNumber(Math.round(supply.perDay), {}, locale) })}
                 sub={t("statNewSupplyPerDaySub", { blocks: BLOCKS_PER_DAY })}
               />
               <StatTile
                 label={t("statIssuedShare")}
-                value={formatShare(supply.issuedPercent)}
+                value={formatShare(supply.issuedPercent, {}, locale)}
                 sub={t("statIssuedShareSub", {
-                  issued: formatNumber(Math.round(market.circulatingSupply)),
-                  max: formatNumber(market.maxSupply),
+                  issued: formatNumber(Math.round(market.circulatingSupply), {}, locale),
+                  max: formatNumber(market.maxSupply, {}, locale),
                 })}
               />
               <StatTile
                 label={t("statRemaining")}
-                value={t("statRemainingValue", { btc: formatNumber(Math.round(supply.remaining)) })}
+                value={t("statRemainingValue", { btc: formatNumber(Math.round(supply.remaining), {}, locale) })}
                 sub={t("statRemainingSub", { year: supply.lastCoinYear })}
               />
             </div>
@@ -230,7 +231,7 @@ export default async function HalvingPage({
                         {event.number === 0 ? t("genesis") : `#${event.number}`}
                       </td>
                       <td className="border-b border-border px-3 py-3 tabular-nums text-muted-foreground">
-                        {formatNumber(event.block)}
+                        {formatNumber(event.block, {}, locale)}
                       </td>
                       <td className="border-b border-border px-3 py-3 tabular-nums text-muted-foreground">
                         {event.date}
@@ -238,7 +239,7 @@ export default async function HalvingPage({
                       <td className="border-b border-border px-3 py-3 text-right tabular-nums text-foreground">
                         {formatNumber(event.rewardAfter, {
                           maximumFractionDigits: 4,
-                        })}{" "}
+                        }, locale)}{" "}
                         BTC
                       </td>
                       <td className="border-b border-border px-3 py-3">
@@ -285,7 +286,7 @@ export default async function HalvingPage({
           </Card>
         </section>
 
-        <Disclaimer className="mt-10 max-w-2xl">
+        <Disclaimer className="mt-10">
           {t("disclaimer", { minutes: MINUTES_PER_BLOCK })}
         </Disclaimer>
       </Container>
