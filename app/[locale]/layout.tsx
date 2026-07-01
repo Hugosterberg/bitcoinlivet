@@ -102,7 +102,12 @@ export async function generateMetadata({
     },
     category: "finance",
     icons: {
-      icon: [{ url: "/icon", type: "image/png", sizes: "512x512" }],
+      icon: [
+        { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/icon", type: "image/png", sizes: "512x512" },
+      ],
+      shortcut: "/favicon.ico",
       apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
     },
   };
