@@ -119,7 +119,7 @@ export default async function BlogPostPage({
             </span>
             <span aria-hidden>·</span>
             <time dateTime={meta.date} className="tabular-nums">
-              {formatDate(meta.date)}
+              {formatDate(meta.date, locale)}
             </time>
           </div>
         </header>

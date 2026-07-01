@@ -59,7 +59,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/65">
-      <Container as="nav" aria-label={th("mainMenu")} className="flex h-16 items-center justify-between gap-4">
+      <Container as="nav" aria-label={th("mainMenu")} className="flex h-16 items-center justify-between gap-3">
         <Logo />
 
         <ul className="hidden items-center gap-1 lg:flex">
@@ -73,13 +73,13 @@ export function SiteHeader() {
                   href={item.href as Href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "ml-1 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors",
+                    "ml-1 inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors",
                     active
                       ? "border-bitcoin bg-bitcoin text-bitcoin-foreground"
                       : "border-bitcoin/40 bg-bitcoin-muted text-bitcoin hover:border-bitcoin/70",
                   )}
                 >
-                  {NavI ? <NavI size={16} weight="fill" aria-hidden /> : null}
+                  {NavI ? <NavI size={16} weight="fill" aria-hidden className="hidden xl:block" /> : null}
                   {t(item.key)}
                 </Link>
               </li>
@@ -89,13 +89,13 @@ export function SiteHeader() {
                   href={item.href as Href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors",
                     active
                       ? "text-foreground"
                       : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                   )}
                 >
-                  {NavI ? <NavI size={15} weight={active ? "fill" : "regular"} aria-hidden /> : null}
+                  {NavI ? <NavI size={15} weight={active ? "fill" : "regular"} aria-hidden className="hidden xl:block" /> : null}
                   {t(item.key)}
                 </Link>
               </li>
@@ -108,26 +108,28 @@ export function SiteHeader() {
           })}
         </ul>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
           {signedIn ? (
             <Link
               href="/konto"
               aria-label={th("account")}
               aria-current={accountActive ? "page" : undefined}
               className={cn(
-                "grid size-9 place-items-center rounded-full transition-colors hover:bg-muted",
+                "grid size-8 place-items-center rounded-full transition-colors hover:bg-muted",
                 accountActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <UserCircle size={22} weight={accountActive ? "fill" : "regular"} aria-hidden />
+              <UserCircle size={19} weight={accountActive ? "fill" : "regular"} aria-hidden />
             </Link>
           ) : (
             <Link
               href="/konto"
               aria-current={accountActive ? "page" : undefined}
               className={cn(
-                "text-sm font-medium transition-colors",
-                accountActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                accountActive
+                  ? "border-bitcoin/60 text-bitcoin"
+                  : "border-border text-muted-foreground hover:border-bitcoin/50 hover:text-bitcoin",
               )}
             >
               {th("signIn")}

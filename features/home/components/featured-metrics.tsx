@@ -47,6 +47,7 @@ export async function FeaturedMetrics() {
           value={formatCurrency(market.price, locale)}
           sub={t("metricsPerBitcoin")}
           change={market.change24h}
+          locale={locale}
           icon={<CurrencyBtc size={20} weight="bold" aria-hidden />}
         />
         <MetricCard

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Timer, ArrowClockwise, WarningCircle } from "@phosphor-icons/react";
 
 import { Card } from "@/components/ui/card";
@@ -35,6 +35,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export function HalvingCountdown() {
   const t = useTranslations("halvingCountdown");
+  const locale = useLocale();
   const [state, setState] = useState<State>({ status: "loading" });
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -121,15 +122,15 @@ export function HalvingCountdown() {
                 {t("blocksLeft", { number: state.info.halvingNumber })}
               </p>
               <p className="mt-1 font-heading text-3xl font-semibold tracking-tight text-foreground tabular-nums">
-                {formatNumber(state.info.blocksRemaining)}
+                {formatNumber(state.info.blocksRemaining, {}, locale)}
               </p>
             </div>
 
             <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Stat label={t("blockHeightNow")} value={formatNumber(state.info.height)} />
+              <Stat label={t("blockHeightNow")} value={formatNumber(state.info.height, {}, locale)} />
               <Stat
                 label={t("halvingBlock")}
-                value={formatNumber(state.info.nextHalvingBlock)}
+                value={formatNumber(state.info.nextHalvingBlock, {}, locale)}
               />
               <Stat
                 label={t("targetTime")}
@@ -137,7 +138,7 @@ export function HalvingCountdown() {
               />
               <Stat
                 label={t("estimatedDate")}
-                value={formatDate(state.info.estimatedDate)}
+                value={formatDate(state.info.estimatedDate, locale)}
               />
             </dl>
 
@@ -149,7 +150,7 @@ export function HalvingCountdown() {
                     percent: formatNumber(state.info.epochProgress, {
                       minimumFractionDigits: 1,
                       maximumFractionDigits: 1,
-                    }),
+                    }, locale),
                   })}
                 </span>
               </div>

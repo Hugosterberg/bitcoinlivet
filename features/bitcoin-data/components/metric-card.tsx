@@ -13,6 +13,7 @@ export function MetricCard({
   icon,
   className,
   valueClassName,
+  locale = "sv",
 }: {
   label: string;
   value: string;
@@ -23,6 +24,8 @@ export function MetricCard({
   className?: string;
   /** Override the value typography, e.g. smaller text for long full sums. */
   valueClassName?: string;
+  /** Active locale, so the change percent formats correctly (sv/en). */
+  locale?: string;
 }) {
   const hasChange = typeof change === "number";
   const positive = (change ?? 0) >= 0;
@@ -64,7 +67,7 @@ export function MetricCard({
               ) : (
                 <TrendDown size={12} weight="bold" aria-hidden />
               )}
-              {formatPercent(change ?? 0)}
+              {formatPercent(change ?? 0, {}, locale)}
             </span>
           ) : null}
         </div>

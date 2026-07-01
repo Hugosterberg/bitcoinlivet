@@ -93,7 +93,7 @@ export default async function ModulePage({
             <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1 text-bitcoin">
               <Lightning size={14} weight="fill" aria-hidden />
-              {formatNumber(moduleXp)} XP
+              {formatNumber(moduleXp, {}, locale)} XP
             </span>
           </p>
 

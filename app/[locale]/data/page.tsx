@@ -226,6 +226,7 @@ export default async function DataPage({
               value={formatCurrency(market.price, locale)}
               sub={t("perBitcoin")}
               change={market.change24h}
+              locale={locale}
               icon={<CurrencyBtc size={20} weight="bold" aria-hidden />}
             />
             <MetricCard
@@ -546,6 +547,7 @@ export default async function DataPage({
                 value={formatCurrency(investment.currentValue, locale)}
                 valueClassName="text-lg sm:text-xl leading-snug"
                 change={investment.live ? investment.returnPct : undefined}
+                locale={locale}
                 icon={<ChartLineUp size={20} weight="bold" aria-hidden />}
               />
               <MetricCard

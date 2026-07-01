@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Flame, Medal, GraduationCap, Trophy } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ function Ring({ percent }: { percent: number }) {
 export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
   const { data, completedCount, hydrated, reset } = useProgress();
   const t = useTranslations("education");
+  const locale = useLocale();
 
   const lp = getLevelProgress(data.xp);
   const percentComplete = totalLessons
@@ -63,13 +64,13 @@ export function ProgressDashboard({ totalLessons }: { totalLessons: number }) {
               {t(`levels.${lp.current.level}`)}
             </p>
             <p className="mt-1 text-pretty text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
-              {formatNumber(data.xp)} XP
+              {formatNumber(data.xp, {}, locale)} XP
               {lp.next ? (
                 <>
                   {" "}
                   ·{" "}
                   {t("xpToNext", {
-                    xp: formatNumber(lp.xpToNext),
+                    xp: formatNumber(lp.xpToNext, {}, locale),
                     name: t(`levels.${lp.next.level}`),
                   })}
                 </>

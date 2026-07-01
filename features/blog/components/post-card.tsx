@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, Clock } from "@phosphor-icons/react/dist/ssr";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ export function PostCard({
   className?: string;
 }) {
   const t = useTranslations("articles");
+  const locale = useLocale();
   return (
     <Link
       href={post.href}
@@ -63,7 +64,7 @@ export function PostCard({
             dateTime={post.date}
             className="text-xs text-muted-foreground tabular-nums"
           >
-            {formatDateShort(post.date)}
+            {formatDateShort(post.date, locale)}
           </time>
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-bitcoin">
             {t("cardReadMore")}

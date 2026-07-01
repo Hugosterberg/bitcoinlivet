@@ -107,13 +107,13 @@ export async function AccountStats({
                 {t(`levels.${lp.current.level}`)}
               </p>
               <p className="mt-1 text-pretty text-sm text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
-                {formatNumber(data.xp)} XP
+                {formatNumber(data.xp, {}, locale)} XP
                 {lp.next ? (
                   <>
                     {" "}
                     ·{" "}
                     {t("xpToNext", {
-                      xp: formatNumber(lp.xpToNext),
+                      xp: formatNumber(lp.xpToNext, {}, locale),
                       name: t(`levels.${lp.next.level}`),
                     })}
                   </>
@@ -157,7 +157,7 @@ export async function AccountStats({
           />
           <IconStat
             icon={<Lightning size={18} weight="fill" aria-hidden />}
-            value={formatNumber(data.xp)}
+            value={formatNumber(data.xp, {}, locale)}
             label={t("xpTotal")}
           />
         </div>

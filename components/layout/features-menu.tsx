@@ -76,13 +76,13 @@ export function FeaturesMenu() {
           if (e.key === "Escape") setOpen(false);
         }}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+          "inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors",
           active || open
             ? "text-bitcoin"
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
-        <SquaresFour size={16} weight={active || open ? "fill" : "regular"} aria-hidden />
+        <SquaresFour size={16} weight={active || open ? "fill" : "regular"} aria-hidden className="hidden xl:block" />
         {t("features")}
         <CaretDown
           size={12}

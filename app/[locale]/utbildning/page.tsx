@@ -143,7 +143,7 @@ export default async function UtbildningPage({
               {t("pathStats", {
                 modules: moduleCount,
                 lessons: totalLessons,
-                xp: formatNumber(totalXp),
+                xp: formatNumber(totalXp, {}, locale),
               })}
             </p>
           </div>
