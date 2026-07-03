@@ -57,3 +57,12 @@ Before major changes:
 2. Explain architecture decisions.
 3. Implement incrementally.
 4. Avoid modifying unrelated files.
+# BAI Digital company context
+
+bitcoinlivet is a BAI Digital product. Company-level rules (the feature loop:
+feat/<slug> branches, human-reviewed PRs, definition of done) live in
+[Hugosterberg/bai-digital-office](https://github.com/Hugosterberg/bai-digital-office) — read `ai/PLAYBOOK.md` there first.
+Product context for agents is indexed in [ai/](./ai/README.md).
+
+Definition of done here: `npm run lint` + `npm run build` green, change
+observed in `next dev`, ai/-docs updated when architecture or decisions change.
